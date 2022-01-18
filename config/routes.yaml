@@ -1,0 +1,3 @@
+#index:
+#    path: /
+#    controller: LegacyFighter\Cabs\Controller\DefaultController::index
