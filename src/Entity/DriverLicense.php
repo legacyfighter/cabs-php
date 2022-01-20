@@ -2,10 +2,15 @@
 
 namespace LegacyFighter\Cabs\Entity;
 
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Embeddable;
+
+#[Embeddable]
 class DriverLicense
 {
     public const DRIVER_LICENSE_REGEX = '/^[A-Z9]{5}\d{6}[A-Z9]{2}\d[A-Z]{2}$/';
 
+    #[Column]
     private string $driverLicense;
 
     private function __construct(string $driverLicense)

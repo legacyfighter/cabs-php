@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Service;
 use LegacyFighter\Cabs\DTO\DriverDTO;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
+use LegacyFighter\Cabs\Entity\DriverLicense;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
@@ -32,11 +33,10 @@ class DriverService
     {
         $driver = new Driver();
         if($status === Driver::STATUS_ACTIVE) {
-            if($license === '' || preg_match(self::DRIVER_LICENSE_REGEX, $license) !== 1) {
-                throw new \InvalidArgumentException('Illegal license no = '.$license);
-            }
+            $driver->setDriverLicense(DriverLicense::withLicense($license));
+        } else {
+            $driver->setDriverLicense(DriverLicense::withoutValidation($license));
         }
-        $driver->setDriverLicense($license);
         $driver->setLastName($lastName);
         $driver->setFirstName($firstName);
         $driver->setType($type);
@@ -57,16 +57,11 @@ class DriverService
         if($driver === null) {
             throw new \InvalidArgumentException('Driver does not exists, id = '.$driverId);
         }
-        if($newLicense === '' || preg_match(self::DRIVER_LICENSE_REGEX, $newLicense) !== 1) {
-            throw new \InvalidArgumentException('Illegal license no = '.$newLicense);
-        }
+        $driver->setDriverLicense(DriverLicense::withLicense($newLicense));
+
         if($driver->getStatus() !== Driver::STATUS_ACTIVE) {
             throw new \InvalidArgumentException('Driver is not active, cannot change license');
         }
-
-        $driver->setDriverLicense($newLicense);
-
-
     }
 
     public function changeDriverStatus(int $driverId, string $status): void
@@ -76,14 +71,9 @@ class DriverService
             throw new \InvalidArgumentException('Driver does not exists, id = '.$driverId);
         }
         if($status === Driver::STATUS_ACTIVE) {
-            $license = $driver->getDriverLicense();
-            if($license === '' || preg_match(self::DRIVER_LICENSE_REGEX, $license) !== 1) {
-                throw new \InvalidArgumentException('Status cannot be ACTIVE. Illegal license no = '.$license);
-            }
+            $driver->setDriverLicense(DriverLicense::withLicense($driver->getDriverLicense()->asString()));
         }
-
-
-
+        
         $driver->setStatus($status);
     }
 

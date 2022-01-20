@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
@@ -34,8 +35,8 @@ class Driver extends BaseEntity
     #[Column(type: 'text', nullable: true)]
     private ?string $photo = null;
 
-    #[Column]
-    private string $driverLicense;
+    #[Embedded(class: DriverLicense::class, columnPrefix: false)]
+    private DriverLicense $driverLicense;
 
     #[OneToOne(targetEntity: DriverFee::class)]
     private DriverFee $fee;
@@ -122,12 +123,12 @@ class Driver extends BaseEntity
         $this->photo = $photo;
     }
 
-    public function getDriverLicense(): string
+    public function getDriverLicense(): DriverLicense
     {
         return $this->driverLicense;
     }
 
-    public function setDriverLicense(string $driverLicense): void
+    public function setDriverLicense(DriverLicense $driverLicense): void
     {
         $this->driverLicense = $driverLicense;
     }

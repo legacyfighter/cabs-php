@@ -19,7 +19,7 @@ class DriverDTO implements \JsonSerializable
         $this->id = $driver->getId();
         $this->firstName = $driver->getFirstName();
         $this->lastName = $driver->getLastName();
-        $this->driverLicense = $driver->getDriverLicense();
+        $this->driverLicense = $driver->getDriverLicense()->asString();
         $this->photo = $driver->getPhoto();
         $this->status = $driver->getStatus();
         $this->type = $driver->getType();
