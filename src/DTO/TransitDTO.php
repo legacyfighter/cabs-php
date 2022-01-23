@@ -73,7 +73,7 @@ class TransitDTO implements \JsonSerializable
 
     private function setTariff(Transit $transit): void
     {
-        $date = new \DateTimeImmutable();
+        $date = $this->date;
 
         // wprowadzenie nowych cennikow od 1.01.2019
         if((int) $date->format('Y') <= 2018) {
@@ -89,7 +89,7 @@ class TransitDTO implements \JsonSerializable
             $this->tariff = 'Sylwester';
             $this->kmRate = 3.5;
         } else {
-            switch ((int) $date->format('l')) {
+            switch ($date->format('l')) {
                 case 'Monday':
                 case 'Tuesday':
                 case 'Wednesday':

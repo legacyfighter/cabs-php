@@ -279,7 +279,7 @@ class Transit extends BaseEntity
 
     public function getKm(): ?Distance
     {
-        return Distance::ofKm($this->km);
+        return $this->km === null ? null : Distance::ofKm($this->km);
     }
 
     public function setKm(Distance $km): void
