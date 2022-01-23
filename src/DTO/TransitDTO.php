@@ -56,7 +56,7 @@ class TransitDTO implements \JsonSerializable
             $this->driverFee = (float) $transit->getDriversFee()->toInt();
         }
         if($transit->getEstimatedPrice() !== null) {
-            $this->estimatedPrice = (float) $transit->getEstimatedPrice();
+            $this->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();
         }
         $this->dateTime = $transit->getDateTime();
         $this->published = $transit->getPublished();
