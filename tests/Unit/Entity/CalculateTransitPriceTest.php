@@ -4,7 +4,7 @@ namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Tests\Support\PrivateProperty;
+use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
 use PHPUnit\Framework\TestCase;
 
 class CalculateTransitPriceTest extends TestCase

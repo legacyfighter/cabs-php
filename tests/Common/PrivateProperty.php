@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Tests\Support;
+namespace LegacyFighter\Cabs\Tests\Common;
 
 class PrivateProperty
 {
