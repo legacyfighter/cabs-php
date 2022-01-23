@@ -80,20 +80,4 @@ class TariffRecognizingIntegrationTest extends KernelTestCase
         self::assertEquals('Standard', $response['tariff']);
         self::assertEquals(1.0, $response['kmRate']);
     }
-
-    /**
-     * @test
-     */
-    public function standardTariffShouldBeDisplayedBefore2019(): void
-    {
-        //given
-        $transit = $this->fixtures->aCompletedTransitAt(60, new \DateTimeImmutable('2018-12-31 08:30'));
-
-        //when
-        $response = json_decode($this->transitController->getTransit($transit->getId())->getContent(), true);
-
-        //then
-        self::assertEquals('Standard', $response['tariff']);
-        self::assertEquals(1.0, $response['kmRate']);
-    }
 }

@@ -138,23 +138,6 @@ class CalculateTransitPriceTest extends TestCase
         self::assertEquals(Money::from(6000), $price); //60.00
     }
 
-    /**
-     * @test
-     */
-    public function shouldUseStandardPriceBefore2019(): void
-    {
-        //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
-        //and
-        $this->transitWasDoneIn2018($transit);
-
-        //when
-        $price = $transit->calculateFinalCosts();
-
-        //then
-        self::assertEquals(Money::from(2900), $price); //29.00
-    }
-
     private function transit(string $status, float $km): Transit
     {
         $transit = new Transit();
@@ -189,10 +172,5 @@ class CalculateTransitPriceTest extends TestCase
     private function transitWasDoneOnSaturdayNight(Transit $transit): void
     {
         $transit->setDateTime(new \DateTimeImmutable('2021-04-17 19:30'));
-    }
-
-    private function transitWasDoneIn2018(Transit $transit): void
-    {
-        $transit->setDateTime(new \DateTimeImmutable('2018-01-01 08:30'));
     }
 }
