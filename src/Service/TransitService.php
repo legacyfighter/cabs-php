@@ -488,7 +488,7 @@ class TransitService
             $this->driverRepository->save($driver);
             $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
             $this->transitRepository->save($transit);
-            $this->invoiceGenerator->generate($transit->getPrice(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
+            $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
         } else {
             throw new \RuntimeException('Cannot complete Transit, id = '.$transitId);
         }

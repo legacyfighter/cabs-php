@@ -14,9 +14,9 @@ class TransitDTO implements \JsonSerializable
     private ?float $distance;
     private string $distanceUnit;
     private float $kmRate;
-    private ?float $price;
-    private ?float $driverFee;
-    private ?float $estimatedPrice;
+    private ?float $price = null;
+    private ?float $driverFee = null;
+    private ?float $estimatedPrice = null;
     private float $baseFee;
     private \DateTimeImmutable $date;
     private ?\DateTimeImmutable $dateTime;
@@ -39,7 +39,9 @@ class TransitDTO implements \JsonSerializable
         $this->id = $transit->getId();
         $this->distance = $transit->getKm();
         $this->factor = $transit->getFactor();
-        $this->price = $transit->getPrice();
+        if($transit->getPrice()!== null) {
+            $this->price = (float) $transit->getPrice()->toInt();
+        }
         $this->date = $transit->getDateTime();
         $this->status = $transit->getStatus();
         $this->setTariff($transit);
@@ -50,8 +52,12 @@ class TransitDTO implements \JsonSerializable
         $this->from = AddressDTO::from($transit->getFrom());
         $this->carClass = $transit->getCarType();
         $this->clientDTO = ClientDTO::from($transit->getClient());
-        $this->driverFee = $transit->getDriversFee();
-        $this->estimatedPrice = $transit->getEstimatedPrice();
+        if($transit->getDriversFee()!==null) {
+            $this->driverFee = (float) $transit->getDriversFee()->toInt();
+        }
+        if($transit->getEstimatedPrice() !== null) {
+            $this->estimatedPrice = (float) $transit->getEstimatedPrice();
+        }
         $this->dateTime = $transit->getDateTime();
         $this->published = $transit->getPublished();
         $this->acceptedAt = $transit->getAcceptedAt();

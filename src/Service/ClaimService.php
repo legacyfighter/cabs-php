@@ -105,7 +105,7 @@ class ClaimService
             return $claim;
         }
         if($claim->getOwner()->getType() === Client::TYPE_VIP) {
-            if($claim->getTransit()->getPrice() < $this->appProperties->getAutomaticRefundForVipThreshold()) {
+            if($claim->getTransit()->getPrice()->toInt() < $this->appProperties->getAutomaticRefundForVipThreshold()) {
                 $claim->setStatus(Claim::STATUS_REFUNDED);
                 $claim->setCompletionDate(new \DateTimeImmutable());
                 $claim->setChangeDate(new \DateTimeImmutable());
@@ -121,7 +121,7 @@ class ClaimService
             }
         } else {
             if(count($this->transitRepository->findByClient($claim->getOwner())) >= $this->appProperties->getNoOfTransitsForClaimAutomaticRefund()) {
-                if($claim->getTransit()->getPrice() < $this->appProperties->getAutomaticRefundForVipThreshold()) {
+                if($claim->getTransit()->getPrice()->toInt() < $this->appProperties->getAutomaticRefundForVipThreshold()) {
                     $claim->setStatus(Claim::STATUS_REFUNDED);
                     $claim->setCompletionDate(new \DateTimeImmutable());
                     $claim->setChangeDate(new \DateTimeImmutable());

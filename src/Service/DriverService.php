@@ -7,6 +7,7 @@ use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\DriverLicense;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\DriverRepository;
@@ -73,7 +74,7 @@ class DriverService
         if($status === Driver::STATUS_ACTIVE) {
             $driver->setDriverLicense(DriverLicense::withLicense($driver->getDriverLicense()->asString()));
         }
-        
+
         $driver->setStatus($status);
     }
 
@@ -94,7 +95,7 @@ class DriverService
         $this->driverRepository->save($driver);
     }
 
-    public function calculateDriverMonthlyPayment(int $driverId, int $year, int $month): int
+    public function calculateDriverMonthlyPayment(int $driverId, int $year, int $month): Money
     {
         $driver = $this->driverRepository->getOne($driverId);
         if($driver === null) {
@@ -104,18 +105,20 @@ class DriverService
         $to = (new \DateTimeImmutable(sprintf('last day of %s-%s', $year, $month)))->modify('+1 day');
 
         $transitsList = $this->transitRepository->findAllByDriverAndDateTimeBetween($driver, $from, $to);
-        $sum = array_sum(
+        $sum = array_reduce(
             array_map(
                 fn(Transit $transit) => $this->driverFeeService->calculateDriverFee($transit->getId()),
                 $transitsList
-            )
+            ),
+            fn(Money $sum, Money $fee) => $sum->add($fee),
+            Money::zero()
         );
 
-        return (int) $sum;
+        return $sum;
     }
 
     /**
-     * @return array<string,int>
+     * @return array<string,Money>
      */
     public function calculateDriverYearlyPayment(int $driverId, int $year): array
     {

@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Support\PrivateProperty;
 use PHPUnit\Framework\TestCase;
 
@@ -48,7 +49,7 @@ class CalculateTransitPriceTest extends TestCase
         $price = $transit->calculateFinalCosts();
 
         //then
-        self::assertEquals(2900, $price); //29.00
+        self::assertEquals(Money::from(2900), $price); //29.00
     }
 
     /**
@@ -65,7 +66,7 @@ class CalculateTransitPriceTest extends TestCase
         $price = $transit->estimateCost();
 
         //then
-        self::assertEquals(2900, $price); //29.00
+        self::assertEquals(Money::from(2900), $price); //29.00
     }
 
     private function transit(string $status, float $km): Transit
