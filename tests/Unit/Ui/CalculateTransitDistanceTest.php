@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Ui;
 
+use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
@@ -75,7 +76,7 @@ class CalculateTransitDistanceTest extends TestCase
         $t->setTo($address);
         $t->setFrom($address);
         $t->setStatus(Transit::STATUS_DRAFT);
-        $t->setKm($km);
+        $t->setKm(Distance::ofKm($km));
         $t->setClient($client);
         return TransitDTO::from($t);
     }

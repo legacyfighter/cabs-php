@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Money\Money;
 
 #[Entity]
@@ -276,14 +277,14 @@ class Transit extends BaseEntity
         $this->factor = $factor;
     }
 
-    public function getKm(): ?float
+    public function getKm(): ?Distance
     {
-        return $this->km;
+        return Distance::ofKm($this->km);
     }
 
-    public function setKm(float $km): void
+    public function setKm(Distance $km): void
     {
-        $this->km = $km;
+        $this->km = $km->toKmInFloat();
         $this->estimateCost();
     }
 

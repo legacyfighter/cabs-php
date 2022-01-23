@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
+use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Transit;
 
 class TransitDTO implements \JsonSerializable
@@ -11,7 +12,7 @@ class TransitDTO implements \JsonSerializable
     private string $status;
     public ?DriverDTO $driver = null;
     public ?int $factor;
-    private ?float $distance;
+    private ?Distance $distance;
     private string $distanceUnit;
     private float $kmRate;
     private ?float $price = null;
@@ -160,23 +161,7 @@ class TransitDTO implements \JsonSerializable
     public function getDistance(string $unit): string
     {
         $this->distanceUnit = $unit;
-        if($unit === 'km') {
-            if($this->distance === ceil($this->distance)) {
-                return sprintf('%d', round($this->distance)).'km';
-            }
-            return sprintf('%.3f', $this->distance).'km';
-        }
-        if($unit === 'miles') {
-            $distance = $this->distance / 1.609344;
-            if($distance === ceil($distance)) {
-                return sprintf('%d', round($distance)).'miles';
-            }
-            return sprintf('%.3f', $distance).'miles';
-        }
-        if($unit === 'm') {
-            return sprintf('%d', round($this->distance * 1000)).'m';
-        }
-        throw new \InvalidArgumentException('Invalid unit '.$unit);
+        return $this->distance->printIn($unit);
     }
 
     public function getDriverFee(): float

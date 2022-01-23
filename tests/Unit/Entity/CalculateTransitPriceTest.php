@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
+use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
@@ -75,7 +76,7 @@ class CalculateTransitPriceTest extends TestCase
         PrivateProperty::setId(1, $transit);
         $transit->setDateTime(new \DateTimeImmutable());
         $transit->setStatus(Transit::STATUS_DRAFT);
-        $transit->setKm($km);
+        $transit->setKm(Distance::ofKm($km));
         $transit->setStatus($status);
         return $transit;
     }
