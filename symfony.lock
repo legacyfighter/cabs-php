@@ -121,6 +121,9 @@
     "php-cs-fixer/diff": {
         "version": "v2.0.2"
     },
+    "phpstan/phpstan": {
+        "version": "1.4.5"
+    },
     "psr/cache": {
         "version": "2.0.0"
     },
@@ -132,6 +135,9 @@
     },
     "psr/log": {
         "version": "2.0.0"
+    },
+    "rector/rector": {
+        "version": "0.12.15"
     },
     "symfony/cache": {
         "version": "v5.3.10"
