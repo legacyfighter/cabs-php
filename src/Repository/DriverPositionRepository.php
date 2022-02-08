@@ -39,21 +39,24 @@ class DriverPositionRepository
      */
     public function findAverageDriverPositionSince(float $latitudeMin, float $latitudeMax, float $longitudeMin, float $longitudeMax, \DateTimeImmutable $date): array
     {
-        return $this->em->createQueryBuilder()
-            ->select('NEW LegacyFighter\Cabs\DTO\DriverPositionDTOV2(p.driver, avg(p.latitude), avg(p.longitude), max(p.seenAt))')
-            ->from(DriverPosition::class, 'p')
-            ->where('p.latitude between :latitudeMin and :latitudeMax')
-            ->andWhere('p.longitude between :longitudeMin and :longitudeMax')
-            ->andWhere('p.seenAt >= :seenAt')
-            ->groupBy('p.driver.id')
-            ->setParameters([
-                'latitudeMin' => $latitudeMin,
-                'latitudeMax' => $latitudeMax,
-                'longitudeMin' => $longitudeMin,
-                'longitudeMax' => $longitudeMax,
-                'seenAt' => $date
-            ])
-            ->getQuery()
-            ->getResult();
+        return \array_map(
+            static fn (array $data): DriverPositionDTOV2 => new DriverPositionDTOV2($data['driver'], $data['lat'], $data['lon'], new \DateTimeImmutable($data['seen'])),
+            $this->em->createQueryBuilder()
+                ->select(\sprintf('d as driver, avg(p.latitude) as lat, avg(p.longitude) as lon, max(p.seenAt) as seen'))
+                ->from(Driver::class, 'd')
+                ->join(DriverPosition::class, 'p', 'WITH', 'p.driver = d')
+                ->where('p.latitude between :latitudeMin and :latitudeMax')
+                ->andWhere('p.longitude between :longitudeMin and :longitudeMax')
+                ->andWhere('p.seenAt >= :seenAt')
+                ->setParameters([
+                    'latitudeMin' => $latitudeMin,
+                    'latitudeMax' => $latitudeMax,
+                    'longitudeMin' => $longitudeMin,
+                    'longitudeMax' => $longitudeMax,
+                    'seenAt' => $date
+                ])
+                ->groupBy('d.id')
+                ->getQuery()
+                ->getResult());
     }
 }

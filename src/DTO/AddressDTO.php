@@ -24,6 +24,7 @@ class AddressDTO implements \JsonSerializable
         $this->additionalNumber = $address->getAdditionalNumber();
         $this->postalCode = $address->getPostalCode();
         $this->name = $address->getName();
+        $this->district = $address->getDistrict();
     }
 
     public static function from(Address $address): self

@@ -76,7 +76,7 @@ class TransitService
         return $this->createTransitFrom($transitDTO->getClientDTO()->getId(), $from, $to, $transitDTO->getCarClass());
     }
 
-    public function createTransitFrom(int $clientId, Address $from, Address $to, string $carClass): Transit
+    public function createTransitFrom(int $clientId, Address $from, Address $to, ?string $carClass): Transit
     {
         $client = $this->clientRepository->getOne($clientId);
 
@@ -257,7 +257,7 @@ class TransitService
                     $distanceToCheck++;
 
                     // FIXME: to refactor when the final business logic will be determined
-                    if(($transit->getPublished()->modify('+300 seconds') > $this->clock->now())
+                    if(($transit->getPublished()->modify('+300 seconds') < $this->clock->now())
                         ||
                         ($distanceToCheck >= 20)
                         ||
@@ -354,9 +354,9 @@ class TransitService
 
                                     $driver->getOccupied() == false) {
                                 if(!in_array($driver,
-                                        $transit->getDriversRejections())) {
+                                        $transit->getDriversRejections(), true)) {
                                     $proposedDrivers = $transit->getProposedDrivers();
-                                    $proposedDrivers[] = $transit;
+                                    $proposedDrivers[] = $driver;
                                     $transit->setProposedDrivers($proposedDrivers); $transit->setAwaitingDriversResponses($transit->getAwaitingDriversResponses() + 1);
                                     $this->notificationService->notifyAboutPossibleTransit($driver->getId(), $transitId);
                                 }
@@ -394,16 +394,20 @@ class TransitService
                 if($transit->getDriver() !== null) {
                     throw new \RuntimeException('Transit already accepted, id = '.$transitId);
                 } else {
-                    if(in_array($driver, $transit->getDriversRejections())) {
-                        throw new \RuntimeException('"Driver out of possible drivers, id = '.$driverId);
+                    if(!in_array($driver, $transit->getProposedDrivers(), true)) {
+                        throw new \RuntimeException('Driver out of possible drivers, id = ' . $driverId);
                     } else {
-                        $transit->setDriver($driver);
-                        $transit->setAwaitingDriversResponses(0);
-                        $transit->setAcceptedAt($this->clock->now());
-                        $transit->setStatus(Transit::STATUS_TRANSIT_TO_PASSENGER);
-                        $this->transitRepository->save($transit);
-                        $driver->setOccupied(true);
-                        $this->driverRepository->save($driver);
+                        if (in_array($driver, $transit->getDriversRejections(), true)) {
+                            throw new \RuntimeException('"Driver out of possible drivers, id = ' . $driverId);
+                        } else {
+                            $transit->setDriver($driver);
+                            $transit->setAwaitingDriversResponses(0);
+                            $transit->setAcceptedAt($this->clock->now());
+                            $transit->setStatus(Transit::STATUS_TRANSIT_TO_PASSENGER);
+                            $this->transitRepository->save($transit);
+                            $driver->setOccupied(true);
+                            $this->driverRepository->save($driver);
+                        }
                     }
                 }
             }

@@ -32,7 +32,7 @@ class TransitDTO implements \JsonSerializable
     private array $proposedDrivers = [];
     private AddressDTO $to;
     private AddressDTO $from;
-    private ?string $carClass;
+    private ?string $carClass = null;
     private ?ClientDTO $clientDTO = null;
 
     private function __construct(Transit $transit)
@@ -103,7 +103,7 @@ class TransitDTO implements \JsonSerializable
         return $this->kmRate;
     }
 
-    public function getPrice(): float
+    public function getPrice(): ?float
     {
         return $this->price;
     }
@@ -114,12 +114,12 @@ class TransitDTO implements \JsonSerializable
         return $this->distance->printIn($unit);
     }
 
-    public function getDriverFee(): float
+    public function getDriverFee(): ?float
     {
         return $this->driverFee;
     }
 
-    public function getEstimatedPrice(): float
+    public function getEstimatedPrice(): ?float
     {
         return $this->estimatedPrice;
     }
@@ -134,32 +134,32 @@ class TransitDTO implements \JsonSerializable
         return $this->date;
     }
 
-    public function getDateTime(): \DateTimeImmutable
+    public function getDateTime(): ?\DateTimeImmutable
     {
         return $this->dateTime;
     }
 
-    public function getPublished(): \DateTimeImmutable
+    public function getPublished(): ?\DateTimeImmutable
     {
         return $this->published;
     }
 
-    public function getAcceptedAt(): \DateTimeImmutable
+    public function getAcceptedAt(): ?\DateTimeImmutable
     {
         return $this->acceptedAt;
     }
 
-    public function getStarted(): \DateTimeImmutable
+    public function getStarted(): ?\DateTimeImmutable
     {
         return $this->started;
     }
 
-    public function getCompletedAt(): \DateTimeImmutable
+    public function getCompletedAt(): ?\DateTimeImmutable
     {
         return $this->completedAt;
     }
 
-    public function getClaimDTO(): ClaimDTO
+    public function getClaimDTO(): ?ClaimDTO
     {
         return $this->claimDTO;
     }
@@ -179,7 +179,7 @@ class TransitDTO implements \JsonSerializable
         return $this->from;
     }
 
-    public function getCarClass(): string
+    public function getCarClass(): ?string
     {
         return $this->carClass;
     }

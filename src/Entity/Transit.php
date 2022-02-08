@@ -104,7 +104,7 @@ class Transit extends BaseEntity
     #[Column(type: 'money', nullable: true)]
     private ?Money $estimatedPrice = null;
 
-    #[Column(type: 'integer', nullable: true)]
+    #[Column(type: 'money', nullable: true)]
     private ?Money $driversFee = null;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
