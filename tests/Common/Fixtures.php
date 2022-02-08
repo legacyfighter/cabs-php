@@ -2,7 +2,12 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
+use LegacyFighter\Cabs\DTO\AddressDTO;
+use LegacyFighter\Cabs\DTO\CarTypeDTO;
+use LegacyFighter\Cabs\DTO\ClientDTO;
+use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
+use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverFee;
@@ -12,6 +17,7 @@ use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Service\CarTypeService;
 use LegacyFighter\Cabs\Service\DriverService;
 
 class Fixtures
@@ -21,13 +27,15 @@ class Fixtures
     private DriverService $driverService;
     private AddressRepository $addressRepository;
     private ClientRepository $clientRepository;
+    private CarTypeService $carTypeService;
 
     public function __construct(
         TransitRepository $transitRepository,
         DriverFeeRepository $feeRepository,
         DriverService $driverService,
         AddressRepository $addressRepository,
-        ClientRepository $clientRepository
+        ClientRepository $clientRepository,
+        CarTypeService $carTypeService
     )
     {
         $this->transitRepository = $transitRepository;
@@ -35,6 +43,7 @@ class Fixtures
         $this->driverService = $driverService;
         $this->addressRepository = $addressRepository;
         $this->clientRepository = $clientRepository;
+        $this->carTypeService = $carTypeService;
     }
 
 
@@ -76,6 +85,44 @@ class Fixtures
         $transit->setFrom($this->anAddress('Polska', 'Warszawa', 'Młynarska', 20));
         $transit->setClient($this->aClient());
         return $this->transitRepository->save($transit);
+    }
+
+    public function anActiveCarCategory(string $carClass): CarType
+    {
+        $carType = new CarType($carClass, 'opis', 1);
+        PrivateProperty::setId(1, $carType);
+        $carTypeDTO = CarTypeDTO::new($carType);
+        $carType = $this->carTypeService->create($carTypeDTO);
+        $this->carTypeService->registerCar($carClass);
+        $this->carTypeService->activate($carType->getId());
+        return $carType;
+    }
+
+    public function aTransitDTOWith(Client $client, AddressDTO $from, AddressDTO $to): TransitDTO
+    {
+        $transit = new Transit();
+        PrivateProperty::setId(1, $transit);
+        $transit->setDateTime(new \DateTimeImmutable());
+        $transit->setStatus(Transit::STATUS_DRAFT);
+        $transit->setTo($to->toAddressEntity());
+        $transit->setFrom($from->toAddressEntity());
+        $transit->setClient($client);
+
+        return TransitDTO::from($transit);
+    }
+
+    public function aTransitDTO(AddressDTO $from, AddressDTO $to): TransitDTO
+    {
+        return $this->aTransitDTOWith($this->aClient(), $from, $to);
+    }
+
+    public function anAddressDTO(string $country, string $city, string $street, int $buildingNumber): AddressDTO
+    {
+        $address = new Address($country, $city, $street, $buildingNumber);
+        $address->setPostalCode('11-111');
+        $address->setName('name');
+        $address->setDistrict('district');
+        return AddressDTO::from($address);
     }
 
     private function anAddress(string $country, string $city, string $street, int $buildingNumber): Address
