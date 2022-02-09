@@ -2,27 +2,27 @@
 
 namespace LegacyFighter\Cabs\Entity;
 
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\Id;
-
-#[Entity]
 class CarTypeActiveCounter
 {
-    #[Id]
-    #[Column]
-    private string $carClass;
+    private CarType $carType;
 
-    #[Column(type: 'integer')]
-    private int $activeCarsCounter = 0;
-
-    public function __construct(string $carClass)
+    public function __construct(CarType $carType)
     {
-        $this->carClass = $carClass;
+        $this->carType = $carType;
+    }
+
+    public function registerActiveCar(): void
+    {
+        $this->carType->registerActiveCar();
+    }
+
+    public function unregisterActiveCar(): void
+    {
+        $this->carType->unregisterActiveCar();
     }
 
     public function getActiveCarsCounter(): int
     {
-        return $this->activeCarsCounter;
+        return $this->carType->getActiveCarsCounter();
     }
 }

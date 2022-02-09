@@ -73,12 +73,12 @@ class CarTypeService
 
     public function unregisterActiveCar(string $carClass): void
     {
-        $this->carTypeRepository->decrementCounter($carClass);
+        $this->carTypeRepository->findActiveCounter($carClass)->unregisterActiveCar();
     }
 
     public function registerActiveCar(string $carClass): void
     {
-        $this->carTypeRepository->incrementCounter($carClass);
+        $this->carTypeRepository->findActiveCounter($carClass)->registerActiveCar();
     }
 
     /**
