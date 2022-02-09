@@ -16,7 +16,7 @@ class CarTypeController
     public function create(CarTypeDTO $carTypeDTO): Response
     {
         $created = $this->carTypeService->create($carTypeDTO);
-        return new JsonResponse(CarTypeDTO::new($created));
+        return new JsonResponse($this->carTypeService->loadDto($created->getId()));
     }
 
     #[Route('/cartypes/{carClass}/registerCar', methods: ['POST'])]

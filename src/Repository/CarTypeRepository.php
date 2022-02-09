@@ -4,15 +4,17 @@ namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Entity\CarType;
+use LegacyFighter\Cabs\Entity\CarTypeActiveCounter;
 
 class CarTypeRepository
 {
-    private EntityManagerInterface $em;
 
-    public function __construct(EntityManagerInterface $em)
-    {
-        $this->em = $em;
-    }
+
+    public function __construct(
+        private EntityManagerInterface $em,
+        private CarTypeActiveCounterRepository $carTypeActiveCounterRepository
+    ) {}
+
 
     public function getOne(int $carTypeId): ?CarType
     {
@@ -22,6 +24,11 @@ class CarTypeRepository
     public function findByCarClass(string $carClass): ?CarType
     {
         return $this->em->getRepository(CarType::class)->findOneBy(['carClass' => $carClass]);
+    }
+
+    public function findActiveCounter(string $carClass): ?CarTypeActiveCounter
+    {
+        return $this->carTypeActiveCounterRepository->findByCarClass($carClass);
     }
 
     /**
@@ -35,12 +42,24 @@ class CarTypeRepository
     public function save(CarType $carType): void
     {
         $this->em->persist($carType);
+        $this->carTypeActiveCounterRepository->save(new CarTypeActiveCounter($carType->getCarClass()));
         $this->em->flush();
     }
 
     public function delete(CarType $carType): void
     {
         $this->em->remove($carType);
+        $this->carTypeActiveCounterRepository->delete($this->carTypeActiveCounterRepository->findByCarClass($carType->getCarClass()));
         $this->em->flush();
+    }
+
+    public function incrementCounter(string $carClass): void
+    {
+        $this->carTypeActiveCounterRepository->incrementCounter($carClass);
+    }
+
+    public function decrementCounter(string $carClass): void
+    {
+        $this->carTypeActiveCounterRepository->decrementCounter($carClass);
     }
 }

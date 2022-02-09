@@ -14,20 +14,20 @@ class CarTypeDTO implements \JsonSerializable
     private int $activeCarsCounter;
     private int $minNoOfCarsToActivateClass;
 
-    private function __construct(CarType $carType)
+    private function __construct(CarType $carType, int $activeCarsCounter)
     {
         $this->id = $carType->getId();
         $this->carClass = $carType->getCarClass();
         $this->status = $carType->getStatus();
         $this->carsCounter = $carType->getCarsCounter();
         $this->description = $carType->getDescription();
-        $this->activeCarsCounter = $carType->getActiveCarsCounter();
+        $this->activeCarsCounter = $activeCarsCounter;
         $this->minNoOfCarsToActivateClass = $carType->getMinNoOfCarsToActivateClass();
     }
 
-    public static function new(CarType $carType): self
+    public static function new(CarType $carType, int $activeCarsCounter = 0): self
     {
-        return new self($carType);
+        return new self($carType, $activeCarsCounter);
     }
 
     public function getId(): int

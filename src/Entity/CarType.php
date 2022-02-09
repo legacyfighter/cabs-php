@@ -32,24 +32,11 @@ class CarType extends BaseEntity
     #[Column(type: 'integer')]
     private int $minNoOfCarsToActivateClass;
 
-    #[Column(type: 'integer')]
-    private int $activeCarsCounter = 0;
-
     public function __construct(string $carClass, string $description, int $minNoOfCarsToActivateClass)
     {
         $this->carClass = $carClass;
         $this->description = $description;
         $this->minNoOfCarsToActivateClass = $minNoOfCarsToActivateClass;
-    }
-
-    public function registerActiveCar(): void
-    {
-        $this->activeCarsCounter++;
-    }
-
-    public function unregisterActiveCar(): void
-    {
-        $this->activeCarsCounter--;
     }
 
     public function registerCar(): void
@@ -114,10 +101,5 @@ class CarType extends BaseEntity
     public function getMinNoOfCarsToActivateClass(): int
     {
         return $this->minNoOfCarsToActivateClass;
-    }
-
-    public function getActiveCarsCounter(): int
-    {
-        return $this->activeCarsCounter;
     }
 }

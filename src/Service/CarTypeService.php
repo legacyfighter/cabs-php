@@ -30,7 +30,8 @@ class CarTypeService
 
     public function loadDto(int $id): CarTypeDTO
     {
-        return CarTypeDTO::new($this->load($id));
+        $loaded = $this->load($id);
+        return CarTypeDTO::new($loaded, $this->carTypeRepository->findActiveCounter($loaded->getCarClass())->getActiveCarsCounter());
     }
 
     public function create(CarTypeDTO $carTypeDTO): CarType
@@ -42,7 +43,7 @@ class CarTypeService
             return $type;
         } else {
             $byCarClass->setDescription($carTypeDTO->getDescription());
-            return $byCarClass;
+            return $this->carTypeRepository->findByCarClass($carTypeDTO->getCarClass());
         }
     }
 
@@ -72,14 +73,12 @@ class CarTypeService
 
     public function unregisterActiveCar(string $carClass): void
     {
-        $carType = $this->findByCarClass($carClass);
-        $carType->unregisterActiveCar();
+        $this->carTypeRepository->decrementCounter($carClass);
     }
 
     public function registerActiveCar(string $carClass): void
     {
-        $carType = $this->findByCarClass($carClass);
-        $carType->registerActiveCar();
+        $this->carTypeRepository->incrementCounter($carClass);
     }
 
     /**
