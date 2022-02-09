@@ -30,9 +30,6 @@ class CarType extends BaseEntity
     private int $carsCounter = 0;
 
     #[Column(type: 'integer')]
-    private int $activeCarsCounter = 0;
-
-    #[Column(type: 'integer')]
     private int $minNoOfCarsToActivateClass;
 
     public function __construct(string $carClass, string $description, int $minNoOfCarsToActivateClass)
@@ -66,30 +63,6 @@ class CarType extends BaseEntity
     public function deactivate(): void
     {
         $this->status = self::STATUS_INACTIVE;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function registerActiveCar(): void
-    {
-        $this->activeCarsCounter++;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function unregisterActiveCar(): void
-    {
-        $this->activeCarsCounter--;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getActiveCarsCounter(): int
-    {
-        return $this->activeCarsCounter;
     }
 
     public function getCarClass(): string

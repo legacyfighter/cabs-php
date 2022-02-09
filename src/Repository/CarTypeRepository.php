@@ -8,9 +8,13 @@ use LegacyFighter\Cabs\Entity\CarTypeActiveCounter;
 
 class CarTypeRepository
 {
+
+
     public function __construct(
         private EntityManagerInterface $em,
+        private CarTypeActiveCounterRepository $carTypeActiveCounterRepository
     ) {}
+
 
     public function getOne(int $carTypeId): ?CarType
     {
@@ -24,12 +28,7 @@ class CarTypeRepository
 
     public function findActiveCounter(string $carClass): ?CarTypeActiveCounter
     {
-        $carType = $this->findByCarClass($carClass);
-        if($carType === null) {
-            return null;
-        }
-
-        return new CarTypeActiveCounter($carType);
+        return $this->carTypeActiveCounterRepository->findByCarClass($carClass);
     }
 
     /**
@@ -43,12 +42,24 @@ class CarTypeRepository
     public function save(CarType $carType): void
     {
         $this->em->persist($carType);
+        $this->carTypeActiveCounterRepository->save(new CarTypeActiveCounter($carType->getCarClass()));
         $this->em->flush();
     }
 
     public function delete(CarType $carType): void
     {
         $this->em->remove($carType);
+        $this->carTypeActiveCounterRepository->delete($this->carTypeActiveCounterRepository->findByCarClass($carType->getCarClass()));
         $this->em->flush();
+    }
+
+    public function incrementCounter(string $carClass): void
+    {
+        $this->carTypeActiveCounterRepository->incrementCounter($carClass);
+    }
+
+    public function decrementCounter(string $carClass): void
+    {
+        $this->carTypeActiveCounterRepository->decrementCounter($carClass);
     }
 }
