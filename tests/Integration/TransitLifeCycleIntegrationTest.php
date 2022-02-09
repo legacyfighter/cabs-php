@@ -46,7 +46,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
 
         //then
         $loaded = $this->transitService->loadTransit($transit->getId());
-        self::assertNull($loaded->getCarClass());
+        self::assertNotNull($loaded->getCarClass());
         self::assertNull($loaded->getClaimDTO());
         self::assertNotNull($loaded->getEstimatedPrice());
         self::assertNull($loaded->getPrice());

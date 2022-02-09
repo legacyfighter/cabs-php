@@ -119,10 +119,148 @@ class Transit extends BaseEntity
     #[Column(nullable: true)]
     private ?string $carType = null;
 
-    public function __construct()
+    public function __construct(Address $from, Address $to, Client $client, string $carType, \DateTimeImmutable $when, Distance $distance)
     {
+        $this->from = $from;
+        $this->to = $to;
+        $this->client = $client;
+        $this->carType = $carType;
+        $this->setDateTime($when);
+        $this->km = $distance->toKmInFloat();
+        $this->setStatus(self::STATUS_DRAFT);
         $this->proposedDrivers = new ArrayCollection();
         $this->driversRejections = new ArrayCollection();
+    }
+
+    public static function withStatus(string $status, Address $from, Address $to, Client $client, string $carType, \DateTimeImmutable $when, Distance $distance): self
+    {
+        $transit = new self($from, $to, $client, $carType, $when, $distance);
+        $transit->setStatus($status);
+
+        return $transit;
+    }
+
+    public function changePickupTo(Address $newAddress, Distance $newDistance, float $distanceFromPreviousPickup): void
+    {
+        if($distanceFromPreviousPickup > 0.25) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id ='.$this->getId());
+        }
+
+        if(!in_array($this->status, [self::STATUS_DRAFT, self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT], true)) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id ='.$this->getId());
+        }
+
+        if($this->pickupAddressChangeCounter > 2) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id ='.$this->getId());
+        }
+
+        $this->from = $newAddress;
+        $this->pickupAddressChangeCounter++;
+        $this->km = $newDistance->toKmInFloat();
+        $this->estimateCost();
+    }
+
+    public function changeDestinationTo(Address $newAddress, Distance $newDistance): void
+    {
+        if($this->status === self::STATUS_COMPLETED) {
+            throw new \InvalidArgumentException('Address \'to\' cannot be changed, id ='.$this->getId());
+        }
+
+        $this->to = $newAddress;
+        $this->km = $newDistance->toKmInFloat();
+        $this->estimateCost();
+    }
+
+    public function cancel(): void
+    {
+        if(!in_array($this->status, [self::STATUS_DRAFT, self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, self::STATUS_TRANSIT_TO_PASSENGER], true)) {
+            throw new \InvalidArgumentException('Transit cannot be cancelled, id = '.$this->getId());
+        }
+
+        $this->status = self::STATUS_CANCELLED;
+        $this->driver = null;
+        $this->km = Distance::zero()->toKmInFloat();
+        $this->awaitingDriversResponses = 0;
+    }
+
+    public function canProposeTo(Driver $driver): bool
+    {
+        return !$this->driversRejections->contains($driver);
+    }
+
+    public function proposeTo(Driver $driver): void
+    {
+        if($this->canProposeTo($driver)) {
+            $this->proposedDrivers->add($driver);
+            $this->awaitingDriversResponses++;
+        }
+    }
+
+    public function failDriverAssignment(): void
+    {
+        $this->status = self::STATUS_DRIVER_ASSIGNMENT_FAILED;
+        $this->driver = null;
+        $this->km = Distance::zero()->toKmInFloat();
+        $this->awaitingDriversResponses = 0;
+    }
+
+    public function shouldNotWaitForDriverAnyMore(\DateTimeImmutable $date): bool
+    {
+        return $this->status === self::STATUS_CANCELLED || $this->getPublished()->modify('+300 seconds') < $date;
+    }
+
+    public function acceptBy(Driver $driver, \DateTimeImmutable $when): void
+    {
+        if($this->driver !== null) {
+            throw new \RuntimeException('Transit already accepted, id = '.$this->getId());
+        }
+        if(!$this->proposedDrivers->contains($driver)) {
+            throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getId());
+        }
+        if($this->driversRejections->contains($driver)) {
+            throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getId());
+        }
+
+        $this->driver = $driver;
+        $this->driver->setOccupied(true);
+        $this->awaitingDriversResponses = 0;
+        $this->acceptedAt = $when;
+        $this->status = self::STATUS_TRANSIT_TO_PASSENGER;
+    }
+
+    public function start(\DateTimeImmutable $when): void
+    {
+        if($this->status !== self::STATUS_TRANSIT_TO_PASSENGER) {
+            throw new \InvalidArgumentException('Transit cannot be started, id = '.$this->getId());
+        }
+        $this->started = $when;
+        $this->status = self::STATUS_IN_TRANSIT;
+    }
+
+    public function rejectBy(Driver $driver): void
+    {
+        $this->driversRejections->add($driver);
+        $this->awaitingDriversResponses--;
+    }
+
+    public function publishAt(\DateTimeImmutable $when): void
+    {
+        $this->status = self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT;
+        $this->published = $when;
+    }
+
+    public function completeAt(\DateTimeImmutable $when, Address $destinationAddress, Distance $distance): void
+    {
+        if($this->status !== self::STATUS_IN_TRANSIT) {
+            throw new \RuntimeException('Cannot complete Transit, id = '.$this->getId());
+        }
+
+        $this->km = $distance->toKmInFloat();
+        $this->estimateCost();
+        $this->completeAt = $when;
+        $this->to = $destinationAddress;
+        $this->status = self::STATUS_COMPLETED;
+        $this->calculateFinalCosts();
     }
 
     public function getDriverPaymentStatus(): ?string
@@ -160,7 +298,7 @@ class Transit extends BaseEntity
         return $this->status;
     }
 
-    public function setStatus(string $status): void
+    private function setStatus(string $status): void
     {
         if(!in_array($status, [
             self::STATUS_IN_TRANSIT,
@@ -191,29 +329,9 @@ class Transit extends BaseEntity
         return $this->from;
     }
 
-    public function setFrom(Address $from): void
-    {
-        $this->from = $from;
-    }
-
     public function getTo(): Address
     {
         return $this->to;
-    }
-
-    public function setTo(Address $to): void
-    {
-        $this->to = $to;
-    }
-
-    public function getPickupAddressChangeCounter(): int
-    {
-        return $this->pickupAddressChangeCounter;
-    }
-
-    public function setPickupAddressChangeCounter(int $pickupAddressChangeCounter): void
-    {
-        $this->pickupAddressChangeCounter = $pickupAddressChangeCounter;
     }
 
     public function getAcceptedAt(): ?\DateTimeImmutable
@@ -221,29 +339,9 @@ class Transit extends BaseEntity
         return $this->acceptedAt;
     }
 
-    public function setAcceptedAt(?\DateTimeImmutable $acceptedAt): void
-    {
-        $this->acceptedAt = $acceptedAt;
-    }
-
     public function getStarted(): ?\DateTimeImmutable
     {
         return $this->started;
-    }
-
-    public function setStarted(?\DateTimeImmutable $started): void
-    {
-        $this->started = $started;
-    }
-
-    public function getDriversRejections(): array
-    {
-        return $this->driversRejections->toArray();
-    }
-
-    public function setDriversRejections(array $driversRejections): void
-    {
-        $this->driversRejections = new ArrayCollection($driversRejections);
     }
 
     public function getProposedDrivers(): array
@@ -251,30 +349,14 @@ class Transit extends BaseEntity
         return $this->proposedDrivers->toArray();
     }
 
-    public function setProposedDrivers(array $proposedDrivers): void
-    {
-        $this->proposedDrivers = new ArrayCollection($proposedDrivers);
-    }
-
     public function getAwaitingDriversResponses(): int
     {
         return $this->awaitingDriversResponses;
     }
 
-    public function setAwaitingDriversResponses(int $awaitingDriversResponses): void
-    {
-        $this->awaitingDriversResponses = $awaitingDriversResponses;
-    }
-
     public function getKm(): ?Distance
     {
         return $this->km === null ? null : Distance::ofKm($this->km);
-    }
-
-    public function setKm(Distance $km): void
-    {
-        $this->km = $km->toKmInFloat();
-        $this->estimateCost();
     }
 
     public function getPrice(): ?Money
@@ -319,19 +401,9 @@ class Transit extends BaseEntity
         return $this->published;
     }
 
-    public function setPublished(?\DateTimeImmutable $published): void
-    {
-        $this->published = $published;
-    }
-
     public function getClient(): Client
     {
         return $this->client;
-    }
-
-    public function setClient(Client $client): void
-    {
-        $this->client = $client;
     }
 
     public function estimateCost(): Money
@@ -368,29 +440,14 @@ class Transit extends BaseEntity
         return $this->driver;
     }
 
-    public function setDriver(?Driver $driver): void
-    {
-        $this->driver = $driver;
-    }
-
     public function getCompleteAt(): ?\DateTimeImmutable
     {
         return $this->completeAt;
     }
 
-    public function setCompleteAt(?\DateTimeImmutable $completeAt): void
-    {
-        $this->completeAt = $completeAt;
-    }
-
     public function getCarType(): ?string
     {
         return $this->carType;
-    }
-
-    public function setCarType(?string $carType): void
-    {
-        $this->carType = $carType;
     }
 
     public function getTariff(): Tariff

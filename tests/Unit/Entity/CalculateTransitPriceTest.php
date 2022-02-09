@@ -3,6 +3,9 @@
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
 use LegacyFighter\Cabs\Distance\Distance;
+use LegacyFighter\Cabs\Entity\Address;
+use LegacyFighter\Cabs\Entity\CarType;
+use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
@@ -140,12 +143,21 @@ class CalculateTransitPriceTest extends TestCase
 
     private function transit(string $status, float $km): Transit
     {
-        $transit = new Transit();
+        $address = new Address('country', 'city', 'street', 1);
+        $address->setName('name');
+        $address->setPostalCode('111');
+        PrivateProperty::setId(1, $address);
+
+        $client = new Client();
+        $client->setName('Janusz');
+        $client->setLastName('Kowalski');
+        $client->setType(Client::TYPE_NORMAL);
+        $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
+        PrivateProperty::setId(1, $client);
+
+        $transit = Transit::withStatus($status, $address, $address, $client, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
         PrivateProperty::setId(1, $transit);
-        $transit->setDateTime(new \DateTimeImmutable());
-        $transit->setStatus(Transit::STATUS_DRAFT);
-        $transit->setKm(Distance::ofKm($km));
-        $transit->setStatus($status);
+
         return $transit;
     }
 

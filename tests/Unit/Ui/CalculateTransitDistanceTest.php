@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Tests\Unit\Ui;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
+use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
@@ -60,6 +61,7 @@ class CalculateTransitDistanceTest extends TestCase
         $address = new Address('country', 'city', 'street', 1);
         $address->setName('name');
         $address->setPostalCode('111');
+        $address->setDistrict('district');
         PrivateProperty::setId(1, $address);
 
         $client = new Client();
@@ -69,15 +71,9 @@ class CalculateTransitDistanceTest extends TestCase
         $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
         PrivateProperty::setId(1, $client);
 
-        $t = new Transit();
+        $t = new Transit($address, $address, $client, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
         PrivateProperty::setId(1, $t);
         $t->setPrice(Money::from(10));
-        $t->setDateTime(new \DateTimeImmutable());
-        $t->setTo($address);
-        $t->setFrom($address);
-        $t->setStatus(Transit::STATUS_DRAFT);
-        $t->setKm(Distance::ofKm($km));
-        $t->setClient($client);
         return TransitDTO::from($t);
     }
 }

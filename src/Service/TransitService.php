@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Service;
 
-//ss If this cla will still be here in 2022 I will quit.
+// If this class will still be here in 2022 I will quit.
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
@@ -84,20 +84,13 @@ class TransitService
             throw new \InvalidArgumentException('Client does not exist, id = '.$clientId);
         }
 
-        $transit = new Transit();
-
         // FIXME later: add some exceptions handling
         $geoFrom = $this->geocodingService->geocodeAddress($from);
         $geoTo = $this->geocodingService->geocodeAddress($to);
 
-        $transit->setClient($client);
-        $transit->setFrom($from);
-        $transit->setTo($to);
-        $transit->setCarType($carClass);
-        $transit->setStatus(Transit::STATUS_DRAFT);
-        $transit->setDateTime($this->clock->now());
-        $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])));
-
+        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+        $transit = new Transit($from, $to, $client, $carClass, $this->clock->now(), $distance);
+        $transit->estimateCost();
         return $this->transitRepository->save($transit);
     }
 
@@ -144,17 +137,8 @@ class TransitService
         // calculate the result
         $distanceInKMeters = $c * $r;
 
-        if(!($transit->getStatus() === Transit::STATUS_DRAFT) ||
-            ($transit->getStatus() === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) ||
-            ($transit->getPickupAddressChangeCounter() > 2) ||
-            ($distanceInKMeters > 0.25)
-        ) {
-            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$transitId);
-        }
-
-        $transit->setFrom($newAddress);
-        $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1])));
-        $transit->setPickupAddressChangeCounter($transit->getPickupAddressChangeCounter() + 1);
+        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1]));
+        $transit->changePickupTo($newAddress, $distance, $distanceInKMeters);
         $this->transitRepository->save($transit);
 
         foreach ($transit->getProposedDrivers() as $driver) {
@@ -171,16 +155,12 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getStatus() === Transit::STATUS_COMPLETED) {
-            throw new \InvalidArgumentException('Address \'to\' cannot be changed, id = '.$transitId);
-        }
-
         // FIXME later: add some exceptions handling
         $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
         $geoTo = $this->geocodingService->geocodeAddress($newAddress);
 
-        $transit->setTo($newAddress);
-        $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])));
+        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+        $transit->changeDestinationTo($newAddress, $distance);
 
         if($transit->getDriver() !== null) {
             $this->notificationService->notifyAboutChangedTransitAddress($transit->getDriver()->getId(), $transit->getId());
@@ -204,18 +184,12 @@ class TransitService
         if($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
-        if(!in_array($transit->getStatus(),  [Transit::STATUS_DRAFT, Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, Transit::STATUS_TRANSIT_TO_PASSENGER], true)) {
-            throw new \InvalidArgumentException('Transit cannot be cancelled, id = '.$transitId);
-        }
 
         if($transit->getDriver() !== null) {
             $this->notificationService->notifyAboutCancelledTransit($transit->getDriver()->getId(), $transitId);
         }
 
-        $transit->setStatus(Transit::STATUS_CANCELLED);
-        $transit->setDriver(null);
-        $transit->setKm(Distance::zero());
-        $transit->setAwaitingDriversResponses(0);
+        $transit->cancel();
         $this->transitRepository->save($transit);
     }
 
@@ -227,8 +201,7 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $transit->setStatus(Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT);
-        $transit->setPublished($this->clock->now());
+        $transit->publishAt($this->clock->now());
         $this->transitRepository->save($transit);
 
         return $this->findDriversForTransit($transitId);
@@ -241,7 +214,6 @@ class TransitService
 
         if($transit !== null) {
             if($transit->getStatus() === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) {
-
 
 
                 $distanceToCheck = 0;
@@ -257,17 +229,8 @@ class TransitService
                     $distanceToCheck++;
 
                     // FIXME: to refactor when the final business logic will be determined
-                    if(($transit->getPublished()->modify('+300 seconds') < $this->clock->now())
-                        ||
-                        ($distanceToCheck >= 20)
-                        ||
-                        // Should it be here? How is it even possible due to previous status check above loop?
-                        ($transit->getStatus() === Transit::STATUS_CANCELLED)
-                    ) {
-                        $transit->setStatus(Transit::STATUS_DRIVER_ASSIGNMENT_FAILED);
-                        $transit->setDriver(null);
-                        $transit->setKm(Distance::zero());
-                        $transit->setAwaitingDriversResponses(0);
+                    if($transit->shouldNotWaitForDriverAnyMore($this->clock->now()) || $distanceToCheck >= 20) {
+                        $transit->failDriverAssignment();
                         $this->transitRepository->save($transit);
                         return $transit;
                     }
@@ -353,11 +316,8 @@ class TransitService
                             if($driver->getStatus() === Driver::STATUS_ACTIVE &&
 
                                     $driver->getOccupied() == false) {
-                                if(!in_array($driver,
-                                        $transit->getDriversRejections(), true)) {
-                                    $proposedDrivers = $transit->getProposedDrivers();
-                                    $proposedDrivers[] = $driver;
-                                    $transit->setProposedDrivers($proposedDrivers); $transit->setAwaitingDriversResponses($transit->getAwaitingDriversResponses() + 1);
+                                if($transit->canProposeTo($driver)) {
+                                    $transit->proposeTo($driver);
                                     $this->notificationService->notifyAboutPossibleTransit($driver->getId(), $transitId);
                                 }
                             } else {
@@ -385,33 +345,15 @@ class TransitService
         $driver = $this->driverRepository->getOne($driverId);
         if($driver === null) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
-        } else {
-            $transit = $this->transitRepository->getOne($transitId);
-
-            if($transit === null) {
-                throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
-            } else {
-                if($transit->getDriver() !== null) {
-                    throw new \RuntimeException('Transit already accepted, id = '.$transitId);
-                } else {
-                    if(!in_array($driver, $transit->getProposedDrivers(), true)) {
-                        throw new \RuntimeException('Driver out of possible drivers, id = ' . $driverId);
-                    } else {
-                        if (in_array($driver, $transit->getDriversRejections(), true)) {
-                            throw new \RuntimeException('"Driver out of possible drivers, id = ' . $driverId);
-                        } else {
-                            $transit->setDriver($driver);
-                            $transit->setAwaitingDriversResponses(0);
-                            $transit->setAcceptedAt($this->clock->now());
-                            $transit->setStatus(Transit::STATUS_TRANSIT_TO_PASSENGER);
-                            $this->transitRepository->save($transit);
-                            $driver->setOccupied(true);
-                            $this->driverRepository->save($driver);
-                        }
-                    }
-                }
-            }
         }
+        $transit = $this->transitRepository->getOne($transitId);
+        if($transit === null) {
+            throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
+        }
+
+        $transit->acceptBy($driver, $this->clock->now());
+        $this->transitRepository->save($transit);
+        $this->driverRepository->save($driver);
     }
 
     public function startTransit(int $driverId, int $transitId): void
@@ -428,12 +370,7 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getStatus() !== Transit::STATUS_TRANSIT_TO_PASSENGER) {
-            throw new \InvalidArgumentException('Transit cannot be started, id = '.$transitId);
-        }
-
-        $transit->setStatus(Transit::STATUS_IN_TRANSIT);
-        $transit->setStarted(new \DateTimeImmutable());
+        $transit->start($this->clock->now());
         $this->transitRepository->save($transit);
     }
 
@@ -451,10 +388,7 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $rejectedDrivers = $transit->getDriversRejections();
-        $rejectedDrivers[] = $driver;
-        $transit->setDriversRejections($rejectedDrivers);
-        $transit->setAwaitingDriversResponses($transit->getAwaitingDriversResponses() - 1);
+        $transit->rejectBy($driver);
         $this->transitRepository->save($transit);
     }
 
@@ -478,26 +412,17 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getStatus() === Transit::STATUS_IN_TRANSIT) {
-            // FIXME later: add some exceptions handling
-            $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
-            $geoTo = $this->geocodingService->geocodeAddress($transit->getTo());
-
-            $transit->setTo($destinationAddress);
-            $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])));
-            $transit->setStatus(Transit::STATUS_COMPLETED);
-            $transit->calculateFinalCosts();
-            $driver->setOccupied(false);
-            $transit->setCompleteAt($this->clock->now());
-            $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
-            $transit->setDriversFee($driverFee);
-            $this->driverRepository->save($driver);
-            $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
-            $this->transitRepository->save($transit);
-            $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
-        } else {
-            throw new \RuntimeException('Cannot complete Transit, id = '.$transitId);
-        }
+        // FIXME later: add some exceptions handling
+        $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
+        $geoTo = $this->geocodingService->geocodeAddress($transit->getTo());
+        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+        $transit->completeAt($this->clock->now(), $destinationAddress, $distance);
+        $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
+        $transit->setDriversFee($driverFee);
+        $this->driverRepository->save($driver);
+        $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
+        $this->transitRepository->save($transit);
+        $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
     }
 
     public function loadTransit(int $id): TransitDTO
