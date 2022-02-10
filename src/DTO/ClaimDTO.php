@@ -19,29 +19,43 @@ class ClaimDTO implements \JsonSerializable
     private string $status;
     private string $claimNo;
 
-    private function __construct(Claim $claim)
+    private function __construct()
     {
-        if($claim->getStatus() === Claim::STATUS_DRAFT) {
-            $this->isDraft = true;
-        } else {
-            $this->isDraft = false;
-        }
-        $this->claimId = $claim->getId();
-        $this->reason = $claim->getReason();
-        $this->incidentDescription = $claim->getIncidentDescription();
-        $this->transitId = $claim->getTransit()->getId();
-        $this->clientId = $claim->getOwner()->getId();
-        $this->completionDate = $claim->getCompletionDate();
-        $this->changeDate = $claim->getChangeDate();
-        $this->claimNo = $claim->getClaimNo();
-        $this->status = $claim->getStatus();
-        $this->completionMode = $claim->getCompletionMode();
-        $this->creationDate = $claim->getCreationDate();
+
     }
 
     public static function from(Claim $claim): self
     {
-        return new self($claim);
+        $dto = new self();
+        if($claim->getStatus() === Claim::STATUS_DRAFT) {
+            $dto->isDraft = true;
+        } else {
+            $dto->isDraft = false;
+        }
+        $dto->claimId = $claim->getId();
+        $dto->reason = $claim->getReason();
+        $dto->incidentDescription = $claim->getIncidentDescription();
+        $dto->transitId = $claim->getTransit()->getId();
+        $dto->clientId = $claim->getOwner()->getId();
+        $dto->completionDate = $claim->getCompletionDate();
+        $dto->changeDate = $claim->getChangeDate();
+        $dto->claimNo = $claim->getClaimNo();
+        $dto->status = $claim->getStatus();
+        $dto->completionMode = $claim->getCompletionMode();
+        $dto->creationDate = $claim->getCreationDate();
+
+        return  $dto;
+    }
+
+    public static function with(string $desc, string $reason, int $clientId, int $transitId): self
+    {
+        $dto = new self();
+        $dto->incidentDescription = $desc;
+        $dto->reason = $reason;
+        $dto->clientId = $clientId;
+        $dto->transitId = $transitId;
+
+        return $dto;
     }
 
     public function getClaimId(): int

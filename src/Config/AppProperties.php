@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Config;
 
-final class AppProperties
+class AppProperties
 {
     private int $noOfTransitsForClaimAutomaticRefund = 5;
     private int $automaticRefundForVipThreshold = 2;

@@ -26,7 +26,7 @@ class Claim extends BaseEntity
     #[ManyToOne]
     private Client $owner;
 
-    #[OneToOne]
+    #[ManyToOne]
     private Transit $transit;
 
     #[Column(type: 'datetime_immutable')]
