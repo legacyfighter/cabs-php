@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
+use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\CarTypeDTO;
@@ -19,37 +20,25 @@ use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Service\CarTypeService;
 use LegacyFighter\Cabs\Service\ClaimService;
 use LegacyFighter\Cabs\Service\DriverService;
 
 class Fixtures
 {
-    private TransitRepository $transitRepository;
-    private DriverFeeRepository $feeRepository;
-    private DriverService $driverService;
-    private AddressRepository $addressRepository;
-    private ClientRepository $clientRepository;
-    private CarTypeService $carTypeService;
-    private ClaimService $claimService;
-
     public function __construct(
-        TransitRepository $transitRepository,
-        DriverFeeRepository $feeRepository,
-        DriverService $driverService,
-        AddressRepository $addressRepository,
-        ClientRepository $clientRepository,
-        CarTypeService $carTypeService,
-        ClaimService $claimService
+        private TransitRepository $transitRepository,
+        private DriverFeeRepository $feeRepository,
+        private DriverService $driverService,
+        private AddressRepository $addressRepository,
+        private ClientRepository $clientRepository,
+        private CarTypeService $carTypeService,
+        private ClaimService $claimService,
+        private AwardsService $awardsService,
+        private EntityManagerInterface $em
     )
     {
-        $this->transitRepository = $transitRepository;
-        $this->feeRepository = $feeRepository;
-        $this->driverService = $driverService;
-        $this->addressRepository = $addressRepository;
-        $this->clientRepository = $clientRepository;
-        $this->carTypeService = $carTypeService;
-        $this->claimService = $claimService;
     }
 
 
@@ -131,7 +120,7 @@ class Fixtures
 
     public function clientHasDoneTransits(Client $client, int $noOfTransits): void
     {
-        foreach (range(1, $noOfTransits+1) as $_) {
+        foreach (range(1, $noOfTransits) as $_) {
             $this->aCompletedTransitAt(10, new \DateTimeImmutable(), $client);
         }
     }
@@ -152,9 +141,10 @@ class Fixtures
 
     public function clientHasDoneClaims(Client $client, int $howMany): void
     {
-        foreach (range(1, $howMany+1) as $_) {
+        foreach (range(1, $howMany) as $_) {
             $this->createAndResolveClaim($client, $this->aTransit($this->aDriver(), 20, new \DateTimeImmutable(), $client));
         }
+        $this->em->refresh($client);
     }
 
     public function aClientWithClaims(string $type, int $howManyClaims): Client
@@ -171,6 +161,17 @@ class Fixtures
         $address->setName('name');
         $address->setDistrict('district');
         return AddressDTO::from($address);
+    }
+
+    public function awardsAccount(Client $client): void
+    {
+        $this->awardsService->registerToProgram($client->getId());
+    }
+
+    public function activeAwardsAccount(Client $client): void
+    {
+        $this->awardsAccount($client);
+        $this->awardsService->activateAccount($client->getId());
     }
 
     private function anAddress(string $country, string $city, string $street, int $buildingNumber): Address

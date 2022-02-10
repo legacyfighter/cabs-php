@@ -24,6 +24,21 @@ class AwardsAccountDTO implements \JsonSerializable
         return new self($account);
     }
 
+    public function getClient(): ClientDTO
+    {
+        return $this->clientDTO;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function getTransactions(): int
+    {
+        return $this->transactions;
+    }
+
     public function jsonSerialize(): array
     {
         return [

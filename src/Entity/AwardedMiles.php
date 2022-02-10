@@ -12,13 +12,6 @@ use LegacyFighter\Cabs\Common\BaseEntity;
 #[Entity]
 class AwardedMiles extends BaseEntity
 {
-    // Aggregate
-    // 1. mile celowo są osobno, aby się mogło rozjechać na ich wydawaniu -> docelowo: kolekcja VOs w agregacie
-
-    // VO
-    // 1. miles + expirationDate -> VO przykrywające logikę walidacji, czy nie przekroczono daty ważności punktów
-    // 2. wydzielenie interfejsu Miles -> różne VO z różną logiką, np. ExpirableMiles, NonExpirableMiles, LinearExpirableMiles
-
     #[ManyToOne(targetEntity: Client::class)]
     private Client $client;
 
@@ -29,13 +22,13 @@ class AwardedMiles extends BaseEntity
     private \DateTimeImmutable $date;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $expirationDate;
+    private ?\DateTimeImmutable $expirationDate = null;
 
     #[Column(type: 'boolean')]
     private bool $isSpecial;
 
     #[ManyToOne(targetEntity: Transit::class)]
-    private ?Transit $transit;
+    private ?Transit $transit = null;
 
     public function __construct()
     {

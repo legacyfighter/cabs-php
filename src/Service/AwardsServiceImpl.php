@@ -147,6 +147,7 @@ class AwardsServiceImpl implements AwardsService
                 if(count($client->getClaims()) >= 3) {
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
                     $milesList = array_reverse($milesList);
+                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() === null ? -1 : ($b->getExpirationDate() === null ? 1 : 0));
                 } else if($client->getType() === Client::TYPE_VIP) {
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->isSpecial() <=> (int) $b->isSpecial());
@@ -172,7 +173,7 @@ class AwardsServiceImpl implements AwardsService
                             $iter->setMiles($iter->getMiles() - $miles);
                             $miles = 0;
                         }
-                        $this->milesRepository->save($miles);
+                        $this->milesRepository->save($iter);
                     }
                 }
             } else {
@@ -242,6 +243,6 @@ class AwardsServiceImpl implements AwardsService
 
     private function isSunday(): bool
     {
-        return $this->clock->now()->format('l') === 'sunday';
+        return $this->clock->now()->format('l') === 'Sunday';
     }
 }

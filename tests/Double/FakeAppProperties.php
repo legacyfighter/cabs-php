@@ -9,6 +9,9 @@ class FakeAppProperties extends AppProperties
     private int $automaticRefundForVipThreshold = 2;
     private int $noOfTransitsForClaimAutomaticRefund = 5;
 
+    private int $milesExpirationInDays = 365;
+    private int $defaultMilesBonus = 10;
+
     public function getAutomaticRefundForVipThreshold(): int
     {
         return $this->automaticRefundForVipThreshold;
@@ -27,5 +30,25 @@ class FakeAppProperties extends AppProperties
     public function setNoOfTransitsForClaimAutomaticRefund(int $noOfTransitsForClaimAutomaticRefund): void
     {
         $this->noOfTransitsForClaimAutomaticRefund = $noOfTransitsForClaimAutomaticRefund;
+    }
+
+    public function getMilesExpirationInDays(): int
+    {
+        return $this->milesExpirationInDays;
+    }
+
+    public function setMilesExpirationInDays(int $milesExpirationInDays): void
+    {
+        $this->milesExpirationInDays = $milesExpirationInDays;
+    }
+
+    public function getDefaultMilesBonus(): int
+    {
+        return $this->defaultMilesBonus;
+    }
+
+    public function setDefaultMilesBonus(int $defaultMilesBonus): void
+    {
+        $this->defaultMilesBonus = $defaultMilesBonus;
     }
 }
