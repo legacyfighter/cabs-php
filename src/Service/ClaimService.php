@@ -6,8 +6,11 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\DTO\ClaimDTO;
 use LegacyFighter\Cabs\Entity\Claim;
+use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
+use LegacyFighter\Cabs\Entity\ClaimsResolver;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Repository\ClaimRepository;
+use LegacyFighter\Cabs\Repository\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 
@@ -22,8 +25,20 @@ class ClaimService
     private AwardsService $awardService;
     private ClientNotificationService $clientNotificationService;
     private DriverNotificationService $driverNotificationService;
+    private ClaimsResolverRepository $claimsResolverRepository;
 
-    public function __construct(Clock $clock, ClientRepository $clientRepository, TransitRepository $transitRepository, ClaimRepository $claimRepository, ClaimNumberGenerator $claimNumberGenerator, AppProperties $appProperties, AwardsService $awardService, ClientNotificationService $clientNotificationService, DriverNotificationService $driverNotificationService)
+    public function __construct(
+        Clock $clock,
+        ClientRepository $clientRepository,
+        TransitRepository $transitRepository,
+        ClaimRepository $claimRepository,
+        ClaimNumberGenerator $claimNumberGenerator,
+        AppProperties $appProperties,
+        AwardsService $awardService,
+        ClientNotificationService $clientNotificationService,
+        DriverNotificationService $driverNotificationService,
+        ClaimsResolverRepository $claimsResolverRepository
+    )
     {
         $this->clock = $clock;
         $this->clientRepository = $clientRepository;
@@ -34,6 +49,7 @@ class ClaimService
         $this->awardService = $awardService;
         $this->clientNotificationService = $clientNotificationService;
         $this->driverNotificationService = $driverNotificationService;
+        $this->claimsResolverRepository = $claimsResolverRepository;
     }
 
     public function create(ClaimDTO $claimDTO): Claim
@@ -89,60 +105,45 @@ class ClaimService
     public function tryToResolveAutomatically(int $id): Claim
     {
         $claim = $this->find($id);
-        if(count($this->claimRepository->findByOwnerAndTransit($claim->getOwner(), $claim->getTransit())) > 1) {
-            $claim->setStatus(Claim::STATUS_ESCALATED);
-            $claim->setCompletionDate(new \DateTimeImmutable());
-            $claim->setChangeDate(new \DateTimeImmutable());
-            $claim->setCompletionMode(Claim::COMPLETION_MODE_MANUAL);
-            return $claim;
-        }
-        if(count($this->claimRepository->findByOwner($claim->getOwner())) <= 3) {
-            $claim->setStatus(Claim::STATUS_REFUNDED);
-            $claim->setCompletionDate(new \DateTimeImmutable());
-            $claim->setChangeDate(new \DateTimeImmutable());
-            $claim->setCompletionMode(Claim::COMPLETION_MODE_AUTOMATIC);
+
+        $claimsResolver = $this->findOrCreateResolver($claim->getOwner());
+        $transitsDoneByClient = $this->transitRepository->findByClient($claim->getOwner());
+        $result = $claimsResolver->resolve(
+            $claim,
+            $this->appProperties->getAutomaticRefundForVipThreshold(),
+            count($transitsDoneByClient),
+            $this->appProperties->getNoOfTransitsForClaimAutomaticRefund()
+        );
+
+        if($result->getDecision() === Claim::STATUS_REFUNDED) {
+            $claim->refund();
             $this->clientNotificationService->notifyClientAboutRefund($claim->getClaimNo(), $claim->getOwner()->getId());
-            return $claim;
-        }
-        if($claim->getOwner()->getType() === Client::TYPE_VIP) {
-            if($claim->getTransit()->getPrice()->toInt() < $this->appProperties->getAutomaticRefundForVipThreshold()) {
-                $claim->setStatus(Claim::STATUS_REFUNDED);
-                $claim->setCompletionDate(new \DateTimeImmutable());
-                $claim->setChangeDate(new \DateTimeImmutable());
-                $claim->setCompletionMode(Claim::COMPLETION_MODE_AUTOMATIC);
-                $this->clientNotificationService->notifyClientAboutRefund($claim->getClaimNo(), $claim->getOwner()->getId());
+            if($claim->getOwner()->getType() === Client::TYPE_VIP) {
                 $this->awardService->registerSpecialMiles($claim->getOwner()->getId(), 10);
-            } else {
-                $claim->setStatus(Claim::STATUS_ESCALATED);
-                $claim->setCompletionDate(new \DateTimeImmutable());
-                $claim->setChangeDate(new \DateTimeImmutable());
-                $claim->setCompletionMode(Claim::COMPLETION_MODE_MANUAL);
-                $this->driverNotificationService->askDriverForDetailsAboutClaim($claim->getClaimNo(), $claim->getTransit()->getDriver()->getId());
-            }
-        } else {
-            if(count($this->transitRepository->findByClient($claim->getOwner())) >= $this->appProperties->getNoOfTransitsForClaimAutomaticRefund()) {
-                if($claim->getTransit()->getPrice()->toInt() < $this->appProperties->getAutomaticRefundForVipThreshold()) {
-                    $claim->setStatus(Claim::STATUS_REFUNDED);
-                    $claim->setCompletionDate(new \DateTimeImmutable());
-                    $claim->setChangeDate(new \DateTimeImmutable());
-                    $claim->setCompletionMode(Claim::COMPLETION_MODE_AUTOMATIC);
-                    $this->clientNotificationService->notifyClientAboutRefund($claim->getClaimNo(), $claim->getOwner()->getId());
-                } else {
-                    $claim->setStatus(Claim::STATUS_ESCALATED);
-                    $claim->setCompletionDate(new \DateTimeImmutable());
-                    $claim->setChangeDate(new \DateTimeImmutable());
-                    $claim->setCompletionMode(Claim::COMPLETION_MODE_MANUAL);
-                    $this->clientNotificationService->askForMoreInformation($claim->getClaimNo(), $claim->getOwner()->getId());
-                }
-            } else {
-                $claim->setStatus(Claim::STATUS_ESCALATED);
-                $claim->setCompletionDate(new \DateTimeImmutable());
-                $claim->setChangeDate(new \DateTimeImmutable());
-                $claim->setCompletionMode(Claim::COMPLETION_MODE_MANUAL);
-                $this->driverNotificationService->askDriverForDetailsAboutClaim($claim->getClaimNo(), $claim->getTransit()->getDriver()->getId());
             }
         }
 
+        if($result->getDecision() === Claim::STATUS_ESCALATED) {
+            $claim->escalate();
+        }
+
+        if($result->getWhoToAsk() === Result::ASK_DRIVER) {
+            $this->driverNotificationService->askDriverForDetailsAboutClaim($claim->getClaimNo(), $claim->getTransit()->getDriver()->getId());
+        }
+        if($result->getWhoToAsk() === Result::ASK_CLIENT) {
+            $this->clientNotificationService->askForMoreInformation($claim->getClaimNo(), $claim->getOwner()->getId());
+        }
+
         return $claim;
+    }
+
+    private function findOrCreateResolver(Client $client): ClaimsResolver
+    {
+        $claimsResolver = $this->claimsResolverRepository->findByClientId($client->getId());
+        if($claimsResolver === null) {
+            $claimsResolver = $this->claimsResolverRepository->save(new ClaimsResolver($client->getId()));
+        }
+
+        return $claimsResolver;
     }
 }

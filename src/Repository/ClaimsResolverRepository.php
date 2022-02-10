@@ -13,4 +13,10 @@ class ClaimsResolverRepository
     {
         return $this->em->getRepository(ClaimsResolver::class)->findOneBy(['clientId' => $clientId]);
     }
+
+    public function save(ClaimsResolver $claimsResolver): ClaimsResolver
+    {
+        $this->em->persist($claimsResolver);
+        return $claimsResolver;
+    }
 }

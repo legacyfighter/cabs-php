@@ -66,6 +66,22 @@ class Claim extends BaseEntity
     {
     }
 
+    public function escalate(): void
+    {
+        $this->setStatus(self::STATUS_ESCALATED);
+        $this->setCompletionDate(new \DateTimeImmutable());
+        $this->setChangeDate(new \DateTimeImmutable());
+        $this->setCompletionMode(self::COMPLETION_MODE_MANUAL);
+    }
+
+    public function refund(): void
+    {
+        $this->setStatus(self::STATUS_REFUNDED);
+        $this->setCompletionDate(new \DateTimeImmutable());
+        $this->setChangeDate(new \DateTimeImmutable());
+        $this->setCompletionMode(self::COMPLETION_MODE_AUTOMATIC);
+    }
+
     public function getOwner(): Client
     {
         return $this->owner;

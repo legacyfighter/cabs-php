@@ -3,11 +3,13 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\DTO\ClaimDTO;
 use LegacyFighter\Cabs\Entity\Claim;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\ClaimRepository;
+use LegacyFighter\Cabs\Repository\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
@@ -41,7 +43,8 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
             $this->appProperties,
             $this->awardsService = $this->createMock(AwardsService::class),
             $this->clientNotificationService = $this->createMock(ClientNotificationService::class),
-            $this->driverNotificationService = $this->createMock(DriverNotificationService::class)
+            $this->driverNotificationService = $this->createMock(DriverNotificationService::class),
+            $this->getContainer()->get(ClaimsResolverRepository::class)
         );
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
     }
@@ -86,7 +89,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $driver = $this->fixtures->aDriver();
         //and
-        $client = $this->fixtures->aClientWithClaims(Client::TYPE_VIP, 3);
+        $client = $this->aClientWithClaims(Client::TYPE_VIP, 3);
         //and
         $transit = $this->aTransit($client, $driver, 39);
         //and
@@ -114,7 +117,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $driver = $this->fixtures->aDriver();
         //and
-        $client = $this->fixtures->aClientWithClaims(Client::TYPE_VIP, 3);
+        $client = $this->aClientWithClaims(Client::TYPE_VIP, 3);
         //and
         $transit = $this->aTransit($client, $driver, 50);
         //and
@@ -177,7 +180,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $this->noOfTransitsForAutomaticRefundIs(10);
         //and
-        $client = $this->fixtures->aClientWithClaims(Client::TYPE_NORMAL, 3);
+        $client = $this->aClientWithClaims(Client::TYPE_NORMAL, 3);
         //and
         $this->fixtures->clientHasDoneTransits($client, 12);
         //and
@@ -207,7 +210,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $this->noOfTransitsForAutomaticRefundIs(10);
         //and
-        $client = $this->fixtures->aClientWithClaims(Client::TYPE_NORMAL, 3);
+        $client = $this->aClientWithClaims(Client::TYPE_NORMAL, 3);
         //and
         $this->fixtures->clientHasDoneTransits($client, 12);
         //and
@@ -275,5 +278,22 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
     private function lowCostThresholdIs(int $price): void
     {
         $this->appProperties->setAutomaticRefundForVipThreshold($price);
+    }
+
+    private function aClientWithClaims(string $type, int $howManyClaims): Client
+    {
+        $client = $this->fixtures->aClient($type);
+        foreach (range(1, $howManyClaims+1) as $_) {
+            $claim = $this->createClaim($client, $this->fixtures->aTransit($this->fixtures->aDriver(), 20, new \DateTimeImmutable(), $client));
+            $this->claimService->tryToResolveAutomatically($claim->getId());
+        }
+        return $client;
+    }
+
+    public function createClaim(Client $client, Transit $transit): Claim
+    {
+        $claimDto = ClaimDTO::with('Okradli mnie na hajs', '$$$', $client->getId(), $transit->getId());
+        $claimDto->setIsDraft(false);
+        return $this->claimService->create($claimDto);
     }
 }
