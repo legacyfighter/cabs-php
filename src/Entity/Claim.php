@@ -23,6 +23,15 @@ class Claim extends BaseEntity
     public const COMPLETION_MODE_MANUAL = 'manual';
     public const COMPLETION_MODE_AUTOMATIC = 'automatic';
 
+    public const ALL_STATUSES = [
+        self::STATUS_DRAFT,
+        self::STATUS_NEW,
+        self::STATUS_IN_PROCESS,
+        self::STATUS_REFUNDED,
+        self::STATUS_ESCALATED,
+        self::STATUS_REJECTED
+    ];
+
     #[ManyToOne]
     private Client $owner;
 
@@ -144,7 +153,7 @@ class Claim extends BaseEntity
 
     public function setStatus(string $status): void
     {
-        if(!in_array($status, [self::STATUS_NEW, self::STATUS_DRAFT, self::STATUS_ESCALATED, self::STATUS_IN_PROCESS, self::STATUS_REFUNDED, self::STATUS_REJECTED])) {
+        if(!in_array($status, self::ALL_STATUSES, true)) {
             throw new \InvalidArgumentException('Invalid status provided');
         }
         $this->status = $status;
