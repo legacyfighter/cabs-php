@@ -41,7 +41,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     /**
      * @test
      */
-    public function byDefaultRemoveOldestFirstEvenWhenTheyAreSpecial(): void
+    public function byDefaultRemoveOldestFirstEvenWhenTheyAreNonExpiring(): void
     {
         //given
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
@@ -50,14 +50,14 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         //add
         $middle = $this->grantedMilesThatWillExpireInDays(10, 365, $this->yesterday(), $client, $transit);
         $youngest = $this->grantedMilesThatWillExpireInDays(10, 365, $this->today(), $client, $transit);
-        $oldestSpecialMiles = $this->grantedSpecialMiles(5, $this->dayBeforeYesterday(), $client);
+        $oldestNonExpiringMiles = $this->grantedNonExpiringMiles(5, $this->dayBeforeYesterday(), $client);
 
         //when
         $this->awardsService->removeMiles($client->getId(), 16);
 
         //then
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
-        self::assertThatMilesWereReducedTo($oldestSpecialMiles, 0, $awardedMiles);
+        self::assertThatMilesWereReducedTo($oldestNonExpiringMiles, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($middle, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($youngest, 9, $awardedMiles);
     }
@@ -91,7 +91,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     /**
      * @test
      */
-    public function shouldRemoveSpecialMilesLastWhenManyTransits(): void
+    public function shouldRemoveNoNExpiringMilesLastWhenManyTransits(): void
     {
         //given
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
@@ -101,7 +101,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $transit = $this->fixtures->aTransit(null, 80);
         //add
         $regularMiles = $this->grantedMilesThatWillExpireInDays(10, 365, $this->today(), $client, $transit);
-        $oldestSpecialMiles = $this->grantedSpecialMiles(5, $this->dayBeforeYesterday(), $client);
+        $oldestNonExpiringMiles = $this->grantedNonExpiringMiles(5, $this->dayBeforeYesterday(), $client);
 
         //when
         $this->awardsService->removeMiles($client->getId(), 13);
@@ -109,7 +109,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         //then
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
         self::assertThatMilesWereReducedTo($regularMiles, 0, $awardedMiles);
-        self::assertThatMilesWereReducedTo($oldestSpecialMiles, 2, $awardedMiles);
+        self::assertThatMilesWereReducedTo($oldestNonExpiringMiles, 2, $awardedMiles);
     }
 
     /**
@@ -125,14 +125,14 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $secondToExpire = $this->grantedMilesThatWillExpireInDays(10, 60, $this->yesterday(), $client, $transit);
         $thirdToExpire = $this->grantedMilesThatWillExpireInDays(5, 365, $this->dayBeforeYesterday(), $client, $transit);
         $firstToExpire = $this->grantedMilesThatWillExpireInDays(15, 30, $this->today(), $client, $transit);
-        $specialMiles = $this->grantedSpecialMiles(1, $this->dayBeforeYesterday(), $client);
+        $nonExpiring = $this->grantedNonExpiringMiles(1, $this->dayBeforeYesterday(), $client);
 
         //when
         $this->awardsService->removeMiles($client->getId(), 21);
 
         //then
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
-        self::assertThatMilesWereReducedTo($specialMiles, 1, $awardedMiles);
+        self::assertThatMilesWereReducedTo($nonExpiring, 1, $awardedMiles);
         self::assertThatMilesWereReducedTo($firstToExpire, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($secondToExpire, 4, $awardedMiles);
         self::assertThatMilesWereReducedTo($thirdToExpire, 5, $awardedMiles);
@@ -153,7 +153,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $secondToExpire = $this->grantedMilesThatWillExpireInDays(10, 60, $this->yesterday(), $client, $transit);
         $thirdToExpire = $this->grantedMilesThatWillExpireInDays(5, 365, $this->dayBeforeYesterday(), $client, $transit);
         $firstToExpire = $this->grantedMilesThatWillExpireInDays(15, 10, $this->today(), $client, $transit);
-        $specialMiles = $this->grantedSpecialMiles(100, $this->yesterday(), $client);
+        $nonExpiring = $this->grantedNonExpiringMiles(100, $this->yesterday(), $client);
 
         //when
         $this->itIsSunday();
@@ -161,7 +161,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
 
         //then
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
-        self::assertThatMilesWereReducedTo($specialMiles, 100, $awardedMiles);
+        self::assertThatMilesWereReducedTo($nonExpiring, 100, $awardedMiles);
         self::assertThatMilesWereReducedTo($firstToExpire, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($secondToExpire, 4, $awardedMiles);
         self::assertThatMilesWereReducedTo($thirdToExpire, 5, $awardedMiles);
@@ -182,14 +182,14 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $secondToExpire = $this->grantedMilesThatWillExpireInDays(4, 60, $this->yesterday(), $client, $transit);
         $thirdToExpire = $this->grantedMilesThatWillExpireInDays(10, 365, $this->dayBeforeYesterday(), $client, $transit);
         $firstToExpire = $this->grantedMilesThatWillExpireInDays(5, 10, $this->yesterday(), $client, $transit);
-        $specialMiles = $this->grantedSpecialMiles(10, $this->yesterday(), $client);
+        $nonExpiring = $this->grantedNonExpiringMiles(10, $this->yesterday(), $client);
 
         //when
         $this->awardsService->removeMiles($client->getId(), 21);
 
         //then
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
-        self::assertThatMilesWereReducedTo($specialMiles, 0, $awardedMiles);
+        self::assertThatMilesWereReducedTo($nonExpiring, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($firstToExpire, 5, $awardedMiles);
         self::assertThatMilesWereReducedTo($secondToExpire, 3, $awardedMiles);
         self::assertThatMilesWereReducedTo($thirdToExpire, 0, $awardedMiles);
@@ -214,11 +214,11 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         return $this->milesRegisteredAt($when, $client, $transit);
     }
 
-    private function grantedSpecialMiles(int $miles, \DateTimeImmutable $when, Client $client): AwardedMiles
+    private function grantedNonExpiringMiles(int $miles, \DateTimeImmutable $when, Client $client): AwardedMiles
     {
         $this->defaultMilesBonusIs($miles);
         $this->clock->setDateTime($when);
-        return $this->awardsService->registerSpecialMiles($client->getId(), $miles);
+        return $this->awardsService->registerNonExpiringMiles($client->getId(), $miles);
     }
 
     private function milesRegisteredAt(\DateTimeImmutable $when, Client $client, Transit $transit): AwardedMiles

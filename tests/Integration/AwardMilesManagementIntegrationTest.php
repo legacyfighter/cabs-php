@@ -96,13 +96,13 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
         self::assertCount(1, $awardedMiles);
         self::assertEquals(10, $awardedMiles[0]->getMiles());
-        self::assertFalse($awardedMiles[0]->isSpecial());
+        self::assertFalse($awardedMiles[0]->cantExpire());
     }
 
     /**
      * @test
      */
-    public function canRegisterSpecialMiles(): void
+    public function canRegisterNonExpiringMiles(): void
     {
         //given
         $client = $this->fixtures->aClient();
@@ -110,7 +110,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $this->fixtures->activeAwardsAccount($client);
 
         //when
-        $this->awardsService->registerSpecialMiles($client->getId(), 20);
+        $this->awardsService->registerNonExpiringMiles($client->getId(), 20);
 
         //then
         $account = $this->awardsService->findBy($client->getId());
@@ -118,7 +118,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
         self::assertCount(1, $awardedMiles);
         self::assertEquals(20, $awardedMiles[0]->getMiles());
-        self::assertTrue($awardedMiles[0]->isSpecial());
+        self::assertTrue($awardedMiles[0]->cantExpire());
     }
 
     /**
@@ -134,7 +134,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $transit = $this->fixtures->aTransit(null, 80);
 
         //when
-        $this->awardsService->registerSpecialMiles($client->getId(), 20);
+        $this->awardsService->registerNonExpiringMiles($client->getId(), 20);
         $this->awardsService->registerMiles($client->getId(), $transit->getId());
         $this->awardsService->registerMiles($client->getId(), $transit->getId());
 
@@ -156,7 +156,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $this->fixtures->activeAwardsAccount($client);
         $this->fixtures->activeAwardsAccount($secondClient);
         //and
-        $this->awardsService->registerSpecialMiles($client->getId(), 10);
+        $this->awardsService->registerNonExpiringMiles($client->getId(), 10);
 
         //when
         $this->awardsService->transferMiles($client->getId(), $secondClient->getId(), 10);
@@ -178,7 +178,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $this->fixtures->activeAwardsAccount($client);
         $this->fixtures->activeAwardsAccount($secondClient);
         //and
-        $this->awardsService->registerSpecialMiles($client->getId(), 10);
+        $this->awardsService->registerNonExpiringMiles($client->getId(), 10);
         //and
         $this->awardsService->deactivateAccount($client->getId());
 
@@ -201,7 +201,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $this->fixtures->activeAwardsAccount($client);
         $this->fixtures->activeAwardsAccount($secondClient);
         //and
-        $this->awardsService->registerSpecialMiles($client->getId(), 10);
+        $this->awardsService->registerNonExpiringMiles($client->getId(), 10);
 
         //when
         $this->awardsService->transferMiles($client->getId(), $secondClient->getId(), 30);

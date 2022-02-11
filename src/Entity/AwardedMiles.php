@@ -74,7 +74,7 @@ class AwardedMiles extends BaseEntity
         $this->expirationDate = $expirationDate;
     }
 
-    public function isSpecial(): bool
+    public function cantExpire(): bool
     {
         return $this->isSpecial;
     }

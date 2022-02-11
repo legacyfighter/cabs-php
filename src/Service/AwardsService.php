@@ -17,7 +17,7 @@ interface AwardsService
 
     public function registerMiles(int $clientId, int $transitId): ?AwardedMiles;
 
-    public function registerSpecialMiles(int $clientId, int $miles): AwardedMiles;
+    public function registerNonExpiringMiles(int $clientId, int $miles): AwardedMiles;
 
     public function removeMiles(int $clientId, int $miles): void;
 

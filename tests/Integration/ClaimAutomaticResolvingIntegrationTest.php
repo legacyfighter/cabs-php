@@ -96,7 +96,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $claim = $this->fixtures->createClaim($client, $transit);
 
         //then
-        $this->awardsService->expects($this->once())->method('registerSpecialMiles')->with($client->getId(), 10);
+        $this->awardsService->expects($this->once())->method('registerNonExpiringMiles')->with($client->getId(), 10);
         $this->clientNotificationService->expects($this->once())->method('notifyClientAboutRefund')->with($claim->getClaimNo(), $client->getId());
 
         //when
@@ -124,7 +124,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $claim = $this->fixtures->createClaim($client, $transit);
 
         //then
-        $this->awardsService->expects($this->never())->method('registerSpecialMiles');
+        $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
         $this->driverNotificationService->expects($this->once())->method('askDriverForDetailsAboutClaim')->with($claim->getClaimNo(), $driver->getId());
 
         //when
@@ -150,7 +150,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $driver = $this->fixtures->aDriver();
 
         //then
-        $this->awardsService->expects($this->never())->method('registerSpecialMiles');
+        $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
         $this->clientNotificationService->expects($this->exactly(3))->method('notifyClientAboutRefund');
 
         //when
@@ -189,7 +189,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $claim = $this->fixtures->createClaim($client, $transit);
 
         //then
-        $this->awardsService->expects($this->never())->method('registerSpecialMiles');
+        $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
         $this->clientNotificationService->expects($this->once())->method('notifyClientAboutRefund')->with($claim->getClaimNo(), $client->getId());
 
         //when
@@ -219,7 +219,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $claim = $this->fixtures->createClaim($client, $transit);
 
         //then
-        $this->awardsService->expects($this->never())->method('registerSpecialMiles');
+        $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
         $this->clientNotificationService->expects($this->once())->method('askForMoreInformation')->with($claim->getClaimNo(), $client->getId());
 
         //when
@@ -249,7 +249,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $claim = $this->fixtures->createClaim($client, $this->fixtures->aTransit($driver, 50, new \DateTimeImmutable(), $client));
 
         //then
-        $this->awardsService->expects($this->never())->method('registerSpecialMiles');
+        $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
         $this->driverNotificationService->expects($this->once())->method('askDriverForDetailsAboutClaim')->with($claim->getClaimNo(), $driver->getId());
 
         //when

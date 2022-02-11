@@ -113,7 +113,7 @@ class AwardsServiceImpl implements AwardsService
         }
     }
 
-    public function registerSpecialMiles(int $clientId, int $miles): AwardedMiles
+    public function registerNonExpiringMiles(int $clientId, int $miles): AwardedMiles
     {
         $account = $this->accountRepository->findByClient($this->clientRepository->getOne($clientId));
 
@@ -150,13 +150,13 @@ class AwardsServiceImpl implements AwardsService
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() === null ? -1 : ($b->getExpirationDate() === null ? 1 : 0));
                 } else if($client->getType() === Client::TYPE_VIP) {
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
-                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->isSpecial() <=> (int) $b->isSpecial());
+                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
                 } else if($transitsCounter >= 15 && $this->isSunday()) {
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
-                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->isSpecial() <=> (int) $b->isSpecial());
+                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
                 } else if($transitsCounter >= 15) {
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
-                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->isSpecial() <=> (int) $b->isSpecial());
+                    usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
                 } else {
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
                 }
@@ -165,7 +165,7 @@ class AwardsServiceImpl implements AwardsService
                     if($miles <= 0) {
                         break;
                     }
-                    if($iter->isSpecial() || $iter->getExpirationDate() > $this->clock->now()) {
+                    if($iter->cantExpire() || $iter->getExpirationDate() > $this->clock->now()) {
                         if($iter->getMiles() <= $miles) {
                             $miles -= $iter->getMiles();
                             $iter->setMiles(0);
@@ -192,7 +192,7 @@ class AwardsServiceImpl implements AwardsService
                 fn(AwardedMiles $miles) => $miles->getMiles(),
                 array_filter(
                     $milesList,
-                    fn(AwardedMiles $miles) => $miles->getExpirationDate() !== null && $miles->getExpirationDate() > $this->clock->now() || $miles->isSpecial())
+                    fn(AwardedMiles $miles) => $miles->getExpirationDate() !== null && $miles->getExpirationDate() > $this->clock->now() || $miles->cantExpire())
             )
         );
     }
@@ -212,7 +212,7 @@ class AwardsServiceImpl implements AwardsService
             $milesList = $this->milesRepository->findAllByClient($fromClient);
 
             foreach ($milesList as $iter) {
-                if($iter->isSpecial() || $iter->getExpirationDate() > $this->clock->now()) {
+                if($iter->cantExpire() || $iter->getExpirationDate() > $this->clock->now()) {
                     if($iter->getMiles() <= $miles) {
                         $iter->setClient($accountTo->getClient());
                         $miles -= $iter->getMiles();
@@ -221,7 +221,7 @@ class AwardsServiceImpl implements AwardsService
                         $_miles = new AwardedMiles();
 
                         $_miles->setClient($accountTo->getClient());
-                        $_miles->setSpecial($iter->isSpecial());
+                        $_miles->setSpecial($iter->cantExpire());
                         $_miles->setExpirationDate($iter->getExpirationDate());
                         $_miles->setMiles($iter->getMiles());
 

@@ -119,7 +119,7 @@ class ClaimService
             $claim->refund();
             $this->clientNotificationService->notifyClientAboutRefund($claim->getClaimNo(), $claim->getOwner()->getId());
             if($claim->getOwner()->getType() === Client::TYPE_VIP) {
-                $this->awardService->registerSpecialMiles($claim->getOwner()->getId(), 10);
+                $this->awardService->registerNonExpiringMiles($claim->getOwner()->getId(), 10);
             }
         }
 
