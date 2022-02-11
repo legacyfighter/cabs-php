@@ -8,13 +8,23 @@ use Doctrine\DBAL\Types\JsonType;
 
 class MilesType extends JsonType
 {
+    private const EXPIRING = 'expiring';
+    private const TWO_STEP = 'two-step';
+
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if($value instanceof ConstantUntil) {
             return parent::convertToDatabaseValue([
-                'type' => 'expiring',
+                'type' => self::EXPIRING,
                 'amount' => $value->getAmountFor(new \DateTimeImmutable('0000-01-01')),
                 'whenExpires' => $value->expiresAt()?->format('Y-m-d H:i:s')
+            ], $platform);
+        } else if ($value instanceof TwoStepExpiringMiles) {
+            return parent::convertToDatabaseValue([
+                'type' => self::TWO_STEP,
+                'amount' => $value->getAmountFor(new \DateTimeImmutable('0000-01-01')),
+                'whenExpires' => $value->expiresAt()?->format('Y-m-d H:i:s'),
+                'whenFirstHalfExpires' => $value->getWhenFirstHalfExpires()->format('Y-m-d H:i:s')
             ], $platform);
         }
 
@@ -28,12 +38,18 @@ class MilesType extends JsonType
             throw ConversionException::conversionFailed($value, Miles::class);
         }
 
-        if($array['type'] === 'expiring') {
+        if($array['type'] === self::EXPIRING) {
             if (($array['whenExpires'] ?? null) === null) {
                 return ConstantUntil::untilForever($array['amount']);
             }
 
             return ConstantUntil::until($array['amount'], new \DateTimeImmutable($array['whenExpires']));
+        } else if($array['type'] === self::TWO_STEP) {
+            return new TwoStepExpiringMiles(
+                $array['amount'],
+                new \DateTimeImmutable($array['whenExpires']),
+                new \DateTimeImmutable($array['whenFirstHalfExpires'])
+            );
         }
 
         throw ConversionException::conversionFailed($value, Miles::class);
