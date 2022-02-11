@@ -3,8 +3,8 @@
 namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\AwardedMiles;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 
 class AwardedMilesRepository
 {

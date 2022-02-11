@@ -3,7 +3,7 @@
 namespace LegacyFighter\Cabs\Service;
 
 use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
-use LegacyFighter\Cabs\Entity\AwardedMiles;
+use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 
 interface AwardsService
 {

@@ -95,7 +95,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         self::assertEquals(1, $account->getTransactions());
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
         self::assertCount(1, $awardedMiles);
-        self::assertEquals(10, $awardedMiles[0]->getMiles());
+        self::assertEquals(10, $awardedMiles[0]->getMilesAmount(new \DateTimeImmutable()));
         self::assertFalse($awardedMiles[0]->cantExpire());
     }
 
@@ -117,7 +117,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         self::assertEquals(1, $account->getTransactions());
         $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
         self::assertCount(1, $awardedMiles);
-        self::assertEquals(20, $awardedMiles[0]->getMiles());
+        self::assertEquals(20, $awardedMiles[0]->getMilesAmount(new \DateTimeImmutable()));
         self::assertTrue($awardedMiles[0]->cantExpire());
     }
 

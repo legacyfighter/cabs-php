@@ -5,9 +5,10 @@ namespace LegacyFighter\Cabs\Service;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
-use LegacyFighter\Cabs\Entity\AwardedMiles;
 use LegacyFighter\Cabs\Entity\AwardsAccount;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
+use LegacyFighter\Cabs\Entity\Miles\ConstantUntil;
 use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
@@ -101,9 +102,7 @@ class AwardsServiceImpl implements AwardsService
             $miles->setTransit($transit);
             $miles->setDate($this->clock->now());
             $miles->setClient($account->getClient());
-            $miles->setMiles($this->appProperties->getDefaultMilesBonus());
-            $miles->setExpirationDate($now->modify(sprintf('+%s days', $this->appProperties->getMilesExpirationInDays())));
-            $miles->setSpecial(false);
+            $miles->setMiles(ConstantUntil::until($this->appProperties->getDefaultMilesBonus(), $now->modify(sprintf('+%s days', $this->appProperties->getMilesExpirationInDays()))));
             $account->increaseTransactions();
 
             $this->milesRepository->save($miles);
@@ -123,9 +122,8 @@ class AwardsServiceImpl implements AwardsService
             $_miles = new AwardedMiles();
             $_miles->setTransit(null);
             $_miles->setClient($account->getClient());
-            $_miles->setMiles($miles);
+            $_miles->setMiles(ConstantUntil::untilForever($miles));
             $_miles->setDate($this->clock->now());
-            $_miles->setSpecial(true);
             $account->increaseTransactions();
             $this->milesRepository->save($_miles);
             $this->accountRepository->save($account);
@@ -161,16 +159,18 @@ class AwardsServiceImpl implements AwardsService
                     usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
                 }
 
+                $now = $this->clock->now();
                 foreach ($milesList as $iter) {
                     if($miles <= 0) {
                         break;
                     }
                     if($iter->cantExpire() || $iter->getExpirationDate() > $this->clock->now()) {
-                        if($iter->getMiles() <= $miles) {
-                            $miles -= $iter->getMiles();
-                            $iter->setMiles(0);
+                        $milesAmount = $iter->getMilesAmount($now);
+                        if($milesAmount <= $miles) {
+                            $miles -= $milesAmount;
+                            $iter->removeAll($now);
                         } else {
-                            $iter->setMiles($iter->getMiles() - $miles);
+                            $iter->subtract($miles, $now);
                             $miles = 0;
                         }
                         $this->milesRepository->save($iter);
@@ -187,9 +187,10 @@ class AwardsServiceImpl implements AwardsService
         $client = $this->clientRepository->getOne($clientId);
         $milesList = $this->milesRepository->findAllByClient($client);
 
+        $now = $this->clock->now();
         return array_sum(
             array_map(
-                fn(AwardedMiles $miles) => $miles->getMiles(),
+                fn(AwardedMiles $miles) => $miles->getMilesAmount($now),
                 array_filter(
                     $milesList,
                     fn(AwardedMiles $miles) => $miles->getExpirationDate() !== null && $miles->getExpirationDate() > $this->clock->now() || $miles->cantExpire())
@@ -210,22 +211,22 @@ class AwardsServiceImpl implements AwardsService
         }
         if($this->calculateBalance($fromClientId) >= $miles && $accountFrom->isActive()) {
             $milesList = $this->milesRepository->findAllByClient($fromClient);
+            $now = $this->clock->now();
 
             foreach ($milesList as $iter) {
                 if($iter->cantExpire() || $iter->getExpirationDate() > $this->clock->now()) {
-                    if($iter->getMiles() <= $miles) {
+                    $milesAmount = $iter->getMilesAmount($now);
+                    if($milesAmount <= $miles) {
                         $iter->setClient($accountTo->getClient());
-                        $miles -= $iter->getMiles();
+                        $miles -= $milesAmount;
                     } else {
-                        $iter->setMiles($iter->getMiles() - $miles);
+                        $iter->subtract($miles, $now);
                         $_miles = new AwardedMiles();
 
                         $_miles->setClient($accountTo->getClient());
-                        $_miles->setSpecial($iter->cantExpire());
-                        $_miles->setExpirationDate($iter->getExpirationDate());
                         $_miles->setMiles($iter->getMiles());
 
-                        $miles -= $iter->getMiles();
+                        $miles -= $milesAmount;
 
                         $this->milesRepository->save($_miles);
                     }

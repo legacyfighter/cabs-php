@@ -2,8 +2,8 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
-use LegacyFighter\Cabs\Entity\AwardedMiles;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
@@ -201,7 +201,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     private static function assertThatMilesWereReducedTo(AwardedMiles $firstToExpire, int $milesAfterReduction, array $allMiles): void
     {
         $actual = array_values(array_map(
-            fn(AwardedMiles $am) => $am->getMiles(),
+            fn(AwardedMiles $am) => $am->getMilesAmount(new \DateTimeImmutable('0000-01-01')),
             array_filter($allMiles, fn(AwardedMiles $am) => $firstToExpire->getId() === $am->getId())
         ));
         self::assertEquals($milesAfterReduction, $actual[0]);
