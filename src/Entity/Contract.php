@@ -19,7 +19,7 @@ class Contract extends BaseEntity
     /**
      * @var Collection<ContractAttachment>
      */
-    #[OneToMany(mappedBy: 'contract', targetEntity: ContractAttachment::class)]
+    #[OneToMany(mappedBy: 'contract', targetEntity: ContractAttachment::class, cascade: ['all'])]
     private Collection $attachments;
 
     #[Column]
@@ -46,8 +46,11 @@ class Contract extends BaseEntity
     #[Column]
     private string $contractNo;
 
-    public function __construct()
+    public function __construct(string $partnerName, string $subject, string $contractNo)
     {
+        $this->partnerName = $partnerName;
+        $this->subject = $subject;
+        $this->contractNo = $contractNo;
         $this->creationDate = new \DateTimeImmutable();
         $this->attachments = new ArrayCollection();
         $this->creationDate = new \DateTimeImmutable();
@@ -58,19 +61,9 @@ class Contract extends BaseEntity
         return $this->attachments->toArray();
     }
 
-    public function setAttachments(array $attachments): void
-    {
-        $this->attachments = new ArrayCollection($attachments);
-    }
-
     public function getPartnerName(): string
     {
         return $this->partnerName;
-    }
-
-    public function setPartnerName(string $partnerName): void
-    {
-        $this->partnerName = $partnerName;
     }
 
     public function getSubject(): string
@@ -78,19 +71,9 @@ class Contract extends BaseEntity
         return $this->subject;
     }
 
-    public function setSubject(string $subject): void
-    {
-        $this->subject = $subject;
-    }
-
     public function getCreationDate(): \DateTimeImmutable
     {
         return $this->creationDate;
-    }
-
-    public function setCreationDate(\DateTimeImmutable $creationDate): void
-    {
-        $this->creationDate = $creationDate;
     }
 
     public function getAcceptedAt(): ?\DateTimeImmutable
@@ -98,19 +81,9 @@ class Contract extends BaseEntity
         return $this->acceptedAt;
     }
 
-    public function setAcceptedAt(?\DateTimeImmutable $acceptedAt): void
-    {
-        $this->acceptedAt = $acceptedAt;
-    }
-
     public function getRejectedAt(): ?\DateTimeImmutable
     {
         return $this->rejectedAt;
-    }
-
-    public function setRejectedAt(?\DateTimeImmutable $rejectedAt): void
-    {
-        $this->rejectedAt = $rejectedAt;
     }
 
     public function getChangeDate(): ?\DateTimeImmutable
@@ -118,19 +91,9 @@ class Contract extends BaseEntity
         return $this->changeDate;
     }
 
-    public function setChangeDate(?\DateTimeImmutable $changeDate): void
-    {
-        $this->changeDate = $changeDate;
-    }
-
     public function getStatus(): string
     {
         return $this->status;
-    }
-
-    public function setStatus(string $status): void
-    {
-        $this->status = $status;
     }
 
     public function getContractNo(): string
@@ -138,8 +101,46 @@ class Contract extends BaseEntity
         return $this->contractNo;
     }
 
-    public function setContractNo(string $contractNo): void
+    public function proposeAttachment(string $data): ContractAttachment
     {
-        $this->contractNo = $contractNo;
+        $attachment = new ContractAttachment();
+        $attachment->setData($data);
+        $attachment->setContract($this);
+        $this->attachments->add($attachment);
+        return $attachment;
+    }
+
+    public function accept(): void
+    {
+        if($this->attachments->filter(fn(ContractAttachment $a) => $a->getStatus() !== ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES)->count() === 0) {
+            $this->status = self::STATUS_ACCEPTED;
+        } else {
+            throw new \RuntimeException('Not all attachments accepted by both sides');
+        }
+    }
+
+    public function reject(): void
+    {
+        $this->status = self::STATUS_REJECTED;
+    }
+
+    public function acceptAttachment(int $attachmentId): void
+    {
+        $attachment = $this->findAttachment($attachmentId);
+        if(in_array($attachment->getStatus(), [ContractAttachment::STATUS_ACCEPTED_BY_ONE_SIDE, ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES], true)) {
+            $attachment->setStatus(ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES);
+        } else {
+            $attachment->setStatus(ContractAttachment::STATUS_ACCEPTED_BY_ONE_SIDE);
+        }
+    }
+
+    public function rejectAttachment(int $attachmentId): void
+    {
+        $this->findAttachment($attachmentId)->setStatus(ContractAttachment::STATUS_REJECTED);
+    }
+
+    private function findAttachment(int $attachmentId): ContractAttachment
+    {
+        return $this->attachments->filter(fn(ContractAttachment $a) => $a->getId() === $attachmentId)->first();
     }
 }

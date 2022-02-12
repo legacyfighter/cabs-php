@@ -4,6 +4,7 @@ namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Entity\Contract;
+use LegacyFighter\Cabs\Entity\ContractAttachment;
 
 class ContractRepository
 {
@@ -27,5 +28,14 @@ class ContractRepository
     public function getOne(int $id): ?Contract
     {
         return $this->em->find(Contract::class, $id);
+    }
+
+    public function findByAttachmentId(int $attachmentId): ?Contract
+    {
+        return $this->em->createQuery(sprintf(
+            'SELECT c FROM %s c JOIN c.attachments ca WHERE ca.id = %s',
+            Contract::class,
+            $attachmentId
+        ))->getSingleResult();
     }
 }

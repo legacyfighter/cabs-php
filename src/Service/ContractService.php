@@ -22,45 +22,32 @@ class ContractService
 
     public function createContract(ContractDTO $contractDTO): Contract
     {
-        $contract = new Contract();
-        $contract->setPartnerName($contractDTO->getPartnerName());
         $partnerContractsCount = count($this->contractRepository->findByPartnerName($contractDTO->getPartnerName())) + 1;
-        $contract->setSubject($contractDTO->getSubject());
-        $contract->setContractNo(sprintf('C/%s/%s', $partnerContractsCount, $contractDTO->getPartnerName()));
-        return $this->contractRepository->save($contract);
+        return $this->contractRepository->save(new Contract(
+            $contractDTO->getPartnerName(),
+            $contractDTO->getSubject(),
+            sprintf('C/%s/%s', $partnerContractsCount, $contractDTO->getPartnerName())
+        ));
     }
 
     public function acceptContract(int $id): void
     {
-        $contract = $this->find($id);
-        $attachments = $this->contractAttachmentRepository->findByContract($contract);
-        if(count(array_filter($attachments, fn(ContractAttachment $attachment) => $attachment->getStatus() === ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES)) === count($attachments)) {
-            $contract->setStatus(Contract::STATUS_ACCEPTED);
-        } else {
-            throw new \RuntimeException('Not all attachments accepted by both sides');
-        }
+        $this->find($id)->accept();
     }
 
     public function rejectContract(int $id): void
     {
-        $contract = $this->find($id);
-        $contract->setStatus(Contract::STATUS_REJECTED);
+        $this->find($id)->reject();
     }
 
     public function rejectAttachment(int $attachmentId): void
     {
-        $contractAttachment = $this->contractAttachmentRepository->getOne($attachmentId);
-        $contractAttachment->setStatus(ContractAttachment::STATUS_REJECTED);
+        $this->contractRepository->findByAttachmentId($attachmentId)->rejectAttachment($attachmentId);
     }
 
     public function acceptAttachment(int $attachmentId): void
     {
-        $contractAttachment = $this->contractAttachmentRepository->getOne($attachmentId);
-        if($contractAttachment->getStatus() === ContractAttachment::STATUS_ACCEPTED_BY_ONE_SIDE || $contractAttachment->getStatus() === ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES) {
-            $contractAttachment->setStatus(ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES);
-        } else {
-            $contractAttachment->setStatus(ContractAttachment::STATUS_ACCEPTED_BY_ONE_SIDE);
-        }
+        $this->contractRepository->findByAttachmentId($attachmentId)->acceptAttachment($attachmentId);
     }
 
     public function find(int $id): Contract
@@ -74,20 +61,13 @@ class ContractService
 
     public function findDto(int $id): ContractDTO
     {
-        return ContractDTO::from($this->find($id));
+        return ContractDTO::from($this->find($id), $this->contractAttachmentRepository->findByContractId($id));
     }
 
     public function proposeAttachment(int $contractId, ContractAttachmentDTO $contractAttachmentDTO): ContractAttachmentDTO
     {
         $contract = $this->find($contractId);
-        $contractAttachment = new ContractAttachment();
-        $contractAttachment->setContract($contract);
-        $contractAttachment->setData($contractAttachmentDTO->getData());
-        $this->contractAttachmentRepository->save($contractAttachment);
-        $attachments = $contract->getAttachments();
-        $attachments[] = $contractAttachment;
-        $contract->setAttachments($attachments);
-        return ContractAttachmentDTO::from($contractAttachment);
+        return ContractAttachmentDTO::from($this->contractAttachmentRepository->save($contract->proposeAttachment($contractAttachmentDTO->getData())));
     }
 
     public function removeAttachment(int $contractId, int $attachmentId): void

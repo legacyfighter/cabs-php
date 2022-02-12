@@ -31,8 +31,8 @@ class ContractAttachmentRepository
     /**
      * @return ContractAttachment[]
      */
-    public function findByContract(Contract $contract): array
+    public function findByContractId(int $id): array
     {
-        return $this->em->getRepository(ContractAttachment::class)->findBy(['contract' => $contract]);
+        return $this->em->getRepository(ContractAttachment::class)->findBy(['contract' => $id]);
     }
 }

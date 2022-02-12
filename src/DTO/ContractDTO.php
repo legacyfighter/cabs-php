@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\DTO;
 
 use LegacyFighter\Cabs\Entity\Contract;
+use LegacyFighter\Cabs\Entity\ContractAttachment;
 
 class ContractDTO implements \JsonSerializable
 {
@@ -25,7 +26,10 @@ class ContractDTO implements \JsonSerializable
 
     }
 
-    public static function from(Contract $contract): self
+    /**
+     * @param ContractAttachment[] $attachments
+     */
+    public static function from(Contract $contract, array $attachments): self
     {
         $instance = new self();
         $instance->id = $contract->getId();
@@ -37,7 +41,7 @@ class ContractDTO implements \JsonSerializable
         $instance->changeDate = $contract->getChangeDate();
         $instance->status = $contract->getStatus();
         $instance->contractNo = $contract->getContractNo();
-        foreach ($contract->getAttachments() as $attachment) {
+        foreach ($attachments as $attachment) {
             $instance->attachments[] = ContractAttachmentDTO::from($attachment);
         }
         return $instance;
