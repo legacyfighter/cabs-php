@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Entity\AwardsAccount;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 
@@ -26,18 +27,27 @@ class AwardedMiles extends BaseEntity
     #[ManyToOne(targetEntity: Transit::class)]
     private ?Transit $transit = null;
 
-    public function __construct()
+    #[ManyToOne(targetEntity: AwardsAccount::class)]
+    private AwardsAccount $account;
+
+    public function __construct(AwardsAccount $account, ?Transit $transit, Client $client, \DateTimeImmutable $when, Miles $constantUntil)
     {
+        $this->account = $account;
+        $this->transit = $transit;
+        $this->client = $client;
+        $this->date = $when;
+        $this->miles = $constantUntil;
+    }
+
+    public function transferTo(AwardsAccount $account): void
+    {
+        $this->client = $account->getClient();
+        $this->account = $account;
     }
 
     public function getClient(): Client
     {
         return $this->client;
-    }
-
-    public function setClient(Client $client): void
-    {
-        $this->client = $client;
     }
 
     public function getMilesAmount(\DateTimeImmutable $when): int
@@ -50,19 +60,9 @@ class AwardedMiles extends BaseEntity
         return $this->miles;
     }
 
-    public function setMiles(Miles $miles): void
-    {
-        $this->miles = $miles;
-    }
-
     public function getDate(): \DateTimeImmutable
     {
         return $this->date;
-    }
-
-    public function setDate(\DateTimeImmutable $date): void
-    {
-        $this->date = $date;
     }
 
     public function getExpirationDate(): ?\DateTimeImmutable
@@ -78,11 +78,6 @@ class AwardedMiles extends BaseEntity
     public function getTransit(): ?Transit
     {
         return $this->transit;
-    }
-
-    public function setTransit(?Transit $transit): void
-    {
-        $this->transit = $transit;
     }
 
     public function removeAll(\DateTimeImmutable $when): void

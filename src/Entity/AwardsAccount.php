@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace LegacyFighter\Cabs\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
+use LegacyFighter\Cabs\Entity\Miles\ConstantUntil;
 
 #[Entity]
 class AwardsAccount extends BaseEntity
@@ -24,8 +29,118 @@ class AwardsAccount extends BaseEntity
     #[Column(type: 'integer')]
     private int $transactions = 0;
 
-    public function __construct()
+    #[OneToMany(mappedBy: 'account', targetEntity: AwardedMiles::class, cascade: ['all'])]
+    private Collection $miles;
+
+    public function __construct(Client $client, bool $isActive, \DateTimeImmutable $when)
     {
+        $this->client = $client;
+        $this->isActive = $isActive;
+        $this->date = $when;
+        $this->miles = new ArrayCollection();
+    }
+
+    public static function notActiveAccount(Client $client, \DateTimeImmutable $when): self
+    {
+        return new self($client, false, $when);
+    }
+
+    public function addExpiringMiles(int $amount, \DateTimeImmutable $expireAt, Transit $transit, \DateTimeImmutable $when): AwardedMiles
+    {
+        $expiringMiles = new AwardedMiles($this, $transit, $this->client, $when, ConstantUntil::until($amount, $expireAt));
+        $this->miles->add($expiringMiles);
+        $this->transactions++;
+        return $expiringMiles;
+    }
+
+    public function addNonExpiringMiles(int $amount, \DateTimeImmutable $when): AwardedMiles
+    {
+        $nonExpiringMiles = new AwardedMiles($this, null, $this->client, $when, ConstantUntil::untilForever($amount));
+        $this->miles->add($nonExpiringMiles);
+        $this->transactions++;
+        return $nonExpiringMiles;
+    }
+
+    public function calculateBalance(\DateTimeImmutable $at): int
+    {
+        return array_sum($this->miles
+            ->filter(fn(AwardedMiles $miles) => $miles->getExpirationDate() !== null && $miles->getExpirationDate() > $at || $miles->cantExpire())
+            ->map(fn(AwardedMiles $miles) => $miles->getMilesAmount($at))
+            ->toArray()
+        );
+    }
+
+    public function remove(int $miles, \DateTimeImmutable $when, int $transitsCounter, int $claimsCounter, string $clientType, bool $isSunday): void
+    {
+        if($this->calculateBalance($when) >= $miles && $this->isActive) {
+            $milesList = $this->miles->toArray();
+            if($claimsCounter >= 3) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
+                $milesList = array_reverse($milesList);
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() === null ? -1 : ($b->getExpirationDate() === null ? 1 : 0));
+            } else if($clientType === Client::TYPE_VIP) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
+            } else if($transitsCounter >= 15 && $isSunday) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
+            } else if($transitsCounter >= 15) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
+            } else {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
+            }
+
+            foreach ($milesList as $iter) {
+                if($miles <= 0) {
+                    break;
+                }
+                if($iter->cantExpire() || $iter->getExpirationDate() > $when) {
+                    $milesAmount = $iter->getMilesAmount($when);
+                    if($milesAmount <= $miles) {
+                        $miles -= $milesAmount;
+                        $iter->removeAll($when);
+                    } else {
+                        $iter->subtract($miles, $when);
+                        $miles = 0;
+                    }
+                }
+            }
+        } else {
+            throw new \InvalidArgumentException('Insufficient miles, id = '.$this->client->getId().', miles requested = '.$miles);
+        }
+    }
+
+    public function moveMilesTo(AwardsAccount $accountTo, int $amount, \DateTimeImmutable $when): void
+    {
+        if($this->calculateBalance($when) >= $amount && $this->isActive()) {
+            foreach ($this->miles->toArray() as $iter) {
+                /** @var AwardedMiles $iter */
+                if($iter->cantExpire() || $iter->getExpirationDate() > $when) {
+                    $milesAmount = $iter->getMilesAmount($when);
+                    if($milesAmount <= $amount) {
+                        $iter->transferTo($accountTo);
+                        $amount -= $milesAmount;
+                    } else {
+                        $iter->subtract($amount, $when);
+                        $iter->transferTo($accountTo);
+                        $amount -= $iter->getMilesAmount($when);
+                    }
+                }
+            }
+            $this->transactions++;
+            $accountTo->transactions++;
+        }
+    }
+
+    public function activate(): void
+    {
+        $this->isActive = true;
+    }
+
+    public function deactivate(): void
+    {
+        $this->isActive = false;
     }
 
     public function getClient(): Client
@@ -33,19 +148,9 @@ class AwardsAccount extends BaseEntity
         return $this->client;
     }
 
-    public function setClient(Client $client): void
-    {
-        $this->client = $client;
-    }
-
     public function getDate(): \DateTimeImmutable
     {
         return $this->date;
-    }
-
-    public function setDate(\DateTimeImmutable $date): void
-    {
-        $this->date = $date;
     }
 
     public function isActive(): bool
@@ -53,18 +158,8 @@ class AwardsAccount extends BaseEntity
         return $this->isActive;
     }
 
-    public function setActive(bool $isActive): void
-    {
-        $this->isActive = $isActive;
-    }
-
     public function getTransactions(): int
     {
         return $this->transactions;
-    }
-
-    public function increaseTransactions(): void
-    {
-        $this->transactions++;
     }
 }

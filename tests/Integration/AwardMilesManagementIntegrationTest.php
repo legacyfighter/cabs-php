@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
@@ -162,6 +163,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $this->awardsService->transferMiles($client->getId(), $secondClient->getId(), 10);
 
         //then
+        $this->getContainer()->get(EntityManagerInterface::class)->clear();
         self::assertEquals(0, $this->awardsService->calculateBalance($client->getId()));
         self::assertEquals(10, $this->awardsService->calculateBalance($secondClient->getId()));
     }

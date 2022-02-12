@@ -55,4 +55,8 @@ class MilesType extends JsonType
         throw ConversionException::conversionFailed($value, Miles::class);
     }
 
+    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    {
+        return true;
+    }
 }
