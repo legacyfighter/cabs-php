@@ -48,6 +48,7 @@ class Contract extends BaseEntity
 
     public function __construct()
     {
+        $this->creationDate = new \DateTimeImmutable();
         $this->attachments = new ArrayCollection();
         $this->creationDate = new \DateTimeImmutable();
     }

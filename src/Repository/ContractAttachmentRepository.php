@@ -20,6 +20,7 @@ class ContractAttachmentRepository
     public function deleteById(int $id): void
     {
         $this->em->remove($this->getOne($id));
+        $this->em->flush();
     }
 
     public function getOne(int $id): ContractAttachment

@@ -20,25 +20,35 @@ class ContractDTO implements \JsonSerializable
      */
     private array $attachments = [];
 
-    private function __construct(Contract $contract)
+    private function __construct()
     {
-        $this->id = $contract->getId();
-        $this->subject = $contract->getSubject();
-        $this->partnerName = $contract->getPartnerName();
-        $this->creationDate = $contract->getCreationDate();
-        $this->acceptedAt = $contract->getAcceptedAt();
-        $this->rejectedAt = $contract->getRejectedAt();
-        $this->changeDate = $contract->getChangeDate();
-        $this->status = $contract->getStatus();
-        $this->contractNo = $contract->getContractNo();
-        foreach ($contract->getAttachments() as $attachment) {
-            $this->attachments[] = ContractAttachmentDTO::from($attachment);
-        }
+
     }
 
     public static function from(Contract $contract): self
     {
-        return new self($contract);
+        $instance = new self();
+        $instance->id = $contract->getId();
+        $instance->subject = $contract->getSubject();
+        $instance->partnerName = $contract->getPartnerName();
+        $instance->creationDate = $contract->getCreationDate();
+        $instance->acceptedAt = $contract->getAcceptedAt();
+        $instance->rejectedAt = $contract->getRejectedAt();
+        $instance->changeDate = $contract->getChangeDate();
+        $instance->status = $contract->getStatus();
+        $instance->contractNo = $contract->getContractNo();
+        foreach ($contract->getAttachments() as $attachment) {
+            $instance->attachments[] = ContractAttachmentDTO::from($attachment);
+        }
+        return $instance;
+    }
+
+    public static function with(string $partnerName, string $subject): self
+    {
+        $instance = new self();
+        $instance->partnerName = $partnerName;
+        $instance->subject = $subject;
+        return $instance;
     }
 
     public function getId(): int

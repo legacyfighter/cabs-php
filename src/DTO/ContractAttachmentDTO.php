@@ -15,21 +15,30 @@ class ContractAttachmentDTO implements \JsonSerializable
     private ?\DateTimeImmutable $changeDate;
     private string $status;
 
-    private function __construct(ContractAttachment $attachment)
+    private function __construct()
     {
-        $this->id = $attachment->getId();
-        $this->contractId = $attachment->getContract()->getId();
-        $this->data = $attachment->getData();
-        $this->creationDate = $attachment->getCreationDate();
-        $this->acceptedAt = $attachment->getAcceptedAt();
-        $this->rejectedAt = $attachment->getRejectedAt();
-        $this->changeDate = $attachment->getChangeDate();
-        $this->status = $attachment->getStatus();
+
     }
 
     public static function from(ContractAttachment $attachment): self
     {
-        return new self($attachment);
+        $instance = new self();
+        $instance->id = $attachment->getId();
+        $instance->contractId = $attachment->getContract()->getId();
+        $instance->data = $attachment->getData();
+        $instance->creationDate = $attachment->getCreationDate();
+        $instance->acceptedAt = $attachment->getAcceptedAt();
+        $instance->rejectedAt = $attachment->getRejectedAt();
+        $instance->changeDate = $attachment->getChangeDate();
+        $instance->status = $attachment->getStatus();
+        return $instance;
+    }
+
+    public static function with(string $data): self
+    {
+        $instance = new self();
+        $instance->data = $data;
+        return $instance;
     }
 
     public function getId(): int
