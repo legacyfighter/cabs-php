@@ -6,18 +6,20 @@ use LegacyFighter\Cabs\DTO\ContractAttachmentDTO;
 use LegacyFighter\Cabs\DTO\ContractDTO;
 use LegacyFighter\Cabs\Entity\Contract;
 use LegacyFighter\Cabs\Entity\ContractAttachment;
+use LegacyFighter\Cabs\Entity\ContractAttachmentData;
+use LegacyFighter\Cabs\Repository\ContractAttachmentDataRepository;
 use LegacyFighter\Cabs\Repository\ContractAttachmentRepository;
 use LegacyFighter\Cabs\Repository\ContractRepository;
 
 class ContractService
 {
-    private ContractRepository $contractRepository;
-    private ContractAttachmentRepository $contractAttachmentRepository;
 
-    public function __construct(ContractRepository $contractRepository, ContractAttachmentRepository $contractAttachmentRepository)
+
+    public function __construct(
+        private ContractRepository $contractRepository,
+        private ContractAttachmentDataRepository $contractAttachmentDataRepository
+    )
     {
-        $this->contractRepository = $contractRepository;
-        $this->contractAttachmentRepository = $contractAttachmentRepository;
     }
 
     public function createContract(ContractDTO $contractDTO): Contract
@@ -42,12 +44,16 @@ class ContractService
 
     public function rejectAttachment(int $attachmentId): void
     {
-        $this->contractRepository->findByAttachmentId($attachmentId)->rejectAttachment($attachmentId);
+        $this->contractRepository
+            ->findByAttachmentId($attachmentId)
+            ->rejectAttachment($this->contractRepository->findContractAttachmentNoById($attachmentId));
     }
 
     public function acceptAttachment(int $attachmentId): void
     {
-        $this->contractRepository->findByAttachmentId($attachmentId)->acceptAttachment($attachmentId);
+        $this->contractRepository
+            ->findByAttachmentId($attachmentId)
+            ->acceptAttachment($this->contractRepository->findContractAttachmentNoById($attachmentId));
     }
 
     public function find(int $id): Contract
@@ -61,18 +67,28 @@ class ContractService
 
     public function findDto(int $id): ContractDTO
     {
-        return ContractDTO::from($this->find($id), $this->contractAttachmentRepository->findByContractId($id));
+        return ContractDTO::from(
+            $contract = $this->find($id),
+            $this->contractAttachmentDataRepository->findByContractAttachmentNoIn($contract->getAttachmentIds())
+        );
     }
 
     public function proposeAttachment(int $contractId, ContractAttachmentDTO $contractAttachmentDTO): ContractAttachmentDTO
     {
         $contract = $this->find($contractId);
-        return ContractAttachmentDTO::from($this->contractAttachmentRepository->save($contract->proposeAttachment($contractAttachmentDTO->getData())));
+        $contractAttachmentId = $contract->proposeAttachment()->getContractAttachmentNo();
+        $this->contractRepository->save($contract);
+
+        return ContractAttachmentDTO::from(
+            $contract->findAttachment($contractAttachmentId),
+            $this->contractAttachmentDataRepository->save(new ContractAttachmentData($contractAttachmentId, $contractAttachmentDTO->getData()))
+        );
     }
 
     public function removeAttachment(int $contractId, int $attachmentId): void
     {
         //TODO sprawdzenie czy nalezy do kontraktu (JIRA: II-14455)
-        $this->contractAttachmentRepository->deleteById($attachmentId);
+        $this->find($contractId)->remove($this->contractRepository->findContractAttachmentNoById($attachmentId));
+        $this->contractAttachmentDataRepository->deleteByAttachmentId($attachmentId);
     }
 }

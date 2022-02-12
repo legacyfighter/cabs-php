@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use Symfony\Component\Uid\Uuid;
 
 #[Entity]
 class ContractAttachment extends BaseEntity
@@ -16,11 +17,8 @@ class ContractAttachment extends BaseEntity
     public const STATUS_ACCEPTED_BY_BOTH_SIDES = 'accepted-by-both-side';
     public const STATUS_REJECTED = 'rejected';
 
-    #[Column(type: 'text')]
-    private string $data;
-
-    #[Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $creationDate;
+    #[Column(type:'uuid', nullable: false)]
+    private Uuid $contractAttachmentNo;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $acceptedAt = null;
@@ -39,27 +37,8 @@ class ContractAttachment extends BaseEntity
 
     public function __construct()
     {
+        $this->contractAttachmentNo = Uuid::v4();
         $this->creationDate = new \DateTimeImmutable();
-    }
-
-    public function getData(): string
-    {
-        return $this->data;
-    }
-
-    public function setData(string $data): void
-    {
-        $this->data = $data;
-    }
-
-    public function getCreationDate(): \DateTimeImmutable
-    {
-        return $this->creationDate;
-    }
-
-    public function setCreationDate(\DateTimeImmutable $creationDate): void
-    {
-        $this->creationDate = $creationDate;
     }
 
     public function getAcceptedAt(): ?\DateTimeImmutable
@@ -113,5 +92,10 @@ class ContractAttachment extends BaseEntity
     public function setContract(Contract $contract): void
     {
         $this->contract = $contract;
+    }
+
+    public function getContractAttachmentNo(): Uuid
+    {
+        return $this->contractAttachmentNo;
     }
 }

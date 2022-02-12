@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use Symfony\Component\Uid\Uuid;
 
 #[Entity]
 class Contract extends BaseEntity
@@ -101,13 +102,20 @@ class Contract extends BaseEntity
         return $this->contractNo;
     }
 
-    public function proposeAttachment(string $data): ContractAttachment
+    public function proposeAttachment(): ContractAttachment
     {
         $attachment = new ContractAttachment();
-        $attachment->setData($data);
         $attachment->setContract($this);
         $this->attachments->add($attachment);
         return $attachment;
+    }
+
+    /**
+     * @return Uuid[]
+     */
+    public function getAttachmentIds(): array
+    {
+        return $this->attachments->map(fn(ContractAttachment $a) => $a->getContractAttachmentNo())->toArray();
     }
 
     public function accept(): void
@@ -124,9 +132,9 @@ class Contract extends BaseEntity
         $this->status = self::STATUS_REJECTED;
     }
 
-    public function acceptAttachment(int $attachmentId): void
+    public function acceptAttachment(Uuid $contractAttachmentNo): void
     {
-        $attachment = $this->findAttachment($attachmentId);
+        $attachment = $this->findAttachment($contractAttachmentNo);
         if(in_array($attachment->getStatus(), [ContractAttachment::STATUS_ACCEPTED_BY_ONE_SIDE, ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES], true)) {
             $attachment->setStatus(ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES);
         } else {
@@ -134,13 +142,18 @@ class Contract extends BaseEntity
         }
     }
 
-    public function rejectAttachment(int $attachmentId): void
+    public function rejectAttachment(Uuid $contractAttachmentNo): void
     {
-        $this->findAttachment($attachmentId)->setStatus(ContractAttachment::STATUS_REJECTED);
+        $this->findAttachment($contractAttachmentNo)->setStatus(ContractAttachment::STATUS_REJECTED);
     }
 
-    private function findAttachment(int $attachmentId): ContractAttachment
+    public function findAttachment(Uuid $attachmentId): ContractAttachment
     {
-        return $this->attachments->filter(fn(ContractAttachment $a) => $a->getId() === $attachmentId)->first();
+        return $this->attachments->filter(fn(ContractAttachment $a) => $a->getContractAttachmentNo()->equals($attachmentId))->first();
+    }
+
+    public function remove(Uuid $contractAttachmentNo): void
+    {
+        $this->attachments->removeElement($this->findAttachment($contractAttachmentNo));
     }
 }

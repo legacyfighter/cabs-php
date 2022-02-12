@@ -242,6 +242,9 @@
     "symfony/polyfill-php81": {
         "version": "v1.23.0"
     },
+    "symfony/polyfill-uuid": {
+        "version": "v1.24.0"
+    },
     "symfony/process": {
         "version": "v5.3.13"
     },
@@ -278,6 +281,9 @@
     },
     "symfony/string": {
         "version": "v5.3.10"
+    },
+    "symfony/uid": {
+        "version": "v5.3.14"
     },
     "symfony/var-dumper": {
         "version": "v5.3.10"

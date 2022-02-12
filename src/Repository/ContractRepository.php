@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Repository;
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Entity\Contract;
 use LegacyFighter\Cabs\Entity\ContractAttachment;
+use Symfony\Component\Uid\Uuid;
 
 class ContractRepository
 {
@@ -37,5 +38,14 @@ class ContractRepository
             Contract::class,
             $attachmentId
         ))->getSingleResult();
+    }
+
+    public function findContractAttachmentNoById(int $attachmentId): ?Uuid
+    {
+        $uuid = $this->em->getConnection()->fetchOne(
+            'SELECT c.contract_attachment_no FROM contract_attachment c WHERE c.id = :id',
+            ['id' => $attachmentId]
+        );
+        return $uuid !== false ? Uuid::fromString($uuid) : null;
     }
 }
