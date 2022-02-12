@@ -3,7 +3,7 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
+use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -11,13 +11,13 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 class AwardMilesManagementIntegrationTest extends KernelTestCase
 {
     private AwardsService $awardsService;
-    private AwardedMilesRepository $awardedMilesRepository;
+    private AwardsAccountRepository $awardsAccountRepository;
     private Fixtures $fixtures;
 
     protected function setUp(): void
     {
         $this->awardsService = $this->getContainer()->get(AwardsService::class);
-        $this->awardedMilesRepository = $this->getContainer()->get(AwardedMilesRepository::class);
+        $this->awardsAccountRepository = $this->getContainer()->get(AwardsAccountRepository::class);
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
     }
 
@@ -94,7 +94,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         //then
         $account = $this->awardsService->findBy($client->getId());
         self::assertEquals(1, $account->getTransactions());
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertCount(1, $awardedMiles);
         self::assertEquals(10, $awardedMiles[0]->getMilesAmount(new \DateTimeImmutable()));
         self::assertFalse($awardedMiles[0]->cantExpire());
@@ -116,7 +116,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         //then
         $account = $this->awardsService->findBy($client->getId());
         self::assertEquals(1, $account->getTransactions());
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertCount(1, $awardedMiles);
         self::assertEquals(20, $awardedMiles[0]->getMilesAmount(new \DateTimeImmutable()));
         self::assertTrue($awardedMiles[0]->cantExpire());

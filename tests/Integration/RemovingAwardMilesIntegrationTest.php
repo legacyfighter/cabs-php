@@ -5,7 +5,6 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
@@ -19,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 class RemovingAwardMilesIntegrationTest extends KernelTestCase
 {
     private AwardsService $awardsService;
-    private AwardedMilesRepository $awardedMilesRepository;
+    private AwardsAccountRepository $awardsAccountRepository;
     private Fixtures $fixtures;
     private FixedClock $clock;
     private FakeAppProperties $appProperties;
@@ -28,13 +27,12 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     {
         $this->awardsService = new AwardsServiceImpl(
             $this->getContainer()->get(AwardsAccountRepository::class),
-            $this->getContainer()->get(AwardedMilesRepository::class),
             $this->getContainer()->get(ClientRepository::class),
             $this->getContainer()->get(TransitRepository::class),
             $this->clock = new FixedClock(),
             $this->appProperties = new FakeAppProperties()
         );
-        $this->awardedMilesRepository = $this->getContainer()->get(AwardedMilesRepository::class);
+        $this->awardsAccountRepository = $this->getContainer()->get(AwardsAccountRepository::class);
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
     }
 
@@ -56,7 +54,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $this->awardsService->removeMiles($client->getId(), 16);
 
         //then
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertThatMilesWereReducedTo($oldestNonExpiringMiles, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($middle, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($youngest, 9, $awardedMiles);
@@ -82,7 +80,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $this->awardsService->removeMiles($client->getId(), 15);
 
         //then
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertThatMilesWereReducedTo($oldest, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($middle, 5, $awardedMiles);
         self::assertThatMilesWereReducedTo($youngest, 10, $awardedMiles);
@@ -107,7 +105,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $this->awardsService->removeMiles($client->getId(), 13);
 
         //then
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertThatMilesWereReducedTo($regularMiles, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($oldestNonExpiringMiles, 2, $awardedMiles);
     }
@@ -131,7 +129,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $this->awardsService->removeMiles($client->getId(), 21);
 
         //then
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertThatMilesWereReducedTo($nonExpiring, 1, $awardedMiles);
         self::assertThatMilesWereReducedTo($firstToExpire, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($secondToExpire, 4, $awardedMiles);
@@ -160,7 +158,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $this->awardsService->removeMiles($client->getId(), 21);
 
         //then
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertThatMilesWereReducedTo($nonExpiring, 100, $awardedMiles);
         self::assertThatMilesWereReducedTo($firstToExpire, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($secondToExpire, 4, $awardedMiles);
@@ -188,7 +186,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $this->awardsService->removeMiles($client->getId(), 21);
 
         //then
-        $awardedMiles = $this->awardedMilesRepository->findAllByClient($client);
+        $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertThatMilesWereReducedTo($nonExpiring, 0, $awardedMiles);
         self::assertThatMilesWereReducedTo($firstToExpire, 5, $awardedMiles);
         self::assertThatMilesWereReducedTo($secondToExpire, 3, $awardedMiles);

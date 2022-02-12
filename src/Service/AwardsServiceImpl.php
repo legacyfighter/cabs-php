@@ -6,10 +6,7 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
 use LegacyFighter\Cabs\Entity\AwardsAccount;
-use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
-use LegacyFighter\Cabs\Entity\Miles\ConstantUntil;
-use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
@@ -17,7 +14,6 @@ use LegacyFighter\Cabs\Repository\TransitRepository;
 class AwardsServiceImpl implements AwardsService
 {
     private AwardsAccountRepository $accountRepository;
-    private AwardedMilesRepository $milesRepository;
     private ClientRepository $clientRepository;
     private TransitRepository $transitRepository;
     private Clock $clock;
@@ -25,14 +21,12 @@ class AwardsServiceImpl implements AwardsService
 
     public function __construct(
         AwardsAccountRepository $accountRepository,
-        AwardedMilesRepository $milesRepository,
         ClientRepository $clientRepository,
         TransitRepository $transitRepository,
         Clock $clock,
         AppProperties $appProperties)
     {
         $this->accountRepository = $accountRepository;
-        $this->milesRepository = $milesRepository;
         $this->clientRepository = $clientRepository;
         $this->transitRepository = $transitRepository;
         $this->clock = $clock;

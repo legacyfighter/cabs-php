@@ -4,7 +4,6 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Repository\AwardedMilesRepository;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
@@ -26,7 +25,6 @@ class ExpiringMilesIntegrationTest extends KernelTestCase
     {
         $this->awardsService = new AwardsServiceImpl(
             $this->getContainer()->get(AwardsAccountRepository::class),
-            $this->getContainer()->get(AwardedMilesRepository::class),
             $this->getContainer()->get(ClientRepository::class),
             $this->getContainer()->get(TransitRepository::class),
             $this->clock = new FixedClock(),

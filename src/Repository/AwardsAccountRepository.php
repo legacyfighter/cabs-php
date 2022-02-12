@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Repository;
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Entity\AwardsAccount;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 
 class AwardsAccountRepository
 {
@@ -19,5 +20,13 @@ class AwardsAccountRepository
     {
         $this->em->persist($account);
         $this->em->flush();
+    }
+
+    /**
+     * @return AwardedMiles[]
+     */
+    public function findAllMilesBy(Client $client): array
+    {
+       return $this->findByClient($client)?->getMiles() ?? [];
     }
 }
