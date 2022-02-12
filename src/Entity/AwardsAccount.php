@@ -70,27 +70,11 @@ class AwardsAccount extends BaseEntity
         );
     }
 
-    public function remove(int $miles, \DateTimeImmutable $when, int $transitsCounter, int $claimsCounter, string $clientType, bool $isSunday): void
+    public function remove(int $miles, \DateTimeImmutable $when, callable $strategy): void
     {
         if($this->calculateBalance($when) >= $miles && $this->isActive) {
             $milesList = $this->miles->toArray();
-            if($claimsCounter >= 3) {
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
-                $milesList = array_reverse($milesList);
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() === null ? -1 : ($b->getExpirationDate() === null ? 1 : 0));
-            } else if($clientType === Client::TYPE_VIP) {
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
-            } else if($transitsCounter >= 15 && $isSunday) {
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
-            } else if($transitsCounter >= 15) {
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int) $a->cantExpire() <=> (int) $b->cantExpire());
-            } else {
-                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
-            }
-
+            $strategy($milesList);
             foreach ($milesList as $iter) {
                 if($miles <= 0) {
                     break;

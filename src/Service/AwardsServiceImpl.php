@@ -6,6 +6,7 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
 use LegacyFighter\Cabs\Entity\AwardsAccount;
+use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
@@ -114,10 +115,12 @@ class AwardsServiceImpl implements AwardsService
         $account->remove(
             $miles,
             $this->clock->now(),
-            count($this->transitRepository->findByClient($client)),
-            count($client->getClaims()),
-            $client->getType(),
-            $this->isSunday()
+            $this->chooseStrategy(
+                count($this->transitRepository->findByClient($client)),
+                count($client->getClaims()),
+                $client->getType(),
+                $this->isSunday()
+            )
         );
     }
 
@@ -147,5 +150,35 @@ class AwardsServiceImpl implements AwardsService
     private function isSunday(): bool
     {
         return $this->clock->now()->format('l') === 'Sunday';
+    }
+
+    private function chooseStrategy(int $transitsCounter, int $claimsCounter, string $clientType, bool $isSunday): callable
+    {
+        if($claimsCounter >= 3) {
+            return function(array &$milesList) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
+                $milesList = array_reverse($milesList);
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() === null ? -1 : ($b->getExpirationDate() === null ? 1 : 0));
+            };
+        } else if($clientType === Client::TYPE_VIP) {
+            return function(array &$milesList) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int)$a->cantExpire() <=> (int)$b->cantExpire());
+            };
+        } else if($transitsCounter >= 15 && $isSunday) {
+            return function(array &$milesList) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getExpirationDate() <=> $b->getExpirationDate());
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int)$a->cantExpire() <=> (int)$b->cantExpire());
+            };
+        } else if($transitsCounter >= 15) {
+            return function(array &$milesList) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => (int)$a->cantExpire() <=> (int)$b->cantExpire());
+            };
+        } else {
+            return function(array &$milesList) {
+                usort($milesList, fn(AwardedMiles $a, AwardedMiles $b) => $a->getDate() <=> $b->getDate());
+            };
+        }
     }
 }
