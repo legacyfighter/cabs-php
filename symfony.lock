@@ -118,6 +118,21 @@
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
+    "pheature/inmemory-toggle": {
+        "version": "0.3.0"
+    },
+    "pheature/symfony-toggle": {
+        "version": "0.3.2"
+    },
+    "pheature/toggle-core": {
+        "version": "0.3.0"
+    },
+    "pheature/toggle-crud-psr11-factories": {
+        "version": "0.3.0"
+    },
+    "pheature/toggle-model": {
+        "version": "0.3.0"
+    },
     "php-cs-fixer/diff": {
         "version": "v2.0.2"
     },

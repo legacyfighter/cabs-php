@@ -18,6 +18,8 @@
         "doctrine/doctrine-bundle": "^2.5",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.10",
+        "pheature/inmemory-toggle": "^0.3.0",
+        "pheature/symfony-toggle": "^0.3.2",
         "symfony/console": "5.3.*",
         "symfony/dotenv": "5.3.*",
         "symfony/flex": "^1.3.1",
