@@ -4,7 +4,6 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Service\DriverSessionService;
@@ -12,14 +11,13 @@ use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\GeocodingService;
 use LegacyFighter\Cabs\Service\TransitService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
-use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class TransitLifeCycleIntegrationTest extends KernelTestCase
 {
     private Fixtures $fixtures;
     private TransitService $transitService;
-    private GeocodingService|MockObject $geocodingService;
+    private GeocodingService $geocodingService;
     private DriverSessionService $driverSessionService;
     private DriverTrackingService $driverTrackingService;
 

@@ -54,7 +54,7 @@ class DriverReportController
             /** @var Transit[] $transitsInSession */
             $transitsInSession = array_filter(
                 $driver->getTransits(),
-                fn(Transit $transit) => $transit->getStatus() === Transit::STATUS_COMPLETED && $transit->getCompleteAt() < $session->getLoggedAt() && $transit->getCompleteAt() > $session->setLoggedOutAt()
+                fn(Transit $transit) => $transit->getStatus() === Transit::STATUS_COMPLETED && $transit->getCompleteAt() >= $session->getLoggedAt() && $transit->getCompleteAt() <= $session->getLoggedOutAt()
             );
             $transitsDtosInSession = [];
             foreach ($transitsInSession as $t) {

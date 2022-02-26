@@ -8,3 +8,6 @@ services:
 
   LegacyFighter\Cabs\Service\GeocodingService:
     class: LegacyFighter\Cabs\Tests\Double\FakeGeocodingService
+
+  LegacyFighter\Cabs\Common\Clock:
+    class: LegacyFighter\Cabs\Tests\Common\FixedClock

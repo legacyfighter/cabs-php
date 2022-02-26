@@ -419,6 +419,7 @@ class TransitService
         $transit->completeAt($this->clock->now(), $destinationAddress, $distance);
         $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
         $transit->setDriversFee($driverFee);
+        $driver->setOccupied(false);
         $this->driverRepository->save($driver);
         $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
         $this->transitRepository->save($transit);

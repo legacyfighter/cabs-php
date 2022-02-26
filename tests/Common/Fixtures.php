@@ -13,11 +13,13 @@ use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Claim;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
+use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
@@ -36,11 +38,11 @@ class Fixtures
         private CarTypeService $carTypeService,
         private ClaimService $claimService,
         private AwardsService $awardsService,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private DriverAttributeRepository $driverAttributeRepository
     )
     {
     }
-
 
     public function aClient(string $type = Client::TYPE_NORMAL): Client
     {
@@ -52,9 +54,14 @@ class Fixtures
         return $this->clientRepository->save($client);
     }
 
-    public function aDriver(): Driver
+    public function aDriver(
+        string $status = Driver::STATUS_ACTIVE,
+        string $name = 'Janusz',
+        string $lastName = 'Kowalski',
+        string $license = 'FARME100165AB5EW'
+    ): Driver
     {
-        return $this->driverService->createDriver('FARME100165AB5EW', 'Kowalski', 'Janusz', Driver::TYPE_REGULAR, Driver::STATUS_ACTIVE, '');
+        return $this->driverService->createDriver($license, $lastName, $name, Driver::TYPE_REGULAR, $status, '');
     }
 
     public function driverHasFee(Driver $driver, string $feeType, int $amount, ?int $min = null): DriverFee
@@ -125,9 +132,9 @@ class Fixtures
         }
     }
 
-    public function createClaim(Client $client, Transit $transit): Claim
+    public function createClaim(Client $client, Transit $transit, string $reason = '$$$'): Claim
     {
-        $claimDto = ClaimDTO::with('Okradli mnie na hajs', '$$$', $client->getId(), $transit->getId());
+        $claimDto = ClaimDTO::with('Okradli mnie na hajs', $reason, $client->getId(), $transit->getId());
         $claimDto->setIsDraft(false);
         return $this->claimService->create($claimDto);
     }
@@ -172,6 +179,11 @@ class Fixtures
     {
         $this->awardsAccount($client);
         $this->awardsService->activateAccount($client->getId());
+    }
+
+    public function driverHasAttribute(Driver $driver, string $name, string $value): void
+    {
+        $this->driverAttributeRepository->save(new DriverAttribute($name, $value, $driver));
     }
 
     private function anAddress(string $country, string $city, string $street, int $buildingNumber): Address
