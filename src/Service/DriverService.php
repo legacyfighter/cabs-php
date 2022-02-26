@@ -135,7 +135,7 @@ class DriverService
         if($driver === null) {
             throw new \InvalidArgumentException('Driver does not exists, id = '.$driverId);
         }
-        return new DriverDTO($driver);
+        return DriverDTO::from($driver);
     }
 
     public function addAttribute(int $driverId, string $attributeName, string $value): void

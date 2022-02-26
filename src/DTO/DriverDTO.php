@@ -14,15 +14,33 @@ class DriverDTO implements \JsonSerializable
     private string $status;
     private string $type;
 
-    public function __construct(Driver $driver)
+    private function __construct(int $id, string $firstName, string $lastName, string $driverLicense, ?string $photo, string $status, string $type)
     {
-        $this->id = $driver->getId();
-        $this->firstName = $driver->getFirstName();
-        $this->lastName = $driver->getLastName();
-        $this->driverLicense = $driver->getDriverLicense()->asString();
-        $this->photo = $driver->getPhoto();
-        $this->status = $driver->getStatus();
-        $this->type = $driver->getType();
+        $this->id = $id;
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->driverLicense = $driverLicense;
+        $this->photo = $photo;
+        $this->status = $status;
+        $this->type = $type;
+    }
+
+    public static function from(Driver $driver): self
+    {
+        return new self(
+            $driver->getId(),
+            $driver->getFirstName(),
+            $driver->getLastName(),
+            $driver->getDriverLicense()->asString(),
+            $driver->getPhoto(),
+            $driver->getStatus(),
+            $driver->getType()
+        );
+    }
+
+    public static function with(int $id, string $firstName, string $lastName, string $driverLicense, ?string $photo, string $status, string $type): self
+    {
+        return new self($id, $firstName, $lastName, $driverLicense, $photo, $status, $type);
     }
 
     public function getId(): int

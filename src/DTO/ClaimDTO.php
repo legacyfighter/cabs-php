@@ -47,13 +47,17 @@ class ClaimDTO implements \JsonSerializable
         return  $dto;
     }
 
-    public static function with(string $desc, string $reason, int $clientId, int $transitId): self
+    public static function with(string $desc, string $reason, int $clientId, int $transitId, int $claimId = 0, string $status = '', ?string $completionMode = null, string $claimNo = ''): self
     {
         $dto = new self();
         $dto->incidentDescription = $desc;
         $dto->reason = $reason;
         $dto->clientId = $clientId;
         $dto->transitId = $transitId;
+        $dto->claimId = $claimId;
+        $dto->status = $status;
+        $dto->completionMode = $completionMode;
+        $dto->claimNo = $claimNo;
 
         return $dto;
     }

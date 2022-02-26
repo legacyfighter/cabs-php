@@ -12,18 +12,29 @@ class DriverSessionDTO implements \JsonSerializable
     private string $carClass;
     private string $carBrand;
 
-    private function __construct(DriverSession $session)
+    private function __construct(\DateTimeImmutable $loggedAt, ?\DateTimeImmutable $loggedOutAt, string $platesNumber, string $carClass, string $carBrand)
     {
-        $this->loggedAt = $session->getLoggedAt();
-        $this->loggedOutAt = $session->getLoggedOutAt();
-        $this->platesNumber = $session->getPlatesNumber();
-        $this->carClass = $session->getCarClass();
-        $this->carBrand = $session->getCarBrand();
+        $this->loggedAt = $loggedAt;
+        $this->loggedOutAt = $loggedOutAt;
+        $this->platesNumber = $platesNumber;
+        $this->carClass = $carClass;
+        $this->carBrand = $carBrand;
+    }
+
+    public static function with(\DateTimeImmutable $loggedAt, ?\DateTimeImmutable $loggedOutAt, string $platesNumber, string $carClass, string $carBrand): self
+    {
+        return new self($loggedAt, $loggedOutAt, $platesNumber, $carClass, $carBrand);
     }
 
     public static function from(DriverSession $session): self
     {
-        return new self($session);
+        return new self(
+            $session->getLoggedAt(),
+            $session->getLoggedOutAt(),
+            $session->getPlatesNumber(),
+            $session->getCarClass(),
+            $session->getCarBrand()
+        );
     }
 
     public function getLoggedAt(): \DateTimeImmutable

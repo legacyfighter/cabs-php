@@ -35,40 +35,57 @@ class TransitDTO implements \JsonSerializable
     private ?string $carClass = null;
     private ?ClientDTO $clientDTO = null;
 
-    private function __construct(Transit $transit)
+    private function __construct()
     {
-        $this->id = $transit->getId();
-        $this->distance = $transit->getKm();
-        $this->factor = 1;
-        if($transit->getPrice()!== null) {
-            $this->price = (float) $transit->getPrice()->toInt();
-        }
-        $this->date = $transit->getDateTime();
-        $this->status = $transit->getStatus();
-        $this->setTariff($transit);
-        foreach ($transit->getProposedDrivers() as $driver) {
-            $this->proposedDrivers[] = new DriverDTO($driver);
-        }
-        $this->to = AddressDTO::from($transit->getTo());
-        $this->from = AddressDTO::from($transit->getFrom());
-        $this->carClass = $transit->getCarType();
-        $this->clientDTO = ClientDTO::from($transit->getClient());
-        if($transit->getDriversFee()!==null) {
-            $this->driverFee = (float) $transit->getDriversFee()->toInt();
-        }
-        if($transit->getEstimatedPrice() !== null) {
-            $this->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();
-        }
-        $this->dateTime = $transit->getDateTime();
-        $this->published = $transit->getPublished();
-        $this->acceptedAt = $transit->getAcceptedAt();
-        $this->started = $transit->getStarted();
-        $this->completedAt = $transit->getCompleteAt();
+
+    }
+
+    public static function with(int $id, string $status, string $tariff, float $kmRate, AddressDTO $from, AddressDTO $to, ?DriverDTO $driverDTO, ?ClientDTO $clientDTO, ?ClaimDTO $claimDTO): self
+    {
+        $instance = new self();
+        $instance->id = $id;
+        $instance->status = $status;
+        $instance->tariff = $tariff;
+        $instance->kmRate = $kmRate;
+        $instance->from = $from;
+        $instance->to = $to;
+        $instance->driver = $driverDTO;
+        $instance->clientDTO = $clientDTO;
+        $instance->claimDTO = $claimDTO;
+        return $instance;
     }
 
     public static function from(Transit $transit): self
     {
-        return new self($transit);
+        $instance = new self();
+        $instance->id = $transit->getId();
+        $instance->distance = $transit->getKm();
+        $instance->factor = 1;
+        if($transit->getPrice()!== null) {
+            $instance->price = (float) $transit->getPrice()->toInt();
+        }
+        $instance->date = $transit->getDateTime();
+        $instance->status = $transit->getStatus();
+        $instance->setTariff($transit);
+        foreach ($transit->getProposedDrivers() as $driver) {
+            $instance->proposedDrivers[] = DriverDTO::from($driver);
+        }
+        $instance->to = AddressDTO::from($transit->getTo());
+        $instance->from = AddressDTO::from($transit->getFrom());
+        $instance->carClass = $transit->getCarType();
+        $instance->clientDTO = ClientDTO::from($transit->getClient());
+        if($transit->getDriversFee()!==null) {
+            $instance->driverFee = (float) $transit->getDriversFee()->toInt();
+        }
+        if($transit->getEstimatedPrice() !== null) {
+            $instance->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();
+        }
+        $instance->dateTime = $transit->getDateTime();
+        $instance->published = $transit->getPublished();
+        $instance->acceptedAt = $transit->getAcceptedAt();
+        $instance->started = $transit->getStarted();
+        $instance->completedAt = $transit->getCompleteAt();
+        return $instance;
     }
 
     private function setTariff(Transit $transit): void

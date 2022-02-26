@@ -35,9 +35,17 @@ class DriverReport implements \JsonSerializable
         return $this->attributes;
     }
 
+    /**
+     * @param DriverAttributeDTO[] $attributes
+     */
     public function setAttributes(array $attributes): void
     {
         $this->attributes = $attributes;
+    }
+
+    public function addAttr(string $name, string $value): void
+    {
+        $this->attributes[] = DriverAttributeDTO::with($name, $value);
     }
 
     public function getSessions(): array
@@ -45,6 +53,9 @@ class DriverReport implements \JsonSerializable
         return $this->sessions;
     }
 
+    /**
+     * @param array<array{session: DriverSessionDTO, transits: TransitDTO[]}> $sessions
+     */
     public function setSessions(array $sessions): void
     {
         $this->sessions = $sessions;

@@ -15,21 +15,35 @@ class AddressDTO implements \JsonSerializable
     private string $postalCode;
     private string $name;
 
-    private function __construct(Address $address)
+    public function __construct(string $country, string $district, string $city, string $street, int $buildingNumber, ?int $additionalNumber, string $postalCode, string $name)
     {
-        $this->country = $address->getCountry();
-        $this->city = $address->getCity();
-        $this->street = $address->getStreet();
-        $this->buildingNumber = $address->getBuildingNumber();
-        $this->additionalNumber = $address->getAdditionalNumber();
-        $this->postalCode = $address->getPostalCode();
-        $this->name = $address->getName();
-        $this->district = $address->getDistrict();
+        $this->country = $country;
+        $this->district = $district;
+        $this->city = $city;
+        $this->street = $street;
+        $this->buildingNumber = $buildingNumber;
+        $this->additionalNumber = $additionalNumber;
+        $this->postalCode = $postalCode;
+        $this->name = $name;
+    }
+
+    public static function with(string $country, string $city, string $street, int $buildingNumber, ?int $additionalNumber = null, string $postalCode = '', string $name = '', string $district = ''): self
+    {
+        return new self($country, $district, $city, $street, $buildingNumber, $additionalNumber, $postalCode, $name);
     }
 
     public static function from(Address $address): self
     {
-        return new self($address);
+        return new self(
+            $address->getCountry(),
+            $address->getDistrict(),
+            $address->getCity(),
+            $address->getStreet(),
+            $address->getBuildingNumber(),
+            $address->getAdditionalNumber(),
+            $address->getPostalCode(),
+            $address->getName()
+        );
     }
 
     public function getCountry(): string
