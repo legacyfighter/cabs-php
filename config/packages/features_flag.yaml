@@ -1,6 +1,4 @@
 pheature_flags:
   driver: "inmemory"
   driver_options: []
-  toggles:
-    - { id: "driver_report_sql", enabled: true }
-    - { id: "driver_report_creation_reconciliation", enabled: false }
+  toggles: []
