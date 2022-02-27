@@ -10,6 +10,7 @@ class DriverReportCreator
     public function __construct(
         private SqlBasedDriverReportCreator $sqlBasedDriverReportCreator,
         private OldDriverReportCreator $oldDriverReportCreator,
+        private DriverReportReconciliation $driverReportReconciliation,
         private Toggle $toggle
     )
     {
@@ -17,9 +18,25 @@ class DriverReportCreator
 
     public function create(int $driverId, int $days): DriverReport
     {
-        if($this->toggle->isEnabled('driver_report_sql')) {
-            return $this->sqlBasedDriverReportCreator->createReport($driverId, $days);
+        $newReport = null;
+        $oldReport = null;
+        if($this->toggle->isEnabled('driver_report_creation_reconciliation')) {
+            $newReport = $this->sqlBasedDriverReportCreator->createReport($driverId, $days);
+            $oldReport = $this->oldDriverReportCreator->createReport($driverId, $days);
+            $this->driverReportReconciliation->compare($oldReport, $newReport);
         }
-        return $this->oldDriverReportCreator->createReport($driverId, $days);
+
+        if($this->toggle->isEnabled('driver_report_sql')) {
+            if($newReport===null) {
+                $newReport = $this->sqlBasedDriverReportCreator->createReport($driverId, $days);
+            }
+            return $newReport;
+        }
+
+        if($oldReport === null) {
+            $oldReport = $this->oldDriverReportCreator->createReport($driverId, $days);
+        }
+
+        return $oldReport;
     }
 }
