@@ -26,14 +26,13 @@ class TravelledDistanceService
         ));
     }
 
-    public function addPosition(DriverPosition $driverPosition): void
+    public function addPosition(int $driverId, float $latitude, float $longitude, \DateTimeImmutable $seenAt): void
     {
-        $driverId = $driverPosition->getDriver()->getId();
-        $matchedSlot = $this->travelledDistanceRepository->findTravelledDistanceTimeSlotByTime($driverPosition->getSeenAt(), $driverId);
+        $matchedSlot = $this->travelledDistanceRepository->findTravelledDistanceTimeSlotByTime($seenAt, $driverId);
         $now = $this->clock->now();
         if($matchedSlot !== null) {
             if($matchedSlot->containts($now)) {
-                $this->addDistanceToSlot($driverPosition, $matchedSlot);
+                $this->addDistanceToSlot($matchedSlot, $latitude, $longitude);
             } else if ($matchedSlot->isBefore($now)) {
                 $this->recalculateDistanceFor($matchedSlot, $driverId);
             }
@@ -42,25 +41,25 @@ class TravelledDistanceService
             $prev = $currentTimeSlot->prev();
             $prevTravelledDistance = $this->travelledDistanceRepository->findTravelledDistanceByTimeSlotAndDriverId($prev, $driverId);
             if($prevTravelledDistance !== null) {
-                if($prevTravelledDistance->endsAt($driverPosition->getSeenAt())) {
-                    $this->addDistanceToSlot($driverPosition, $prevTravelledDistance);
+                if($prevTravelledDistance->endsAt($seenAt)) {
+                    $this->addDistanceToSlot($prevTravelledDistance, $latitude, $longitude);
                 }
             }
-            $this->createSlotForNow($driverPosition, $driverId, $currentTimeSlot);
+            $this->createSlotForNow($driverId, $currentTimeSlot, $latitude, $longitude);
         }
     }
 
-    private function addDistanceToSlot(DriverPosition $driverPosition, TravelledDistance $aggregateDistance): void
+    private function addDistanceToSlot(TravelledDistance $aggregateDistance, float $latitude, float $longitude): void
     {
         $aggregateDistance->addDistance(
             Distance::ofKm($this->distanceCalculator->calculateByGeo(
-                $driverPosition->getLatitude(),
-                $driverPosition->getLongitude(),
+                $latitude,
+                $longitude,
                 $aggregateDistance->getLastLatitude(),
                 $aggregateDistance->getLastLongitude()
             )),
-            $driverPosition->getLatitude(),
-            $driverPosition->getLongitude()
+            $latitude,
+            $longitude
         );
         $this->travelledDistanceRepository->save($aggregateDistance);
     }
@@ -70,8 +69,8 @@ class TravelledDistanceService
         // todo
     }
 
-    private function createSlotForNow(DriverPosition $driverPosition, int $driverId, TimeSlot $timeSlot): void
+    private function createSlotForNow(int $driverId, TimeSlot $timeSlot, float $latitude, float $longitude): void
     {
-        $this->travelledDistanceRepository->save(new TravelledDistance($driverId, $timeSlot, $driverPosition));
+        $this->travelledDistanceRepository->save(new TravelledDistance($driverId, $timeSlot, $latitude, $longitude));
     }
 }

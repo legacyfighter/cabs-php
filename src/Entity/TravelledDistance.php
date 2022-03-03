@@ -31,13 +31,13 @@ class TravelledDistance
     #[Column(type: 'distance')]
     private Distance $distance;
 
-    public function __construct(int $driverId, TimeSlot $timeSlot, DriverPosition $driverPosition)
+    public function __construct(int $driverId, TimeSlot $timeSlot, float $lastLatitude, float $lastLongitude)
     {
         $this->intervalId = Uuid::v4();
         $this->driverId = $driverId;
         $this->timeSlot = $timeSlot;
-        $this->lastLatitude = $driverPosition->getLatitude();
-        $this->lastLongitude = $driverPosition->getLongitude();
+        $this->lastLatitude = $lastLatitude;
+        $this->lastLongitude = $lastLongitude;
         $this->distance = Distance::zero();
     }
 
