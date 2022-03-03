@@ -11,7 +11,6 @@ class CalculateDriverTravelledDistanceIntegrationTest extends KernelTestCase
 {
     private DriverTrackingService $driverTrackingService;
     private Fixtures $fixtures;
-    private Clock $clock;
 
     protected function setUp(): void
     {
@@ -43,9 +42,7 @@ class CalculateDriverTravelledDistanceIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $this->itIsNoon();
-        //and
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
 
         //when
         $distance = $this->driverTrackingService->calculateTravelledDistance($driver->getId(), $this->noon(), $this->noonFive());
@@ -62,11 +59,9 @@ class CalculateDriverTravelledDistanceIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $this->itIsNoon();
-        //and
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223, $this->noon());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
 
         //when
         $distance = $this->driverTrackingService->calculateTravelledDistance($driver->getId(), $this->noon(), $this->noonFive());
@@ -83,16 +78,13 @@ class CalculateDriverTravelledDistanceIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $this->itIsNoon();
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223, $this->noon());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
         //and
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        //and
-        $this->itIsNoonFive();
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noonFive());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223, $this->noonFive());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noonFive());
 
         //when
         $distance = $this->driverTrackingService->calculateTravelledDistance($driver->getId(), $this->noon(), $this->noonFive());
@@ -109,44 +101,23 @@ class CalculateDriverTravelledDistanceIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $this->itIsNoon();
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223, $this->noon());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noon());
         //and
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noonFive());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223, $this->noonFive());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noonFive());
         //and
-        $this->itIsNoonFive();
-        //and
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        //and
-        $this->itIsNoonTen();
-        //and
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223);
-        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221);
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noonTen());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.31861111111111, -1.6997222222222223, $this->noonTen());
+        $this->driverTrackingService->registerPosition($driver->getId(), 53.32055555555556, -1.7297222222222221, $this->noonTen());
 
         //when
         $distance = $this->driverTrackingService->calculateTravelledDistance($driver->getId(), $this->noon(), $this->noonTen());
 
         //then
         self::assertSame('12.026km', $distance->printIn('km'));
-    }
-
-    private function itIsNoon(): void
-    {
-        $this->clock->setDateTime($this->noon());
-    }
-
-    private function itIsNoonFive(): void
-    {
-        $this->clock->setDateTime($this->noonFive());
-    }
-
-    private function itIsNoonTen(): void
-    {
-        $this->clock->setDateTime($this->noonTen());
     }
 
     private function noon(): \DateTimeImmutable

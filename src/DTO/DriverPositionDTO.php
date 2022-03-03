@@ -2,8 +2,6 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
-use LegacyFighter\Cabs\Entity\Driver;
-
 class DriverPositionDTO implements \JsonSerializable
 {
     private int $driverId;

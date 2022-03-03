@@ -118,7 +118,7 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
     {
         $this->clock->setDateTime($when);
         $this->driverSessionService->logIn($driver->getId(), $plateNumber, $carClass, $carBrand);
-        $this->driverTrackingService->registerPosition($driver->getId(), 10, 20);
+        $this->driverTrackingService->registerPosition($driver->getId(), 10, 20, new \DateTimeImmutable());
         $transit = $this->transitService->createTransitFrom(
             $client->getId(),
             $this->address('PL', 'MAZ', 'WAW', 'STREET', 1, 10, 20),

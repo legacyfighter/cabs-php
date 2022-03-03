@@ -11,20 +11,15 @@ use LegacyFighter\Cabs\Repository\DriverRepository;
 
 class DriverTrackingService
 {
-    private DriverPositionRepository $driverPositionRepository;
-    private DriverRepository $driverRepository;
-    private DistanceCalculator $distanceCalculator;
-    private Clock $clock;
-
-    public function __construct(DriverPositionRepository $driverPositionRepository, DriverRepository $driverRepository, DistanceCalculator $distanceCalculator, Clock $clock)
+    public function __construct(
+        private DriverPositionRepository $driverPositionRepository,
+        private DriverRepository $driverRepository,
+        private DistanceCalculator $distanceCalculator
+    )
     {
-        $this->driverPositionRepository = $driverPositionRepository;
-        $this->driverRepository = $driverRepository;
-        $this->distanceCalculator = $distanceCalculator;
-        $this->clock = $clock;
     }
 
-    public function registerPosition(int $driverId, float $latitude, float $longitude): DriverPosition
+    public function registerPosition(int $driverId, float $latitude, float $longitude, \DateTimeImmutable $seenAt): DriverPosition
     {
         $driver = $this->driverRepository->getOne($driverId);
         if($driver===null) {
@@ -35,7 +30,7 @@ class DriverTrackingService
         }
         $driverPosition = new DriverPosition();
         $driverPosition->setDriver($driver);
-        $driverPosition->setSeenAt($this->clock->now());
+        $driverPosition->setSeenAt($seenAt);
         $driverPosition->setLatitude($latitude);
         $driverPosition->setLongitude($longitude);
         return $this->driverPositionRepository->save($driverPosition);

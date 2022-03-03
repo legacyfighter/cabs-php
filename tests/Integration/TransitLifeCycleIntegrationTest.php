@@ -533,7 +533,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         $driver = $this->fixtures->aDriver();
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);
         $this->driverSessionService->logIn($driver->getId(), $plateNumber, CarType::CAR_CLASS_VAN, 'BRAND');
-        $this->driverTrackingService->registerPosition($driver->getId(), 1, 1);
+        $this->driverTrackingService->registerPosition($driver->getId(), 1, 1, new \DateTimeImmutable());
         return $driver->getId();
     }
 
@@ -542,7 +542,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         $driver = $this->fixtures->aDriver();
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);
         $this->driverSessionService->logIn($driver->getId(), $plateNumber, CarType::CAR_CLASS_VAN, 'BRAND');
-        $this->driverTrackingService->registerPosition($driver->getId(), 1000, 1000);
+        $this->driverTrackingService->registerPosition($driver->getId(), 1000, 1000, new \DateTimeImmutable());
         return $driver->getId();
     }
 

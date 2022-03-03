@@ -17,7 +17,7 @@ class DriverTrackingController
     #[Route('/driverPositions', methods: ['POST'])]
     public function create(DriverPositionDTO $driverPositionDTO): Response
     {
-        $driverPosition = $this->trackingService->registerPosition($driverPositionDTO->getDriverId(), $driverPositionDTO->getLatitude(), $driverPositionDTO->getLongitude());
+        $driverPosition = $this->trackingService->registerPosition($driverPositionDTO->getDriverId(), $driverPositionDTO->getLatitude(), $driverPositionDTO->getLongitude(), $driverPositionDTO->getSeenAt());
         return new JsonResponse($this->toDto($driverPosition));
     }
 
