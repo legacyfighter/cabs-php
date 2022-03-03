@@ -5,11 +5,9 @@ namespace LegacyFighter\Cabs\Distance;
 final class Distance
 {
     private const MILES_TO_KILOMETERS_RATIO = 1.609344;
-    private float $km;
 
-    private function __construct(float $km)
+    private function __construct(private float $km)
     {
-        $this->km = $km;
     }
 
     public static function ofKm(float $km): self
@@ -20,6 +18,11 @@ final class Distance
     public static function zero(): self
     {
         return new self(0);
+    }
+
+    public function add(self $travelled): self
+    {
+        return new self($this->km + $travelled->km);
     }
 
     public function toKmInFloat(): float

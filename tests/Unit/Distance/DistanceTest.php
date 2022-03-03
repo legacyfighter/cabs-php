@@ -66,4 +66,16 @@ class DistanceTest extends TestCase
         self::assertEquals('194.005miles', Distance::ofKm(312.221111232313)->printIn('miles'));
         self::assertEquals('1.243miles', Distance::ofKm(2)->printIn('miles'));
     }
+
+    /**
+     * @test
+     */
+    public function canAddDistance(): void
+    {
+        //expect
+        self::assertEquals(1000, Distance::ofKm(500)->add(Distance::ofKm(500))->toKmInFloat());
+        self::assertEquals(1042, Distance::ofKm(1020)->add(Distance::ofKm(22))->toKmInFloat());
+        self::assertEquals(0, Distance::ofKm(0)->add(Distance::ofKm(0))->toKmInFloat());
+        self::assertEquals(3.7, Distance::ofKm(1.5)->add(Distance::ofKm(2.2))->toKmInFloat());
+    }
 }
