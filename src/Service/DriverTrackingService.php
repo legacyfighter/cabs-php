@@ -29,12 +29,7 @@ class DriverTrackingService
         if($driver->getStatus() !== Driver::STATUS_ACTIVE) {
             throw new \InvalidArgumentException('Driver is not active, cannot register position, id = '.$driverId);
         }
-        $driverPosition = new DriverPosition();
-        $driverPosition->setDriver($driver);
-        $driverPosition->setSeenAt($seenAt);
-        $driverPosition->setLatitude($latitude);
-        $driverPosition->setLongitude($longitude);
-        $driverPosition = $this->driverPositionRepository->save($driverPosition);
+        $driverPosition = $this->driverPositionRepository->save(new DriverPosition($driver, $latitude, $longitude, $seenAt));
         $this->travelledDistanceService->addPosition($driverPosition);
         return $driverPosition;
     }

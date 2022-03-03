@@ -22,8 +22,12 @@ class DriverPosition extends BaseEntity
     #[Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $seenAt;
 
-    public function __construct()
+    public function __construct(Driver $driver, float $latitude, float $longitude, \DateTimeImmutable $seenAt)
     {
+        $this->driver = $driver;
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+        $this->seenAt = $seenAt;
     }
 
     public function getDriver(): Driver
@@ -31,19 +35,9 @@ class DriverPosition extends BaseEntity
         return $this->driver;
     }
 
-    public function setDriver(Driver $driver): void
-    {
-        $this->driver = $driver;
-    }
-
     public function getLatitude(): float
     {
         return $this->latitude;
-    }
-
-    public function setLatitude(float $latitude): void
-    {
-        $this->latitude = $latitude;
     }
 
     public function getLongitude(): float
@@ -51,18 +45,8 @@ class DriverPosition extends BaseEntity
         return $this->longitude;
     }
 
-    public function setLongitude(float $longitude): void
-    {
-        $this->longitude = $longitude;
-    }
-
     public function getSeenAt(): \DateTimeImmutable
     {
         return $this->seenAt;
-    }
-
-    public function setSeenAt(\DateTimeImmutable $seenAt): void
-    {
-        $this->seenAt = $seenAt;
     }
 }
