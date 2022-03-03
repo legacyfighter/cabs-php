@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\Service;
 
 use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverPosition;
 use LegacyFighter\Cabs\Repository\DriverPositionRepository;
@@ -34,13 +35,13 @@ class DriverTrackingService
         }
         $driverPosition = new DriverPosition();
         $driverPosition->setDriver($driver);
-        $driverPosition->setSeenAt(new \DateTimeImmutable());
+        $driverPosition->setSeenAt($this->clock->now());
         $driverPosition->setLatitude($latitude);
         $driverPosition->setLongitude($longitude);
         return $this->driverPositionRepository->save($driverPosition);
     }
 
-    public function calculateTravelledDistance(int $driverId, \DateTimeImmutable $from, \DateTimeImmutable $to): float
+    public function calculateTravelledDistance(int $driverId, \DateTimeImmutable $from, \DateTimeImmutable $to): Distance
     {
         $driver = $this->driverRepository->getOne($driverId);
         if($driver===null) {
@@ -64,6 +65,6 @@ class DriverTrackingService
             }
         }
 
-        return $distanceTravelled;
+        return Distance::ofKm($distanceTravelled);
     }
 }

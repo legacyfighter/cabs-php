@@ -27,8 +27,8 @@ class DriverPositionRepository
         $expr = Criteria::expr();
         $criteria = Criteria::create()
             ->where($expr->eq('driver', $driver))
-            ->andWhere($expr->gt('seenAt', $from))
-            ->andWhere($expr->lt('seenAt', $to))
+            ->andWhere($expr->gte('seenAt', $from))
+            ->andWhere($expr->lte('seenAt', $to))
             ->orderBy(['seenAt' => Criteria::ASC])
         ;
         return $this->em->getRepository(DriverPosition::class)->matching($criteria)->toArray();

@@ -24,7 +24,7 @@ class DriverTrackingController
     #[Route('/driverPositions/{id}/total', methods: ['GET'])]
     public function calculateTravelledDistance(int $id, Request $request): Response
     {
-        return new JsonResponse($this->trackingService->calculateTravelledDistance($id, new \DateTimeImmutable($request->get('from')), new \DateTimeImmutable($request->get('to'))));
+        return new JsonResponse($this->trackingService->calculateTravelledDistance($id, new \DateTimeImmutable($request->get('from')), new \DateTimeImmutable($request->get('to')))->toKmInFloat());
     }
 
     private function toDto(DriverPosition $driverPosition): DriverPositionDTO
