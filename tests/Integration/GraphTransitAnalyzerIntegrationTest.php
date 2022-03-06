@@ -2,21 +2,16 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
-use Laudis\Neo4j\Contracts\ClientInterface;
-use Laudis\Neo4j\Contracts\TransactionInterface;
 use LegacyFighter\Cabs\TransitAnalyzer\GraphTransitAnalyzer;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class GraphTransitAnalyzerIntegrationTest extends KernelTestCase
+class GraphTransitAnalyzerIntegrationTest extends Neo4jTestCase
 {
     private GraphTransitAnalyzer $analyzer;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->analyzer = $this->getContainer()->get(GraphTransitAnalyzer::class);
-        $this->getContainer()->get(ClientInterface::class)->transaction(function(TransactionInterface $tsx) {
-            $tsx->run('MATCH (n) DETACH DELETE n');
-        });
     }
 
     /**

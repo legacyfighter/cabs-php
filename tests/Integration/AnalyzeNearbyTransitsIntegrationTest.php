@@ -5,14 +5,11 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Service\GeocodingService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
-use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
 use LegacyFighter\Cabs\Ui\TransitAnalyzerController;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class AnalyzeNearbyTransitsIntegrationTest extends KernelTestCase
+class AnalyzeNearbyTransitsIntegrationTest extends Neo4jTestCase
 {
     private Fixtures $fixtures;
     private TransitAnalyzerController $transitAnalyzerController;
@@ -20,6 +17,7 @@ class AnalyzeNearbyTransitsIntegrationTest extends KernelTestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
         $this->transitAnalyzerController = $this->getContainer()->get(TransitAnalyzerController::class);
         $this->clock = $this->getContainer()->get(Clock::class);
@@ -199,7 +197,6 @@ class AnalyzeNearbyTransitsIntegrationTest extends KernelTestCase
 
     /**
      * @test
-     * pytanie za 100 punktów, czy ten test będzie działał na grafie, bo tam jest warunek na ścieżkę o długości przynajmniej 1...
      */
     public function canFindLongTravelBetweenOthers(): void
     {

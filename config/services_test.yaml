@@ -11,6 +11,3 @@ services:
 
   LegacyFighter\Cabs\Common\Clock:
     class: LegacyFighter\Cabs\Tests\Common\FixedClock
-
-  LegacyFighter\Cabs\TransitAnalyzer\GraphTransitAnalyzer:
-    public: true

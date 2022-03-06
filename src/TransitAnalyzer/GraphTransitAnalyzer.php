@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\TransitAnalyzer;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Contracts\TransactionInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
+use LegacyFighter\Cabs\Entity\Events\TransitCompleted;
 
 class GraphTransitAnalyzer
 {
@@ -54,5 +55,17 @@ class GraphTransitAnalyzer
                 'completeAt' => $completeAt->format(DATE_ISO8601)
             ]);
         });
+    }
+
+    public function handle(TransitCompleted $event): void
+    {
+        $this->addTransitBetweenAddresses(
+            $event->clientId(),
+            $event->transitId(),
+            $event->addressFromHash(),
+            $event->addressToHash(),
+            $event->started(),
+            $event->completeAt()
+        );
     }
 }

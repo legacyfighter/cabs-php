@@ -11,6 +11,7 @@ use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverSession;
+use LegacyFighter\Cabs\Entity\Events\TransitCompleted;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
@@ -18,56 +19,29 @@ use LegacyFighter\Cabs\Repository\DriverPositionRepository;
 use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class TransitService
 {
-    private DriverRepository $driverRepository;
-    private TransitRepository $transitRepository;
-    private ClientRepository $clientRepository;
-    private InvoiceGenerator $invoiceGenerator;
-    private DriverNotificationService $notificationService;
-    private DistanceCalculator $distanceCalculator;
-    private DriverPositionRepository $driverPositionRepository;
-    private DriverSessionRepository $driverSessionRepository;
-    private CarTypeService $carTypeService;
-    private GeocodingService $geocodingService;
-    private AddressRepository $addressRepository;
-    private DriverFeeService $driverFeeService;
-    private Clock $clock;
-    private AwardsService $awardsService;
-
     public function __construct(
-        DriverRepository $driverRepository,
-        TransitRepository $transitRepository,
-        ClientRepository $clientRepository,
-        InvoiceGenerator $invoiceGenerator,
-        DriverNotificationService $notificationService,
-        DistanceCalculator $distanceCalculator,
-        DriverPositionRepository $driverPositionRepository,
-        DriverSessionRepository $driverSessionRepository,
-        CarTypeService $carTypeService,
-        GeocodingService $geocodingService,
-        AddressRepository $addressRepository,
-        DriverFeeService $driverFeeService,
-        Clock $clock,
-        AwardsService $awardsService
+        private DriverRepository $driverRepository,
+        private TransitRepository $transitRepository,
+        private ClientRepository $clientRepository,
+        private InvoiceGenerator $invoiceGenerator,
+        private DriverNotificationService $notificationService,
+        private DistanceCalculator $distanceCalculator,
+        private DriverPositionRepository $driverPositionRepository,
+        private DriverSessionRepository $driverSessionRepository,
+        private CarTypeService $carTypeService,
+        private GeocodingService $geocodingService,
+        private AddressRepository $addressRepository,
+        private DriverFeeService $driverFeeService,
+        private Clock $clock,
+        private AwardsService $awardsService,
+        private EventDispatcherInterface $dispatcher
     )
-    {
-        $this->driverRepository = $driverRepository;
-        $this->transitRepository = $transitRepository;
-        $this->clientRepository = $clientRepository;
-        $this->invoiceGenerator = $invoiceGenerator;
-        $this->notificationService = $notificationService;
-        $this->distanceCalculator = $distanceCalculator;
-        $this->driverPositionRepository = $driverPositionRepository;
-        $this->driverSessionRepository = $driverSessionRepository;
-        $this->carTypeService = $carTypeService;
-        $this->geocodingService = $geocodingService;
-        $this->addressRepository = $addressRepository;
-        $this->driverFeeService = $driverFeeService;
-        $this->clock = $clock;
-        $this->awardsService = $awardsService;
-    }
+    { }
 
     public function createTransit(TransitDTO $transitDTO): Transit
     {
@@ -424,6 +398,15 @@ class TransitService
         $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
         $this->transitRepository->save($transit);
         $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
+        $this->dispatcher->dispatch(new TransitCompleted(
+            $transit->getClient()->getId(),
+            $transitId,
+            $transit->getFrom()->getHash(),
+            $transit->getTo()->getHash(),
+            $transit->getStarted(),
+            $transit->getCompleteAt()
+        ));
+
     }
 
     public function loadTransit(int $id): TransitDTO

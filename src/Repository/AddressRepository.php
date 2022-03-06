@@ -35,6 +35,19 @@ class AddressRepository
         return $address;
     }
 
+    public function findHashById(int $id): int
+    {
+        return (int) $this->em->getConnection()->executeQuery(
+            'SELECT hash FROM address WHERE id = :id',
+            ['id' => $id]
+        )->fetchOne();
+    }
+
+    public function getByHash(int $hash): Address
+    {
+        return $this->em->getRepository(Address::class)->findOneBy(['hash' => $hash]);
+    }
+
     private function isIdSet(Address $address): bool
     {
         try {
