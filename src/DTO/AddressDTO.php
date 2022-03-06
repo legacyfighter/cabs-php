@@ -14,8 +14,9 @@ class AddressDTO implements \JsonSerializable
     private ?int $additionalNumber;
     private string $postalCode;
     private string $name;
+    private ?int $hash = null;
 
-    public function __construct(string $country, string $district, string $city, string $street, int $buildingNumber, ?int $additionalNumber, string $postalCode, string $name)
+    public function __construct(string $country, string $district, string $city, string $street, int $buildingNumber, ?int $additionalNumber, string $postalCode, string $name, ?int $hash = null)
     {
         $this->country = $country;
         $this->district = $district;
@@ -25,6 +26,7 @@ class AddressDTO implements \JsonSerializable
         $this->additionalNumber = $additionalNumber;
         $this->postalCode = $postalCode;
         $this->name = $name;
+        $this->hash = $hash;
     }
 
     public static function with(string $country, string $city, string $street, int $buildingNumber, ?int $additionalNumber = null, string $postalCode = '', string $name = '', string $district = ''): self
@@ -42,7 +44,8 @@ class AddressDTO implements \JsonSerializable
             $address->getBuildingNumber(),
             $address->getAdditionalNumber(),
             $address->getPostalCode(),
-            $address->getName()
+            $address->getName(),
+            $address->getHash()
         );
     }
 
@@ -143,7 +146,8 @@ class AddressDTO implements \JsonSerializable
             'city' => $this->city,
             'street' => $this->street,
             'buildingNumber' => $this->buildingNumber,
-            'country' => $this->country
+            'country' => $this->country,
+            'hash' => $this->hash
         ];
     }
 

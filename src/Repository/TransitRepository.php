@@ -41,8 +41,8 @@ class TransitRepository
         $expr = Criteria::expr();
         return $this->em->getRepository(Transit::class)->matching(Criteria::create()
             ->where($expr->eq('driver', $driver))
-            ->andWhere($expr->gt('dateTime', $from))
-            ->andWhere($expr->lt('dateTime', $to))
+            ->andWhere($expr->gte('dateTime', $from))
+            ->andWhere($expr->lte('dateTime', $to))
         )->toArray();
     }
 

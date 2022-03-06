@@ -16,7 +16,7 @@ class Address extends BaseEntity
     private string $country;
 
     #[Column]
-    private string $district;
+    private string $district = '';
 
     #[Column]
     private string $city;
@@ -31,13 +31,13 @@ class Address extends BaseEntity
     private ?int $additionalNumber = null;
 
     #[Column]
-    private string $postalCode;
+    private string $postalCode = '';
 
     #[Column]
-    private string $name;
+    private string $name = '';
 
     #[Column(type: 'bigint', unique: true)]
-    private int $hash;
+    private int $hash = 0;
 
     public function __construct(string $country, string $city, string $street, int $buildingNumber)
     {

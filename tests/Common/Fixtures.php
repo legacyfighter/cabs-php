@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\Tests\Common;
 
 use Doctrine\ORM\EntityManagerInterface;
+use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\CarTypeDTO;
@@ -26,6 +27,9 @@ use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Service\CarTypeService;
 use LegacyFighter\Cabs\Service\ClaimService;
 use LegacyFighter\Cabs\Service\DriverService;
+use LegacyFighter\Cabs\Service\DriverSessionService;
+use LegacyFighter\Cabs\Service\DriverTrackingService;
+use LegacyFighter\Cabs\Service\TransitService;
 
 class Fixtures
 {
@@ -39,7 +43,10 @@ class Fixtures
         private ClaimService $claimService,
         private AwardsService $awardsService,
         private EntityManagerInterface $em,
-        private DriverAttributeRepository $driverAttributeRepository
+        private DriverAttributeRepository $driverAttributeRepository,
+        private TransitService $transitService,
+        private DriverSessionService $driverSessionService,
+        private DriverTrackingService $driverTrackingService
     )
     {
     }
@@ -62,6 +69,15 @@ class Fixtures
     ): Driver
     {
         return $this->driverService->createDriver($license, $lastName, $name, Driver::TYPE_REGULAR, $status, '');
+    }
+
+    public function aNearbyDriver(string $plateNumber): Driver
+    {
+        $driver = $this->aDriver();
+        $this->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);
+        $this->driverSessionService->logIn($driver->getId(), $plateNumber, CarType::CAR_CLASS_VAN, 'brand');
+        $this->driverTrackingService->registerPosition($driver->getId(), 1, 1, new \DateTimeImmutable());
+        return $driver;
     }
 
     public function driverHasFee(Driver $driver, string $feeType, int $amount, ?int $min = null): DriverFee
@@ -99,6 +115,30 @@ class Fixtures
         $transit->completeAt(new \DateTimeImmutable(), $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20), Distance::ofKm(20.0));
         $transit->setPrice(Money::from($price));
         return $this->transitRepository->save($transit);
+    }
+
+    public function aRequestedAndCompletedTransit(
+        string $publishedAt,
+        string $completedAt,
+        Client $client,
+        Driver $driver,
+        Address $from,
+        Address $destination,
+        FixedClock $clock
+    ): Transit
+    {
+        $from = $this->addressRepository->save($from);
+        $destination = $this->addressRepository->save($destination);
+        $clock->setDateTime(new \DateTimeImmutable($publishedAt));
+        $transit = $this->transitService->createTransitFrom($client->getId(), $from, $destination, CarType::CAR_CLASS_VAN);
+        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->findDriversForTransit($transit->getId());
+        $this->transitService->acceptTransit($driver->getId(), $transit->getId());
+        $this->transitService->startTransit($driver->getId(), $transit->getId());
+        $clock->setDateTime(new \DateTimeImmutable($completedAt));
+        $this->transitService->completeTransitFrom($driver->getId(), $transit->getId(), $destination);
+
+        return $this->transitRepository->getOne($transit->getId());
     }
 
     public function anActiveCarCategory(string $carClass): CarType

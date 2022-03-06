@@ -63,21 +63,20 @@ class TransitAnalyzer
 //        }
 
         if($t !== null) {
-            $ts = array_filter($ts, fn(Transit $transit) => $transit->getCompleteAt()->modify('+15 minutes') > $transit->getCompleteAt());
+            $ts = array_filter($ts, fn(Transit $_t) => $t->getCompleteAt()->modify('+15 minutes') >= $_t->getCompleteAt());
             // Before 2018-01-01:
             // $ts = array_filter($ts, fn(Transit $transit) => $transit->getCompleteAt()->modify('+15 minutes') > $transit->getPublished());
         }
 
         if($ts === []) {
-            return [];
+            return [$t->getTo()];
         }
 
         $all = array_map(function(Transit $_t) use ($client): array {
-            $result = [$_t->getFrom()];
-            return $result + $this->_analyze($client, $_t->getTo(), $_t);
+            return array_merge([$_t->getFrom()], $this->_analyze($client, $_t->getTo(), $_t));
         }, $ts);
         usort($all, fn($a, $b) => count($a) <=> count($b));
         $all = array_reverse($all);
-        return $all[0] ?? [];
+        return array_values($all[0] ?? []);
     }
 }
