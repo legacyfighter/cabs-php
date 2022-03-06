@@ -25,3 +25,6 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    Laudis\Neo4j\Contracts\ClientInterface:
+        factory: ['LegacyFighter\Cabs\Config\Neo4jClientFactory', 'create']
+        arguments: ['%env(NEO4J_DSN)%']
