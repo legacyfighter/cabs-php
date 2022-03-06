@@ -141,6 +141,30 @@ class Fixtures
         return $this->transitRepository->getOne($transit->getId());
     }
 
+    public function aRequestedAndCompletedTransitByHand(
+        int $price,
+        string $publishedAt,
+        string $completedAt,
+        Client $client,
+        Driver $driver,
+        Address $from,
+        Address $destination,
+    ): Transit
+    {
+        $publishedAt = new \DateTimeImmutable($publishedAt);
+        $completedAt = new \DateTimeImmutable($completedAt);
+        $from = $this->addressRepository->save($from);
+        $destination = $this->addressRepository->save($destination);
+        $transit = new Transit($from, $destination, $client, CarType::CAR_CLASS_VAN, $publishedAt, Distance::zero());
+        $transit->publishAt($publishedAt);
+        $transit->proposeTo($driver);
+        $transit->acceptBy($driver, $publishedAt);
+        $transit->start($publishedAt);
+        $transit->completeAt($completedAt, $destination, Distance::ofKm(1));
+        $transit->setPrice(Money::from($price));
+        return $this->transitRepository->save($transit);
+    }
+
     public function anActiveCarCategory(string $carClass): CarType
     {
         $carType = new CarType($carClass, 'opis', 1);

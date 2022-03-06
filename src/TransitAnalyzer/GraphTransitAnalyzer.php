@@ -27,7 +27,7 @@ class GraphTransitAnalyzer
                 RETURN [x in nodes(p) | x.hash] AS hashes ORDER BY length(p) DESC LIMIT 1
             ', ['addressHash' => $addressHash, 'clientId' => $clientId]);
 
-            return $result->first()->getAsCypherList('hashes')->toArray();
+            return isset($result[0]) ? $result->first()->getAsCypherList('hashes')->toArray() : [];
         });
     }
 

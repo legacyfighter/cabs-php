@@ -34,6 +34,25 @@ class TransitRepository
     }
 
     /**
+     * @return \Generator<Transit>|Transit[]
+     */
+    public function findAllByStatus(string $status): \Generator
+    {
+        $query = $this->em->createQuery(sprintf('SELECT t FROM %s t WHERE t.status = :status', Transit::class))->setParameter('status', $status);
+        $batchSize = 100;
+        $i = 1;
+
+        foreach ($query->toIterable() as $transit) {
+            yield $transit;
+            $i++;
+            if(($i % $batchSize) === 0) {
+                $this->em->flush();
+                $this->em->clear();
+            }
+        }
+    }
+
+    /**
      * @return Transit[]
      */
     public function findAllByDriverAndDateTimeBetween(Driver $driver, \DateTimeImmutable $from, \DateTimeImmutable $to): array
