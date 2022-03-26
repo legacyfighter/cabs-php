@@ -19,6 +19,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.10",
         "laudis/neo4j-php-client": "^2.4",
+        "munusphp/munus": "^0.4.0",
         "pheature/inmemory-toggle": "^0.3.0",
         "pheature/symfony-toggle": "^0.3.2",
         "symfony/console": "5.3.*",

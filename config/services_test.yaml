@@ -14,3 +14,9 @@ services:
 
   LegacyFighter\Cabs\TransitAnalyzer\PopulateGraphService:
     public: true
+
+  LegacyFighter\Cabs\Repair\Api\RepairProcess:
+    public: true
+
+  LegacyFighter\Cabs\Repair\Api\ContractManager:
+    public: true
