@@ -20,3 +20,15 @@ services:
 
   LegacyFighter\Cabs\Repair\Api\ContractManager:
     public: true
+
+  LegacyFighter\Cabs\Contracts\Application\Editor\DocumentEditor:
+    public: true
+
+  LegacyFighter\Cabs\Contracts\Application\Acme\Dynamic\DocumentResourceManager:
+    public: true
+
+  LegacyFighter\Cabs\Contracts\Legacy\UserRepository:
+    public: true
+
+  LegacyFighter\Cabs\Contracts\Application\Acme\Straigthforward\AcmeContractProcessBasedOnStraightforwardDocumentModel:
+    public: true

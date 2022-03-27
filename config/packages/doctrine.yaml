@@ -23,3 +23,8 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Party/Model/Party'
                 prefix: 'LegacyFighter\Cabs\Party\Model\Party'
                 alias: LegacyFighterParty
+            LegacyFighterContracts:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Contracts'
+                prefix: 'LegacyFighter\Cabs\Contracts'
+                alias: LegacyFighterContracts
