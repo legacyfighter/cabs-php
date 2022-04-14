@@ -10,6 +10,8 @@ use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
+use LegacyFighter\Cabs\TransitDetails\TransitDetails;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
 use PHPUnit\Framework\TestCase;
 
 class CalculateTransitDistanceTest extends TestCase
@@ -71,9 +73,11 @@ class CalculateTransitDistanceTest extends TestCase
         $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
         PrivateProperty::setId(1, $client);
 
-        $t = new Transit($address, $address, $client, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
+        $t = new Transit($client, new \DateTimeImmutable(), Distance::ofKm($km));
+        $td = new TransitDetails(new \DateTimeImmutable(), 1, $address, $address, Distance::zero(), $client, CarType::CAR_CLASS_VAN, Money::from(10), $t->getTariff());
         PrivateProperty::setId(1, $t);
+        PrivateProperty::setId(1, $td);
         $t->setPrice(Money::from(10));
-        return TransitDTO::from($t);
+        return TransitDTO::from($t, TransitDetailsDTO::from($td));
     }
 }

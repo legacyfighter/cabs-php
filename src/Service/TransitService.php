@@ -19,6 +19,7 @@ use LegacyFighter\Cabs\Repository\DriverPositionRepository;
 use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -37,6 +38,7 @@ class TransitService
         private GeocodingService $geocodingService,
         private AddressRepository $addressRepository,
         private DriverFeeService $driverFeeService,
+        private TransitDetailsFacade $transitDetailsFacade,
         private Clock $clock,
         private AwardsService $awardsService,
         private EventDispatcherInterface $dispatcher
@@ -62,10 +64,13 @@ class TransitService
         $geoFrom = $this->geocodingService->geocodeAddress($from);
         $geoTo = $this->geocodingService->geocodeAddress($to);
 
+        $now = $this->clock->now();
         $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
-        $transit = new Transit($from, $to, $client, $carClass, $this->clock->now(), $distance);
-        $transit->estimateCost();
-        return $this->transitRepository->save($transit);
+        $transit = new Transit($client, $now, $distance);
+        $estimatedPrice = $transit->estimateCost();
+        $transit = $this->transitRepository->save($transit);
+        $this->transitDetailsFacade->transitRequested($now, $transit->getId(), $from, $to, $distance, $client, $carClass, $estimatedPrice, $transit->getTariff());
+        return $transit;
     }
 
     private function addressFromDto(AddressDTO $addressDTO): Address
@@ -78,6 +83,7 @@ class TransitService
     {
         $newAddress = $this->addressRepository->save($newAddress);
         $transit = $this->transitRepository->getOne($transitId);
+        $transitDetails = $this->transitDetailsFacade->find($transitId);
 
         if($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
@@ -85,7 +91,7 @@ class TransitService
 
         // FIXME later: add some exceptions handling
         $geoFromNew = $this->geocodingService->geocodeAddress($newAddress);
-        $geoFromOld = $this->geocodingService->geocodeAddress($transit->getFrom());
+        $geoFromOld = $this->geocodingService->geocodeAddress($transitDetails->from->toAddressEntity());
 
         // https://www.geeksforgeeks.org/program-distance-two-points-earth/
         // The math module contains a function
@@ -114,6 +120,7 @@ class TransitService
         $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1]));
         $transit->changePickupTo($newAddress, $distance, $distanceInKMeters);
         $this->transitRepository->save($transit);
+        $this->transitDetailsFacade->pickupChangedTo($transitId, $newAddress, $distance);
 
         foreach ($transit->getProposedDrivers() as $driver) {
             $this->notificationService->notifyAboutChangedTransitAddress($driver->getId(), $transit->getId());
@@ -124,18 +131,19 @@ class TransitService
     {
         $newAddress = $this->addressRepository->save($newAddress);
         $transit = $this->transitRepository->getOne($transitId);
+        $transitDetails = $this->transitDetailsFacade->find($transitId);
 
         if($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
         // FIXME later: add some exceptions handling
-        $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
+        $geoFrom = $this->geocodingService->geocodeAddress($transitDetails->from->toAddressEntity());
         $geoTo = $this->geocodingService->geocodeAddress($newAddress);
 
         $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
         $transit->changeDestinationTo($newAddress, $distance);
-
+        $this->transitDetailsFacade->destinationChanged($transitId, $newAddress, $distance);
         if($transit->getDriver() !== null) {
             $this->notificationService->notifyAboutChangedTransitAddress($transit->getDriver()->getId(), $transit->getId());
         }
@@ -164,6 +172,7 @@ class TransitService
         }
 
         $transit->cancel();
+        $this->transitDetailsFacade->transitCancelled($transitId);
         $this->transitRepository->save($transit);
     }
 
@@ -175,8 +184,10 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $transit->publishAt($this->clock->now());
+        $now = $this->clock->now();
+        $transit->publishAt($now);
         $this->transitRepository->save($transit);
+        $this->transitDetailsFacade->transitPublished($transitId, $now);
 
         return $this->findDriversForTransit($transitId);
     }
@@ -185,6 +196,7 @@ class TransitService
     public function findDriversForTransit(int $transitId): Transit
     {
         $transit = $this->transitRepository->getOne($transitId);
+        $transitDetail = $this->transitDetailsFacade->find($transitId);
 
         if($transit !== null) {
             if($transit->getStatus() === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) {
@@ -212,7 +224,7 @@ class TransitService
 
 
                     try {
-                        $geocoded = $this->geocodingService->geocodeAddress($transit->getFrom());
+                        $geocoded = $this->geocodingService->geocodeAddress($transitDetail->from->toAddressEntity());
                     } catch (\Throwable $throwable) {
                         // Geocoding failed! Ask Jessica or Bryan for some help if needed.
                     }
@@ -258,11 +270,11 @@ class TransitService
                         if(count($activeCarClasses) === 0) {
                             return $transit;
                         }
-                        if($transit->getCarType()
+                        if($transitDetail->carType
 
                             !== null) {
-                            if(in_array($transit->getCarType(), $activeCarClasses)) {
-                                $carClasses[] = $transit->getCarType();
+                            if(in_array($transitDetail->carType, $activeCarClasses)) {
+                                $carClasses[] = $transitDetail->carType;
                             }else {
                                 return $transit;
                                 }
@@ -325,9 +337,11 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $transit->acceptBy($driver, $this->clock->now());
+        $now = $this->clock->now();
+        $transit->acceptBy($driver, $now);
         $this->transitRepository->save($transit);
         $this->driverRepository->save($driver);
+        $this->transitDetailsFacade->transitAccepted($transitId, $now, $driverId);
     }
 
     public function startTransit(int $driverId, int $transitId): void
@@ -344,8 +358,10 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $transit->start($this->clock->now());
+        $now = $this->clock->now();
+        $transit->start($now);
         $this->transitRepository->save($transit);
+        $this->transitDetailsFacade->transitStarted($transitId, $now);
     }
 
     public function rejectTransit(int $driverId, int $transitId): void
@@ -381,36 +397,42 @@ class TransitService
         }
 
         $transit = $this->transitRepository->getOne($transitId);
+        $transitDetails = $this->transitDetailsFacade->find($transitId);
 
         if($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
         // FIXME later: add some exceptions handling
-        $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
-        $geoTo = $this->geocodingService->geocodeAddress($transit->getTo());
+        $geoFrom = $this->geocodingService->geocodeAddress($transitDetails->from->toAddressEntity());
+        $geoTo = $this->geocodingService->geocodeAddress($transitDetails->to->toAddressEntity());
         $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
-        $transit->completeAt($this->clock->now(), $destinationAddress, $distance);
+        $now = $this->clock->now();
+        $transit->completeAt($now, $destinationAddress, $distance);
         $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
         $transit->setDriversFee($driverFee);
         $driver->setOccupied(false);
         $this->driverRepository->save($driver);
-        $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
+        $this->awardsService->registerMiles($transitDetails->client->getId(), $transitId);
         $this->transitRepository->save($transit);
-        $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
+        $this->transitDetailsFacade->transitCompleted($transitId, $now, $transit->getPrice(), $driverFee);
+        $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transitDetails->client->getName() . ' ' . $transitDetails->client->getLastName());
         $this->dispatcher->dispatch(new TransitCompleted(
-            $transit->getClient()->getId(),
+            $transitDetails->client->getId(),
             $transitId,
-            $transit->getFrom()->getHash(),
-            $transit->getTo()->getHash(),
-            $transit->getStarted(),
-            $transit->getCompleteAt()
+            $transitDetails->from->getHash(),
+            $transitDetails->to->getHash(),
+            $transitDetails->started,
+            $now
         ));
 
     }
 
     public function loadTransit(int $id): TransitDTO
     {
-        return TransitDTO::from($this->transitRepository->getOne($id));
+        return TransitDTO::from(
+            $this->transitRepository->getOne($id),
+            $this->transitDetailsFacade->find($id)
+        );
     }
 }

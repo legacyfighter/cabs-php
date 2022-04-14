@@ -23,22 +23,22 @@ class SqlBasedDriverReportCreator
             'WHERE d.id = :driverId AND attr.name <> :filteredAttr';
 
     private const QUERY_FOR_SESSIONS = 'SELECT ds.id AS SESSION_ID, ds.logged_at, ds.logged_out_at, ds.plates_number, ds.car_class, ds.car_brand, ' .
-            't.id as TRANSIT_ID, t.tariff_name as TARIFF_NAME, t.status as TRANSIT_STATUS, t.km, t.tariff_km_rate, ' .
-            't.price, t.drivers_fee, t.estimated_price, t.tariff_base_fee, ' .
-            't.date_time, t.published, t.accepted_at, t.started, t.complete_at, t.car_type, ' .
+            'td.transit_id as TRANSIT_ID, td.tariff_name as TARIFF_NAME, td.status as TRANSIT_STATUS, td.distance, td.tariff_km_rate, ' .
+            'td.price, td.drivers_fee, td.estimated_price, td.tariff_base_fee, ' .
+            'td.date_time, td.published_at, td.accepted_at, td.started, td.completed_at, td.car_type, ' .
             'cl.id as CLAIM_ID, cl.owner_id, cl.reason, cl.incident_description, cl.status as CLAIM_STATUS, cl.creation_date, ' .
             'cl.completion_date, cl.change_date, cl.completion_mode, cl.claim_no, ' .
             'af.country as AF_COUNTRY, af.city as AF_CITY, af.street AS AF_STREET, af.building_number AS AF_NUMBER, ' .
             'ato.country as ATO_COUNTRY, ato.city as ATO_CITY, ato.street AS ATO_STREET, ato.building_number AS ATO_NUMBER ' .
             'FROM driver_session ds ' .
-            'LEFT JOIN transit t ON t.driver_id = ds.driver_id ' .
-            'LEFT JOIN Address af ON t.from_id = af.id ' .
-            'LEFT JOIN Address ato ON t.to_id = ato.id ' .
-            'LEFT JOIN claim cl ON cl.transit_id = t.id ' .
-            'WHERE ds.driver_id = :driverId AND t.status = :transitStatus ' .
+            'LEFT JOIN transit_details td ON td.driver_id = ds.driver_id ' .
+            'LEFT JOIN Address af ON td.from_id = af.id ' .
+            'LEFT JOIN Address ato ON td.to_id = ato.id ' .
+            'LEFT JOIN claim cl ON cl.transit_id = td.transit_id ' .
+            'WHERE ds.driver_id = :driverId AND td.status = :transitStatus ' .
             'AND ds.logged_at >= :since ' .
-            'AND t.complete_at >= ds.logged_at ' .
-            'AND t.complete_at <= ds.logged_out_at';
+            'AND td.completed_at >= ds.logged_at ' .
+            'AND td.completed_at <= ds.logged_out_at';
 
     private Connection $connection;
     private Clock $clock;

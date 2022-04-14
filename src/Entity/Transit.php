@@ -53,26 +53,11 @@ class Transit extends BaseEntity
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $date = null;
 
-    #[ManyToOne(targetEntity: Address::class)]
-    private Address $from;
-
-    #[ManyToOne(targetEntity: Address::class)]
-    private Address $to;
-
     #[Column(type: 'integer')]
     private int $pickupAddressChangeCounter = 0;
 
     #[ManyToOne(targetEntity: Driver::class)]
     private ?Driver $driver = null;
-
-    #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $acceptedAt = null;
-
-    #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $started = null;
-
-    #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $completeAt = null;
 
     /**
      * @var Collection<Driver>
@@ -108,23 +93,14 @@ class Transit extends BaseEntity
     private ?Money $driversFee = null;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $dateTime = null;
-
-    #[Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $published = null;
 
     #[ManyToOne(targetEntity: Client::class)]
     private Client $client;
 
-    #[Column(nullable: true)]
-    private ?string $carType = null;
-
-    public function __construct(Address $from, Address $to, Client $client, string $carType, \DateTimeImmutable $when, Distance $distance)
+    public function __construct(Client $client, \DateTimeImmutable $when, Distance $distance)
     {
-        $this->from = $from;
-        $this->to = $to;
         $this->client = $client;
-        $this->carType = $carType;
         $this->setDateTime($when);
         $this->km = $distance->toKmInFloat();
         $this->setStatus(self::STATUS_DRAFT);
@@ -132,9 +108,9 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
-    public static function withStatus(string $status, Address $from, Address $to, Client $client, string $carType, \DateTimeImmutable $when, Distance $distance): self
+    public static function withStatus(string $status, Client $client, \DateTimeImmutable $when, Distance $distance): self
     {
-        $transit = new self($from, $to, $client, $carType, $when, $distance);
+        $transit = new self($client, $when, $distance);
         $transit->setStatus($status);
 
         return $transit;
@@ -154,7 +130,6 @@ class Transit extends BaseEntity
             throw new \InvalidArgumentException('Address \'from\' cannot be changed, id ='.$this->getId());
         }
 
-        $this->from = $newAddress;
         $this->pickupAddressChangeCounter++;
         $this->km = $newDistance->toKmInFloat();
         $this->estimateCost();
@@ -166,7 +141,6 @@ class Transit extends BaseEntity
             throw new \InvalidArgumentException('Address \'to\' cannot be changed, id ='.$this->getId());
         }
 
-        $this->to = $newAddress;
         $this->km = $newDistance->toKmInFloat();
         $this->estimateCost();
     }
@@ -224,7 +198,6 @@ class Transit extends BaseEntity
         $this->driver = $driver;
         $this->driver->setOccupied(true);
         $this->awaitingDriversResponses = 0;
-        $this->acceptedAt = $when;
         $this->status = self::STATUS_TRANSIT_TO_PASSENGER;
     }
 
@@ -233,7 +206,6 @@ class Transit extends BaseEntity
         if($this->status !== self::STATUS_TRANSIT_TO_PASSENGER) {
             throw new \InvalidArgumentException('Transit cannot be started, id = '.$this->getId());
         }
-        $this->started = $when;
         $this->status = self::STATUS_IN_TRANSIT;
     }
 
@@ -257,8 +229,6 @@ class Transit extends BaseEntity
 
         $this->km = $distance->toKmInFloat();
         $this->estimateCost();
-        $this->completeAt = $when;
-        $this->to = $destinationAddress;
         $this->status = self::STATUS_COMPLETED;
         $this->calculateFinalCosts();
     }
@@ -324,26 +294,6 @@ class Transit extends BaseEntity
         $this->date = $date;
     }
 
-    public function getFrom(): Address
-    {
-        return $this->from;
-    }
-
-    public function getTo(): Address
-    {
-        return $this->to;
-    }
-
-    public function getAcceptedAt(): ?\DateTimeImmutable
-    {
-        return $this->acceptedAt;
-    }
-
-    public function getStarted(): ?\DateTimeImmutable
-    {
-        return $this->started;
-    }
-
     public function getProposedDrivers(): array
     {
         return $this->proposedDrivers->toArray();
@@ -385,25 +335,14 @@ class Transit extends BaseEntity
         $this->driversFee = $driversFee;
     }
 
-    public function getDateTime(): ?\DateTimeImmutable
-    {
-        return $this->dateTime;
-    }
-
     public function setDateTime(?\DateTimeImmutable $dateTime): void
     {
         $this->tariff = Tariff::ofTime($dateTime);
-        $this->dateTime = $dateTime;
     }
 
     public function getPublished(): ?\DateTimeImmutable
     {
         return $this->published;
-    }
-
-    public function getClient(): Client
-    {
-        return $this->client;
     }
 
     public function estimateCost(): Money
@@ -438,16 +377,6 @@ class Transit extends BaseEntity
     public function getDriver(): ?Driver
     {
         return $this->driver;
-    }
-
-    public function getCompleteAt(): ?\DateTimeImmutable
-    {
-        return $this->completeAt;
-    }
-
-    public function getCarType(): ?string
-    {
-        return $this->carType;
     }
 
     public function getTariff(): Tariff

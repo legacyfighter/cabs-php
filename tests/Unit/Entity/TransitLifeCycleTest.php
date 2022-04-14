@@ -19,26 +19,13 @@ class TransitLifeCycleTest extends TestCase
     public function canCreateTransit(): void
     {
         //when
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
 
         //then
         self::assertNull($transit->getPrice());
-        self::assertEquals('Polska', $transit->getFrom()->getCountry());
-        self::assertEquals('Warszawa', $transit->getFrom()->getCity());
-        self::assertEquals('Młynarska', $transit->getFrom()->getStreet());
-        self::assertEquals(20, $transit->getFrom()->getBuildingNumber());
-        self::assertEquals('Polska', $transit->getTo()->getCountry());
-        self::assertEquals('Warszawa', $transit->getTo()->getCity());
-        self::assertEquals('Żytnia', $transit->getTo()->getStreet());
-        self::assertEquals(25, $transit->getTo()->getBuildingNumber());
         self::assertEquals(Transit::STATUS_DRAFT, $transit->getStatus());
         self::assertNotNull($transit->getTariff());
         self::assertNotEquals(0, $transit->getTariff()->getKmRate());
-        self::assertNotNull($transit->getDateTime());
-        self::assertNotNull($transit->getCarType());
     }
 
     /**
@@ -47,18 +34,13 @@ class TransitLifeCycleTest extends TestCase
     public function canChangeTransitDestination(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
 
         //when
         $transit->changeDestinationTo(
             new Address('Polska', 'Warszawa', 'Mazowiecka', 30), Distance::ofKm(20.0));
 
         //then
-        self::assertEquals(30, $transit->getTo()->getBuildingNumber());
-        self::assertEquals('Mazowiecka', $transit->getTo()->getStreet());
         self::assertNotNull($transit->getEstimatedPrice());
         self::assertNull($transit->getPrice());
     }
@@ -73,10 +55,7 @@ class TransitLifeCycleTest extends TestCase
         //and
         $driver = new Driver();
         //and
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            $destination
-        );
+        $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
@@ -102,10 +81,7 @@ class TransitLifeCycleTest extends TestCase
     public function canChangePickupPlace(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
 
         //when
         $transit->changePickupTo(
@@ -113,8 +89,7 @@ class TransitLifeCycleTest extends TestCase
         );
 
         //then
-        self::assertEquals(28, $transit->getFrom()->getBuildingNumber());
-        self::assertEquals('Puławska', $transit->getFrom()->getStreet());
+        self::assertTrue(true);
     }
 
     /**
@@ -127,10 +102,7 @@ class TransitLifeCycleTest extends TestCase
         //and
         $driver = new Driver();
         //and
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            $destination
-        );
+        $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
@@ -170,10 +142,7 @@ class TransitLifeCycleTest extends TestCase
     public function cannotChangePickupPlaceMoreThanThreeTimes(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
         //and
         $transit->changePickupTo(
             new Address('Polska', 'Warszawa', 'Żytnia', 26), Distance::ofKm(20.0), 0.2
@@ -201,10 +170,7 @@ class TransitLifeCycleTest extends TestCase
     public function cannotChangePickupPlaceWhenItIsFarWayFromOriginal(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
@@ -220,10 +186,7 @@ class TransitLifeCycleTest extends TestCase
     public function canCancelTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
 
         //when
         $transit->cancel();
@@ -242,10 +205,7 @@ class TransitLifeCycleTest extends TestCase
         //and
         $driver = new Driver();
         //and
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            $destination
-        );
+        $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
@@ -275,10 +235,7 @@ class TransitLifeCycleTest extends TestCase
     public function canPublishTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
 
         //when
         $transit->publishAt(new \DateTimeImmutable());
@@ -294,10 +251,7 @@ class TransitLifeCycleTest extends TestCase
     public function canAcceptTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 20),
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -310,7 +264,6 @@ class TransitLifeCycleTest extends TestCase
 
         //then
         self::assertEquals(Transit::STATUS_TRANSIT_TO_PASSENGER, $transit->getStatus());
-        self::assertNotNull($transit->getAcceptedAt());
     }
 
     /**
@@ -319,10 +272,7 @@ class TransitLifeCycleTest extends TestCase
     public function onlyOneDriverCanAcceptTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 20),
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -347,10 +297,7 @@ class TransitLifeCycleTest extends TestCase
     public function transitCannotByAcceptedByDriverWhoAlreadyRejected(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -370,10 +317,7 @@ class TransitLifeCycleTest extends TestCase
     public function transitCannotByAcceptedByDriverWhoHasNotSeenProposal(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -391,10 +335,7 @@ class TransitLifeCycleTest extends TestCase
     public function canStartTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -408,7 +349,6 @@ class TransitLifeCycleTest extends TestCase
 
         //then
         self::assertEquals(Transit::STATUS_IN_TRANSIT, $transit->getStatus());
-        self::assertNotNull($transit->getStarted());
     }
 
     /**
@@ -417,10 +357,7 @@ class TransitLifeCycleTest extends TestCase
     public function cannotStartNotAcceptedTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
 
@@ -438,10 +375,7 @@ class TransitLifeCycleTest extends TestCase
         //given
         $destination = new Address('Polska', 'Warszawa', 'Żytnia', 25);
         //and
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            $destination
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -460,7 +394,6 @@ class TransitLifeCycleTest extends TestCase
         self::assertEquals(Transit::STATUS_COMPLETED, $transit->getStatus());
         self::assertNotNull($transit->getPrice());
         self::assertNotNull($transit->getTariff());
-        self::assertNotNull($transit->getCompleteAt());
     }
 
     /**
@@ -471,10 +404,7 @@ class TransitLifeCycleTest extends TestCase
         //given
         $destination = new Address('Polska', 'Warszawa', 'Żytnia', 25);
         //and
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            $destination
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -496,10 +426,7 @@ class TransitLifeCycleTest extends TestCase
     public function canRejectTransit(): void
     {
         //given
-        $transit = $this->requestTransitFromTo(
-            new Address('Polska', 'Warszawa', 'Młynarska', 20),
-            new Address('Polska', 'Warszawa', 'Żytnia', 25),
-        );
+        $transit = $this->requestTransit();
         //and
         $driver = new Driver();
         //and
@@ -510,12 +437,11 @@ class TransitLifeCycleTest extends TestCase
 
         //then
         self::assertEquals(Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, $transit->getStatus());
-        self::assertNull($transit->getAcceptedAt());
     }
 
-    private function requestTransitFromTo(Address $pickup, Address $destination): Transit
+    private function requestTransit(): Transit
     {
-        $transit = new Transit($pickup, $destination, new Client(), CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::zero());
+        $transit = new Transit(new Client(), new \DateTimeImmutable(), Distance::zero());
         PrivateProperty::setId(1, $transit);
         return $transit;
     }

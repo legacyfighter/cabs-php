@@ -30,6 +30,9 @@ use LegacyFighter\Cabs\Service\DriverService;
 use LegacyFighter\Cabs\Service\DriverSessionService;
 use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\TransitService;
+use LegacyFighter\Cabs\TransitDetails\TransitDetails;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class Fixtures
 {
@@ -46,7 +49,8 @@ class Fixtures
         private DriverAttributeRepository $driverAttributeRepository,
         private TransitService $transitService,
         private DriverSessionService $driverSessionService,
-        private DriverTrackingService $driverTrackingService
+        private DriverTrackingService $driverTrackingService,
+        private TransitDetailsFacade $transitDetailsFacade
     )
     {
     }
@@ -88,20 +92,17 @@ class Fixtures
 
     public function aTransit(?Driver $driver, int $price, ?\DateTimeImmutable $when = null, ?Client $client = null): Transit
     {
-        $transit = new Transit(
-            $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20),
-            $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20),
-            $client ?? $this->aClient(),
-            CarType::CAR_CLASS_VAN,
-            $when ?? new \DateTimeImmutable(),
-            Distance::zero()
-        );
+        $when = $when ?? new \DateTimeImmutable();
+        $client = $client ?? $this->aClient();
+        $transit = new Transit($client, $when, Distance::zero());
         $transit->setPrice(Money::from($price));
         if($driver!==null) {
             $transit->proposeTo($driver);
             $transit->acceptBy($driver, new \DateTimeImmutable());
         }
-        return $this->transitRepository->save($transit);
+        $transit = $this->transitRepository->save($transit);
+        $this->transitDetailsFacade->transitRequested($when, $transit->getId(), $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20), $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20), Distance::zero(), $client, CarType::CAR_CLASS_VAN, $transit->getPrice(), $transit->getTariff());
+        return $transit;
     }
 
     public function aCompletedTransitAt(int $price, \DateTimeImmutable $when, ?Client $client = null): Transit
@@ -155,14 +156,19 @@ class Fixtures
         $completedAt = new \DateTimeImmutable($completedAt);
         $from = $this->addressRepository->save($from);
         $destination = $this->addressRepository->save($destination);
-        $transit = new Transit($from, $destination, $client, CarType::CAR_CLASS_VAN, $publishedAt, Distance::zero());
+        $transit = new Transit($client, $publishedAt, Distance::zero());
         $transit->publishAt($publishedAt);
         $transit->proposeTo($driver);
         $transit->acceptBy($driver, $publishedAt);
         $transit->start($publishedAt);
         $transit->completeAt($completedAt, $destination, Distance::ofKm(1));
         $transit->setPrice(Money::from($price));
-        return $this->transitRepository->save($transit);
+        $transit = $this->transitRepository->save($transit);
+        $this->transitDetailsFacade->transitRequested($publishedAt, $transit->getId(), $from, $destination, Distance::zero(), $client, CarType::CAR_CLASS_VAN, $transit->getPrice(), $transit->getTariff());
+        $this->transitDetailsFacade->transitAccepted($transit->getId(), $publishedAt, $driver->getId());
+        $this->transitDetailsFacade->transitStarted($transit->getId(), $publishedAt);
+        $this->transitDetailsFacade->transitCompleted($transit->getId(), $publishedAt, $transit->getPrice(), Money::zero());
+        return $transit;
     }
 
     public function anActiveCarCategory(string $carClass): CarType
@@ -178,10 +184,12 @@ class Fixtures
 
     public function aTransitDTOWith(Client $client, AddressDTO $from, AddressDTO $to): TransitDTO
     {
-        $transit = new Transit($from->toAddressEntity(), $to->toAddressEntity(), $client, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::zero());
+        $transit = new Transit($client, new \DateTimeImmutable(), Distance::zero());
         PrivateProperty::setId(1, $transit);
+        $transitDetails = new TransitDetails(new \DateTimeImmutable(), 1, $from->toAddressEntity(), $to->toAddressEntity(), Distance::zero(), $client, CarType::CAR_CLASS_VAN, Money::zero(), $transit->getTariff());
+        PrivateProperty::setId(1, $transitDetails);
 
-        return TransitDTO::from($transit);
+        return TransitDTO::from($transit, TransitDetailsDTO::from($transitDetails));
     }
 
     public function aTransitDTO(AddressDTO $from, AddressDTO $to): TransitDTO

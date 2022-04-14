@@ -8,6 +8,7 @@ use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\TransitDetails\TransitDetails;
 
 class TransitRepository
 {
@@ -57,40 +58,12 @@ class TransitRepository
      */
     public function findAllByDriverAndDateTimeBetween(Driver $driver, \DateTimeImmutable $from, \DateTimeImmutable $to): array
     {
-        $expr = Criteria::expr();
-        return $this->em->getRepository(Transit::class)->matching(Criteria::create()
-            ->where($expr->eq('driver', $driver))
-            ->andWhere($expr->gte('dateTime', $from))
-            ->andWhere($expr->lte('dateTime', $to))
-        )->toArray();
-    }
-
-    /**
-     * @return Transit[]
-     */
-    public function findAllByClientAndFromAndStatusOrderByDateTimeDesc(Client $client, Address $address, string $status): array
-    {
-        return $this->em->getRepository(Transit::class)->findBy([
-            'client' => $client,
-            'from' => $address,
-            'status' => $status
-        ], [
-            'dateTime' => Criteria::DESC
-        ]);
-    }
-
-    /**
-     * @return Transit[]
-     */
-    public function findAllByClientAndFromAndPublishedAfterAndStatusOrderByDateTimeDesc(Client $client, Address $address, \DateTimeImmutable $when, string $status): array
-    {
-        $expr = Criteria::expr();
-        return $this->em->getRepository(Transit::class)->matching(Criteria::create()
-            ->where($expr->eq('client', $client))
-            ->andWhere($expr->eq('from', $address))
-            ->andWhere($expr->gt('published', $when))
-            ->andWhere($expr->eq('status', $status))
-            ->orderBy(['dateTime' => Criteria::DESC])
-        )->toArray();
+        return $this->em->createQuery(sprintf('SELECT t FROM %s t JOIN %s td WITH t.id = td.transitId WHERE t.driver = :driver AND td.dateTime >= :from AND td.dateTime <= :to' , Transit::class, TransitDetails::class))
+            ->setParameters([
+                'driver' => $driver,
+                'from' => $from,
+                'to' => $to
+            ])
+            ->getResult();
     }
 }

@@ -12,8 +12,8 @@ class FakeGeocodingService extends GeocodingService
 
     public function geocodeAddress(Address $address): array
     {
-        if(isset($this->addressMap[$address->getId()])) {
-            return $this->addressMap[$address->getId()];
+        if(isset($this->addressMap[$address->getHash()])) {
+            return $this->addressMap[$address->getHash()];
         }
 
         if($this->returnValues !== []) {
@@ -30,6 +30,6 @@ class FakeGeocodingService extends GeocodingService
 
     public function setValuesForAddress(Address $address, array $values): void
     {
-        $this->addressMap[$address->getId()] = $values;
+        $this->addressMap[$address->getHash()] = $values;
     }
 }

@@ -155,7 +155,7 @@ class CalculateTransitPriceTest extends TestCase
         $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
         PrivateProperty::setId(1, $client);
 
-        $transit = Transit::withStatus($status, $address, $address, $client, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
+        $transit = Transit::withStatus($status, $client, new \DateTimeImmutable(), Distance::ofKm($km));
         PrivateProperty::setId(1, $transit);
 
         return $transit;

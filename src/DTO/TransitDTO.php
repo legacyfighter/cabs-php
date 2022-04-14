@@ -4,6 +4,7 @@ namespace LegacyFighter\Cabs\DTO;
 
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
 
 class TransitDTO implements \JsonSerializable
 {
@@ -55,7 +56,7 @@ class TransitDTO implements \JsonSerializable
         return $instance;
     }
 
-    public static function from(Transit $transit): self
+    public static function from(Transit $transit, TransitDetailsDTO $transitDetails): self
     {
         $instance = new self();
         $instance->id = $transit->getId();
@@ -64,27 +65,27 @@ class TransitDTO implements \JsonSerializable
         if($transit->getPrice()!== null) {
             $instance->price = (float) $transit->getPrice()->toInt();
         }
-        $instance->date = $transit->getDateTime();
+        $instance->date = $transitDetails->dateTime;
         $instance->status = $transit->getStatus();
         $instance->setTariff($transit);
         foreach ($transit->getProposedDrivers() as $driver) {
             $instance->proposedDrivers[] = DriverDTO::from($driver);
         }
-        $instance->to = AddressDTO::from($transit->getTo());
-        $instance->from = AddressDTO::from($transit->getFrom());
-        $instance->carClass = $transit->getCarType();
-        $instance->clientDTO = ClientDTO::from($transit->getClient());
+        $instance->to = $transitDetails->to;
+        $instance->from = $transitDetails->from;
+        $instance->carClass = $transitDetails->carType;
+        $instance->clientDTO = $transitDetails->client;
         if($transit->getDriversFee()!==null) {
             $instance->driverFee = (float) $transit->getDriversFee()->toInt();
         }
         if($transit->getEstimatedPrice() !== null) {
             $instance->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();
         }
-        $instance->dateTime = $transit->getDateTime();
-        $instance->published = $transit->getPublished();
-        $instance->acceptedAt = $transit->getAcceptedAt();
-        $instance->started = $transit->getStarted();
-        $instance->completedAt = $transit->getCompleteAt();
+        $instance->dateTime = $transitDetails->dateTime;
+        $instance->published = $transitDetails->publishedAt;
+        $instance->acceptedAt = $transitDetails->acceptedAt;
+        $instance->started = $transitDetails->started;
+        $instance->completedAt = $transitDetails->completedAt;
         return $instance;
     }
 

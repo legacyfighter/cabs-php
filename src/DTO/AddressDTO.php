@@ -129,6 +129,11 @@ class AddressDTO implements \JsonSerializable
         $this->name = $name;
     }
 
+    public function getHash(): ?int
+    {
+        return $this->hash;
+    }
+
     public function toAddressEntity(): Address
     {
         $address = new Address($this->country, $this->city, $this->street, $this->buildingNumber);
@@ -136,6 +141,7 @@ class AddressDTO implements \JsonSerializable
         $address->setName($this->getName());
         $address->setPostalCode($this->getPostalCode());
         $address->setDistrict($this->getDistrict());
+        $address->hash();
         return $address;
     }
 

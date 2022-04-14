@@ -12,7 +12,7 @@ class Factory
 {
     public static function transit(int $id, ?Client $client = null): Transit
     {
-        $transit = new Transit(self::address(), self::address(), self::client(), CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::zero());
+        $transit = new Transit(self::client(), new \DateTimeImmutable(), Distance::zero());
         PrivateProperty::setId($id, $transit);
         return $transit;
     }
