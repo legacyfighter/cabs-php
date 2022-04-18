@@ -1,11 +1,12 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use LegacyFighter\Cabs\Common\BaseEntity;
 use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
+use LegacyFighter\Cabs\Entity\Client;
 
 #[Entity]
 class ClaimsResolver extends BaseEntity
@@ -26,6 +27,7 @@ class ClaimsResolver extends BaseEntity
 
     public function resolve(
         Claim $claim,
+        string $clientType,
         int $automaticRefundForVipThreshold,
         int $numberOfTransits,
         int $noOfTransitsForClaimAutomaticRefund
@@ -39,7 +41,7 @@ class ClaimsResolver extends BaseEntity
         if(count($this->claimedTransitsIds) <= 3) {
             return new Result(Result::ASK_NOONE, Claim::STATUS_REFUNDED);
         }
-        if($claim->getOwner()->getType() === Client::TYPE_VIP) {
+        if($clientType === Client::TYPE_VIP) {
             if($claim->getTransitPrice()->toInt() < $automaticRefundForVipThreshold) {
                 return new Result(Result::ASK_NOONE, Claim::STATUS_REFUNDED);
             } else {

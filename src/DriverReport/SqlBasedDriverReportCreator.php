@@ -4,8 +4,8 @@ namespace LegacyFighter\Cabs\DriverReport;
 
 use Doctrine\DBAL\Connection;
 use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
 use LegacyFighter\Cabs\DTO\AddressDTO;
-use LegacyFighter\Cabs\DTO\ClaimDTO;
 use LegacyFighter\Cabs\DTO\DriverDTO;
 use LegacyFighter\Cabs\DTO\DriverReport;
 use LegacyFighter\Cabs\DTO\DriverSessionDTO;

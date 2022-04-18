@@ -77,6 +77,11 @@
         "fix-cs": [
             "php-cs-fixer fix"
         ],
+        "db:reset": [
+            "symfony console d:d:d --force",
+            "symfony console d:d:c",
+            "symfony console d:m:m --no-interaction"
+        ],
         "db:test:reset": [
             "symfony console d:d:d --force --env=test",
             "symfony console d:d:c --env=test",

@@ -11,17 +11,17 @@ class AwardsAccountDTO implements \JsonSerializable
     private bool $isActive;
     private int $transactions;
 
-    private function __construct(AwardsAccount $account)
+    private function __construct(AwardsAccount $account, ClientDTO $clientDTO)
     {
-        $this->clientDTO = ClientDTO::from($account->getClient());
+        $this->clientDTO = $clientDTO;
         $this->date = $account->getDate();
         $this->isActive = $account->isActive();
         $this->transactions = $account->getTransactions();
     }
 
-    public static function from(AwardsAccount $account): self
+    public static function from(AwardsAccount $account, ClientDTO $clientDTO): self
     {
-        return new self($account);
+        return new self($account, $clientDTO);
     }
 
     public function getClient(): ClientDTO

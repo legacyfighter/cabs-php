@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Entity\ClaimResolver;
 
-use LegacyFighter\Cabs\Entity\Claim;
+use LegacyFighter\Cabs\Crm\Claims\Claim;
 
 class Result
 {

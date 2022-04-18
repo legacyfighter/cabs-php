@@ -2,13 +2,14 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Entity\Claim;
+use LegacyFighter\Cabs\Crm\Claims\Claim;
+use LegacyFighter\Cabs\Crm\Claims\ClaimsResolver;
 use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
-use LegacyFighter\Cabs\Entity\ClaimsResolver;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\Factory;
+use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
 use PHPUnit\Framework\TestCase;
 
 class ClaimAutomaticResolvingTest extends TestCase
@@ -25,12 +26,12 @@ class ClaimAutomaticResolvingTest extends TestCase
         //and
         $claim = $this->createClaim($transit);
         //and
-        $resolver->resolve($claim, 40, 15, 10);
+        $resolver->resolve($claim, Client::TYPE_NORMAL, 40, 15, 10);
         //and
         $claim2 = $this->createClaim($transit);
 
         //when
-        $result = $resolver->resolve($claim2, 40, 15, 10);
+        $result = $resolver->resolve($claim2, Client::TYPE_NORMAL, 40, 15, 10);
 
         //then
         self::assertEquals(Claim::STATUS_ESCALATED, $result->getDecision());
@@ -50,7 +51,7 @@ class ClaimAutomaticResolvingTest extends TestCase
         $claim = $this->createClaim($transit);
 
         //when
-        $result = $resolver->resolve($claim, 40, 15, 10);
+        $result = $resolver->resolve($claim, Client::TYPE_VIP, 40, 15, 10);
 
         //then
         self::assertEquals(Claim::STATUS_REFUNDED, $result->getDecision());
@@ -66,16 +67,16 @@ class ClaimAutomaticResolvingTest extends TestCase
         $resolver = new ClaimsResolver(1);
         //and
         $claim = $this->createClaim($this->aTransit(1, 39));
-        $resolver->resolve($claim, 40, 15, 10);
+        $resolver->resolve($claim, Client::TYPE_VIP, 40, 15, 10);
         $claim2 = $this->createClaim($this->aTransit(2, 39));
-        $resolver->resolve($claim2, 40, 15, 10);
+        $resolver->resolve($claim2, Client::TYPE_VIP, 40, 15, 10);
         $claim3 = $this->createClaim($this->aTransit(3, 39));
-        $resolver->resolve($claim3, 40, 15, 10);
+        $resolver->resolve($claim3, Client::TYPE_VIP, 40, 15, 10);
         //and
         $claim4 = $this->createClaim($this->aTransit(4, 41), $this->aClient(Client::TYPE_VIP));
 
         //when
-        $result = $resolver->resolve($claim4, 40, 15, 10);
+        $result = $resolver->resolve($claim4, Client::TYPE_VIP, 40, 15, 10);
 
         //then
         self::assertEquals(Claim::STATUS_ESCALATED, $result->getDecision());
@@ -91,15 +92,15 @@ class ClaimAutomaticResolvingTest extends TestCase
         $resolver = new ClaimsResolver(1);
         //and
         $claim = $this->createClaim($this->aTransit(1, 39));
-        $result1 = $resolver->resolve($claim, 40, 15, 10);
+        $result1 = $resolver->resolve($claim, Client::TYPE_NORMAL, 40, 15, 10);
         $claim2 = $this->createClaim($this->aTransit(2, 39));
-        $result2 = $resolver->resolve($claim2, 40, 15, 10);
+        $result2 = $resolver->resolve($claim2, Client::TYPE_NORMAL, 40, 15, 10);
         $claim3 = $this->createClaim($this->aTransit(3, 39));
-        $result3 = $resolver->resolve($claim3, 40, 15, 10);
+        $result3 = $resolver->resolve($claim3, Client::TYPE_NORMAL, 40, 15, 10);
 
         //when
         $claim4 = $this->createClaim($this->aTransit(4, 39), $this->aClient(Client::TYPE_NORMAL));
-        $result4 = $resolver->resolve($claim4, 40, 4, 10);
+        $result4 = $resolver->resolve($claim4, Client::TYPE_NORMAL, 40, 4, 10);
 
         //then
         self::assertEquals(Claim::STATUS_REFUNDED, $result1->getDecision());
@@ -121,16 +122,16 @@ class ClaimAutomaticResolvingTest extends TestCase
         $resolver = new ClaimsResolver(1);
         //and
         $claim = $this->createClaim($this->aTransit(1, 39));
-        $resolver->resolve($claim, 40, 15, 10);
+        $resolver->resolve($claim, Client::TYPE_NORMAL, 40, 15, 10);
         $claim2 = $this->createClaim($this->aTransit(2, 39));
-        $resolver->resolve($claim2, 40, 15, 10);
+        $resolver->resolve($claim2, Client::TYPE_NORMAL, 40, 15, 10);
         $claim3 = $this->createClaim($this->aTransit(3, 39));
-        $resolver->resolve($claim3, 40, 15, 10);
+        $resolver->resolve($claim3, Client::TYPE_NORMAL, 40, 15, 10);
         //and
         $claim4 = $this->createClaim($this->aTransit(4, 39), $this->aClient(Client::TYPE_NORMAL));
 
         //when
-        $result = $resolver->resolve($claim4, 40, 10, 9);
+        $result = $resolver->resolve($claim4, Client::TYPE_NORMAL, 40, 10, 9);
 
         //then
         self::assertEquals(Claim::STATUS_REFUNDED, $result->getDecision());
@@ -146,16 +147,16 @@ class ClaimAutomaticResolvingTest extends TestCase
         $resolver = new ClaimsResolver(1);
         //and
         $claim = $this->createClaim($this->aTransit(1, 39));
-        $resolver->resolve($claim, 40, 15, 10);
+        $resolver->resolve($claim, Client::TYPE_NORMAL, 40, 15, 10);
         $claim2 = $this->createClaim($this->aTransit(2, 39));
-        $resolver->resolve($claim2, 40, 15, 10);
+        $resolver->resolve($claim2, Client::TYPE_NORMAL, 40, 15, 10);
         $claim3 = $this->createClaim($this->aTransit(3, 39));
-        $resolver->resolve($claim3, 40, 15, 10);
+        $resolver->resolve($claim3, Client::TYPE_NORMAL, 40, 15, 10);
         //and
         $claim4 = $this->createClaim($this->aTransit(4, 50), $this->aClient(Client::TYPE_NORMAL));
 
         //when
-        $result = $resolver->resolve($claim4, 40, 12, 10);
+        $result = $resolver->resolve($claim4, Client::TYPE_NORMAL, 40, 12, 10);
 
         //then
         self::assertEquals(Claim::STATUS_ESCALATED, $result->getDecision());
@@ -171,16 +172,16 @@ class ClaimAutomaticResolvingTest extends TestCase
         $resolver = new ClaimsResolver(1);
         //and
         $claim = $this->createClaim($this->aTransit(1, 39));
-        $resolver->resolve($claim, 40, 15, 10);
+        $resolver->resolve($claim, Client::TYPE_NORMAL, 40, 15, 10);
         $claim2 = $this->createClaim($this->aTransit(2, 39));
-        $resolver->resolve($claim2, 40, 15, 10);
+        $resolver->resolve($claim2, Client::TYPE_NORMAL, 40, 15, 10);
         $claim3 = $this->createClaim($this->aTransit(3, 39));
-        $resolver->resolve($claim3, 40, 15, 10);
+        $resolver->resolve($claim3, Client::TYPE_NORMAL, 40, 15, 10);
         //and
         $claim4 = $this->createClaim($this->aTransit(4, 50), $this->aClient(Client::TYPE_NORMAL));
 
         //when
-        $result = $resolver->resolve($claim4, 40, 2, 10);
+        $result = $resolver->resolve($claim4, Client::TYPE_NORMAL, 40, 2, 10);
 
         //then
         self::assertEquals(Claim::STATUS_ESCALATED, $result->getDecision());
@@ -200,7 +201,7 @@ class ClaimAutomaticResolvingTest extends TestCase
         $claim->setTransitId($transit->getId());
         $claim->setTransitPrice($transit->getPrice());
         if($client !== null) {
-            $claim->setOwner($client);
+            $claim->setOwnerId($client->getId());
         }
         return $claim;
     }
@@ -209,6 +210,7 @@ class ClaimAutomaticResolvingTest extends TestCase
     {
         $client = new Client();
         $client->setType($type);
+        PrivateProperty::setId(1, $client);
         return $client;
     }
 }

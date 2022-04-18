@@ -1,11 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Claim;
-use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Entity\Transit;
 
 class ClaimRepository
 {
@@ -26,5 +23,10 @@ class ClaimRepository
         $this->em->persist($claim);
         $this->em->flush();
         return $claim;
+    }
+
+    public function countByOwnerId(int $clientId): int
+    {
+        return $this->em->getRepository(Claim::class)->count(['ownerId' => $clientId]);
     }
 }

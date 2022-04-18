@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
+use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;

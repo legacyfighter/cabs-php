@@ -1,9 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\ClaimAttachment;
 
 class ClaimAttachmentRepository
 {

@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
@@ -9,6 +10,7 @@ use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Service\AwardsServiceImpl;
+use LegacyFighter\Cabs\Service\ClientService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeAppProperties;
@@ -26,11 +28,12 @@ class ExpiringMilesIntegrationTest extends KernelTestCase
     {
         $this->awardsService = new AwardsServiceImpl(
             $this->getContainer()->get(AwardsAccountRepository::class),
-            $this->getContainer()->get(ClientRepository::class),
             $this->getContainer()->get(TransitRepository::class),
             $this->clock = new FixedClock(),
-            $this->appProperties = new FakeAppProperties()
+            $this->appProperties = new FakeAppProperties(),
+            $this->getContainer()->get(ClientService::class)
         );
+        $this->awardsService->setClaimService($this->getContainer()->get(ClaimService::class));
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
     }
 

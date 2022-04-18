@@ -15,8 +15,8 @@ use LegacyFighter\Cabs\Entity\Transit;
 #[Entity]
 class AwardedMiles extends BaseEntity
 {
-    #[ManyToOne(targetEntity: Client::class)]
-    private Client $client;
+    #[Column(type: 'integer')]
+    private int $clientId;
 
     #[Column(type: 'miles')]
     private Miles $miles;
@@ -30,24 +30,24 @@ class AwardedMiles extends BaseEntity
     #[ManyToOne(targetEntity: AwardsAccount::class, inversedBy: 'miles')]
     private AwardsAccount $account;
 
-    public function __construct(AwardsAccount $account, ?int $transitId, Client $client, \DateTimeImmutable $when, Miles $constantUntil)
+    public function __construct(AwardsAccount $account, ?int $transitId, int $clientId, \DateTimeImmutable $when, Miles $constantUntil)
     {
         $this->account = $account;
         $this->transitId = $transitId;
-        $this->client = $client;
+        $this->clientId = $clientId;
         $this->date = $when;
         $this->miles = $constantUntil;
     }
 
     public function transferTo(AwardsAccount $account): void
     {
-        $this->client = $account->getClient();
+        $this->clientId = $account->getClientId();
         $this->account = $account;
     }
 
-    public function getClient(): Client
+    public function getClientId(): int
     {
-        return $this->client;
+        return $this->clientId;
     }
 
     public function getMilesAmount(\DateTimeImmutable $when): int

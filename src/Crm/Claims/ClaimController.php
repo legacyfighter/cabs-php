@@ -1,10 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
-use LegacyFighter\Cabs\DTO\ClaimDTO;
-use LegacyFighter\Cabs\Entity\Claim;
-use LegacyFighter\Cabs\Service\ClaimService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\Entity\Claim;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 class ClaimDTO implements \JsonSerializable
 {
@@ -36,7 +34,7 @@ class ClaimDTO implements \JsonSerializable
         $dto->reason = $claim->getReason();
         $dto->incidentDescription = $claim->getIncidentDescription();
         $dto->transitId = $claim->getTransitId();
-        $dto->clientId = $claim->getOwner()->getId();
+        $dto->clientId = $claim->getOwnerId();
         $dto->completionDate = $claim->getCompletionDate();
         $dto->changeDate = $claim->getChangeDate();
         $dto->claimNo = $claim->getClaimNo();

@@ -17,8 +17,8 @@ use LegacyFighter\Cabs\Entity\Miles\ConstantUntil;
 #[Entity]
 class AwardsAccount extends BaseEntity
 {
-    #[OneToOne(targetEntity: Client::class)]
-    private Client $client;
+    #[Column(type: 'integer')]
+    private int $clientId;
 
     #[Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $date;
@@ -32,22 +32,22 @@ class AwardsAccount extends BaseEntity
     #[OneToMany(mappedBy: 'account', targetEntity: AwardedMiles::class, cascade: ['all'])]
     private Collection $miles;
 
-    public function __construct(Client $client, bool $isActive, \DateTimeImmutable $when)
+    public function __construct(int $clientId, bool $isActive, \DateTimeImmutable $when)
     {
-        $this->client = $client;
+        $this->clientId = $clientId;
         $this->isActive = $isActive;
         $this->date = $when;
         $this->miles = new ArrayCollection();
     }
 
-    public static function notActiveAccount(Client $client, \DateTimeImmutable $when): self
+    public static function notActiveAccount(int $clientId, \DateTimeImmutable $when): self
     {
-        return new self($client, false, $when);
+        return new self($clientId, false, $when);
     }
 
     public function addExpiringMiles(int $amount, \DateTimeImmutable $expireAt, int $transitId, \DateTimeImmutable $when): AwardedMiles
     {
-        $expiringMiles = new AwardedMiles($this, $transitId, $this->client, $when, ConstantUntil::until($amount, $expireAt));
+        $expiringMiles = new AwardedMiles($this, $transitId, $this->clientId, $when, ConstantUntil::until($amount, $expireAt));
         $this->miles->add($expiringMiles);
         $this->transactions++;
         return $expiringMiles;
@@ -55,7 +55,7 @@ class AwardsAccount extends BaseEntity
 
     public function addNonExpiringMiles(int $amount, \DateTimeImmutable $when): AwardedMiles
     {
-        $nonExpiringMiles = new AwardedMiles($this, null, $this->client, $when, ConstantUntil::untilForever($amount));
+        $nonExpiringMiles = new AwardedMiles($this, null, $this->clientId, $when, ConstantUntil::untilForever($amount));
         $this->miles->add($nonExpiringMiles);
         $this->transactions++;
         return $nonExpiringMiles;
@@ -91,7 +91,7 @@ class AwardsAccount extends BaseEntity
                 }
             }
         } else {
-            throw new \InvalidArgumentException('Insufficient miles, id = '.$this->client->getId().', miles requested = '.$miles);
+            throw new \InvalidArgumentException('Insufficient miles, id = '.$this->clientId.', miles requested = '.$miles);
         }
     }
 
@@ -127,9 +127,9 @@ class AwardsAccount extends BaseEntity
         $this->isActive = false;
     }
 
-    public function getClient(): Client
+    public function getClientId(): int
     {
-        return $this->client;
+        return $this->clientId;
     }
 
     public function getDate(): \DateTimeImmutable

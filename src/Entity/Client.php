@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Crm\Claims\Claim;
 
 #[Entity]
 class Client extends BaseEntity
@@ -39,15 +40,9 @@ class Client extends BaseEntity
     #[Column(type: 'string')]
     private string $clientType = self::CLIENT_TYPE_INDIVIDUAL;
 
-    /**
-     * @var Collection<Claim>
-     */
-    #[OneToMany(mappedBy: 'owner', targetEntity: Claim::class)]
-    private Collection $claims;
-
     public function __construct()
     {
-        $this->claims = new ArrayCollection();
+
     }
 
     public function getType(): string
@@ -107,18 +102,5 @@ class Client extends BaseEntity
             throw new \InvalidArgumentException('Invalid client type value');
         }
         $this->clientType = $clientType;
-    }
-
-    public function getClaims(): array
-    {
-        return $this->claims->toArray();
-    }
-
-    /**
-     * @param Claim[] $claims
-     */
-    public function setClaims(array $claims): void
-    {
-        $this->claims = new ArrayCollection($claims);
     }
 }

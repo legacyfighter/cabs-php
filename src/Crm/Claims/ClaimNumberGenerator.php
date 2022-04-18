@@ -1,9 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
-
-use LegacyFighter\Cabs\Entity\Claim;
-use LegacyFighter\Cabs\Repository\ClaimRepository;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 class ClaimNumberGenerator
 {

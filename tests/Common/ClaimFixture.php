@@ -2,11 +2,11 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\DTO\ClaimDTO;
-use LegacyFighter\Cabs\Entity\Claim;
+use LegacyFighter\Cabs\Crm\Claims\Claim;
+use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
+use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Service\ClaimService;
 
 class ClaimFixture
 {

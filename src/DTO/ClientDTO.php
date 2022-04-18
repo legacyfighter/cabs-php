@@ -12,6 +12,7 @@ class ClientDTO implements \JsonSerializable
     private string $lastName;
     private string $defaultPaymentType;
     private string $clientType;
+    private int $numberOfClaims;
 
     private function __construct(Client $client)
     {

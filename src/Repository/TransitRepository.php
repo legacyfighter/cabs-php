@@ -29,9 +29,9 @@ class TransitRepository
     /**
      * @return Transit[]
      */
-    public function findByClient(Client $client): array
+    public function findByClientId(int $clientId): array
     {
-        return $this->em->getRepository(Transit::class)->findBy(['client' => $client]);
+        return $this->em->getRepository(Transit::class)->findBy(['client' => $clientId]);
     }
 
     /**

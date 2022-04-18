@@ -1,18 +1,15 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
-use LegacyFighter\Cabs\DTO\ClaimDTO;
-use LegacyFighter\Cabs\Entity\Claim;
 use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
-use LegacyFighter\Cabs\Entity\ClaimsResolver;
 use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Repository\ClaimRepository;
-use LegacyFighter\Cabs\Repository\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
-use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Service\AwardsService;
+use LegacyFighter\Cabs\Service\ClientNotificationService;
+use LegacyFighter\Cabs\Service\DriverNotificationService;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class ClaimService
@@ -85,7 +82,7 @@ class ClaimService
         } else {
             $claim->setStatus(Claim::STATUS_NEW);
         }
-        $claim->setOwner($client);
+        $claim->setOwnerId($client->getId());
         $claim->setTransitId($transit->transitId);
         $claim->setTransitPrice($transit->price);
         $claim->setCreationDate($this->clock->now());
@@ -105,10 +102,12 @@ class ClaimService
     {
         $claim = $this->find($id);
 
-        $claimsResolver = $this->findOrCreateResolver($claim->getOwner());
-        $transitsDoneByClient = $this->transitDetailsFacade->findByClient($claim->getOwner()->getId());
+        $claimsResolver = $this->findOrCreateResolver($claim->getOwnerId());
+        $transitsDoneByClient = $this->transitDetailsFacade->findByClient($claim->getOwnerId());
+        $clientType = $this->clientRepository->getOne($claim->getOwnerId())->getType();
         $result = $claimsResolver->resolve(
             $claim,
+            $clientType,
             $this->appProperties->getAutomaticRefundForVipThreshold(),
             count($transitsDoneByClient),
             $this->appProperties->getNoOfTransitsForClaimAutomaticRefund()
@@ -116,9 +115,9 @@ class ClaimService
 
         if($result->getDecision() === Claim::STATUS_REFUNDED) {
             $claim->refund();
-            $this->clientNotificationService->notifyClientAboutRefund($claim->getClaimNo(), $claim->getOwner()->getId());
-            if($claim->getOwner()->getType() === Client::TYPE_VIP) {
-                $this->awardService->registerNonExpiringMiles($claim->getOwner()->getId(), 10);
+            $this->clientNotificationService->notifyClientAboutRefund($claim->getClaimNo(), $claim->getOwnerId());
+            if($clientType === Client::TYPE_VIP) {
+                $this->awardService->registerNonExpiringMiles($claim->getOwnerId(), 10);
             }
         }
 
@@ -130,17 +129,22 @@ class ClaimService
             $this->driverNotificationService->askDriverForDetailsAboutClaim($claim->getClaimNo(), $this->transitDetailsFacade->find($claim->getTransitId())->driverId);
         }
         if($result->getWhoToAsk() === Result::ASK_CLIENT) {
-            $this->clientNotificationService->askForMoreInformation($claim->getClaimNo(), $claim->getOwner()->getId());
+            $this->clientNotificationService->askForMoreInformation($claim->getClaimNo(), $claim->getOwnerId());
         }
 
         return $claim;
     }
 
-    private function findOrCreateResolver(Client $client): ClaimsResolver
+    public function getNumberOfClaims(int $clientId): int
     {
-        $claimsResolver = $this->claimsResolverRepository->findByClientId($client->getId());
+        return $this->claimRepository->countByOwnerId($clientId);
+    }
+
+    private function findOrCreateResolver(int $clientId): ClaimsResolver
+    {
+        $claimsResolver = $this->claimsResolverRepository->findByClientId($clientId);
         if($claimsResolver === null) {
-            $claimsResolver = $this->claimsResolverRepository->save(new ClaimsResolver($client->getId()));
+            $claimsResolver = $this->claimsResolverRepository->save(new ClaimsResolver($clientId));
         }
 
         return $claimsResolver;

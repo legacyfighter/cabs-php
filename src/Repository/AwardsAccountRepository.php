@@ -11,9 +11,9 @@ class AwardsAccountRepository
 {
     public function __construct(private EntityManagerInterface $em) {}
 
-    public function findByClient(Client $client): ?AwardsAccount
+    public function findByClientId(int $clientId): ?AwardsAccount
     {
-        return $this->em->getRepository(AwardsAccount::class)->findOneBy(['client' => $client]);
+        return $this->em->getRepository(AwardsAccount::class)->findOneBy(['clientId' => $clientId]);
     }
 
     public function save(AwardsAccount $account): void
@@ -27,6 +27,6 @@ class AwardsAccountRepository
      */
     public function findAllMilesBy(Client $client): array
     {
-       return $this->findByClient($client)?->getMiles() ?? [];
+       return $this->findByClientId($client->getId())?->getMiles() ?? [];
     }
 }

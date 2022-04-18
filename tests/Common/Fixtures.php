@@ -3,36 +3,19 @@
 namespace LegacyFighter\Cabs\Tests\Common;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Crm\Claims\Claim;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
-use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\DTO\ClaimDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Entity\Claim;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Repository\AddressRepository;
-use LegacyFighter\Cabs\Repository\ClientRepository;
-use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
-use LegacyFighter\Cabs\Repository\DriverFeeRepository;
-use LegacyFighter\Cabs\Repository\TransitRepository;
-use LegacyFighter\Cabs\Service\AwardsService;
-use LegacyFighter\Cabs\Service\CarTypeService;
-use LegacyFighter\Cabs\Service\ClaimService;
-use LegacyFighter\Cabs\Service\DriverService;
-use LegacyFighter\Cabs\Service\DriverSessionService;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
-use LegacyFighter\Cabs\Service\TransitService;
 use LegacyFighter\Cabs\TransitDetails\TransitDetails;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class Fixtures
 {

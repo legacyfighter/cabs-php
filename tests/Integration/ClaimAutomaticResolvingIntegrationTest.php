@@ -3,18 +3,17 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Common\Clock;
-use LegacyFighter\Cabs\DTO\ClaimDTO;
-use LegacyFighter\Cabs\Entity\Claim;
+use LegacyFighter\Cabs\Crm\Claims\Claim;
+use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
+use LegacyFighter\Cabs\Crm\Claims\ClaimNumberGenerator;
+use LegacyFighter\Cabs\Crm\Claims\ClaimRepository;
+use LegacyFighter\Cabs\Crm\Claims\ClaimService;
+use LegacyFighter\Cabs\Crm\Claims\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Repository\ClaimRepository;
-use LegacyFighter\Cabs\Repository\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
-use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
-use LegacyFighter\Cabs\Service\ClaimNumberGenerator;
-use LegacyFighter\Cabs\Service\ClaimService;
 use LegacyFighter\Cabs\Service\ClientNotificationService;
 use LegacyFighter\Cabs\Service\DriverNotificationService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;

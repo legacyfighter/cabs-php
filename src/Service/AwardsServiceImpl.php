@@ -4,6 +4,7 @@ namespace LegacyFighter\Cabs\Service;
 
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
+use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
 use LegacyFighter\Cabs\Entity\AwardsAccount;
 use LegacyFighter\Cabs\Entity\Client;
@@ -14,44 +15,44 @@ use LegacyFighter\Cabs\Repository\TransitRepository;
 
 class AwardsServiceImpl implements AwardsService
 {
-    private AwardsAccountRepository $accountRepository;
-    private ClientRepository $clientRepository;
-    private TransitRepository $transitRepository;
-    private Clock $clock;
-    private AppProperties $appProperties;
+
+    private ClaimService $claimService;
 
     public function __construct(
-        AwardsAccountRepository $accountRepository,
-        ClientRepository $clientRepository,
-        TransitRepository $transitRepository,
-        Clock $clock,
-        AppProperties $appProperties)
+        private AwardsAccountRepository $accountRepository,
+        private TransitRepository $transitRepository,
+        private Clock $clock,
+        private AppProperties $appProperties,
+        private ClientService $clientService,
+    )
+    { }
+
+    public function setClaimService(ClaimService $claimService): void
     {
-        $this->accountRepository = $accountRepository;
-        $this->clientRepository = $clientRepository;
-        $this->transitRepository = $transitRepository;
-        $this->clock = $clock;
-        $this->appProperties = $appProperties;
+        $this->claimService = $claimService;
     }
 
     public function findBy(int $clientId): AwardsAccountDTO
     {
-        return AwardsAccountDTO::from($this->accountRepository->findByClient($this->clientRepository->getOne($clientId)));
+        return AwardsAccountDTO::from(
+            $this->accountRepository->findByClientId($clientId),
+            $this->clientService->load($clientId)
+        );
     }
 
     public function registerToProgram(int $clientId): void
     {
-        $client = $this->clientRepository->getOne($clientId);
+        $client = $this->clientService->load($clientId);
         if($client === null) {
             throw new \InvalidArgumentException('Client does not exists, id = '.$clientId);
         }
 
-        $this->accountRepository->save(AwardsAccount::notActiveAccount($client, $this->clock->now()));
+        $this->accountRepository->save(AwardsAccount::notActiveAccount($clientId, $this->clock->now()));
     }
 
     public function activateAccount(int $clientId): void
     {
-        $account = $this->accountRepository->findByClient($this->clientRepository->getOne($clientId));
+        $account = $this->accountRepository->findByClientId($clientId);
         if($account === null) {
             throw new \InvalidArgumentException('Account does not exists, id = '.$clientId);
         }
@@ -62,7 +63,7 @@ class AwardsServiceImpl implements AwardsService
 
     public function deactivateAccount(int $clientId): void
     {
-        $account = $this->accountRepository->findByClient($this->clientRepository->getOne($clientId));
+        $account = $this->accountRepository->findByClientId($clientId);
         if($account === null) {
             throw new \InvalidArgumentException('Account does not exists, id = '.$clientId);
         }
@@ -73,7 +74,7 @@ class AwardsServiceImpl implements AwardsService
 
     public function registerMiles(int $clientId, int $transitId): ?AwardedMiles
     {
-        $account = $this->accountRepository->findByClient($this->clientRepository->getOne($clientId));
+        $account = $this->accountRepository->findByClientId($clientId);
 
         $now = $this->clock->now();
         if($account === null || !$account->isActive()) {
@@ -88,7 +89,7 @@ class AwardsServiceImpl implements AwardsService
 
     public function registerNonExpiringMiles(int $clientId, int $miles): AwardedMiles
     {
-        $account = $this->accountRepository->findByClient($this->clientRepository->getOne($clientId));
+        $account = $this->accountRepository->findByClientId($clientId);
 
         if($account === null) {
             throw new \InvalidArgumentException('Account does not exists, id = '.$clientId);
@@ -101,8 +102,8 @@ class AwardsServiceImpl implements AwardsService
 
     public function removeMiles(int $clientId, int $miles): void
     {
-        $client = $this->clientRepository->getOne($clientId);
-        $account = $this->accountRepository->findByClient($client);
+        $client = $this->clientService->load($clientId);
+        $account = $this->accountRepository->findByClientId($clientId);
 
         if($account===null) {
             throw new \InvalidArgumentException('Account does not exists, id = '.$clientId);
@@ -112,8 +113,8 @@ class AwardsServiceImpl implements AwardsService
             $miles,
             $this->clock->now(),
             $this->chooseStrategy(
-                count($this->transitRepository->findByClient($client)),
-                count($client->getClaims()),
+                count($this->transitRepository->findByClientId($clientId)),
+                $this->claimService->getNumberOfClaims($clientId),
                 $client->getType(),
                 $this->isSunday()
             )
@@ -122,16 +123,14 @@ class AwardsServiceImpl implements AwardsService
 
     public function calculateBalance(int $clientId): int
     {
-        $client = $this->clientRepository->getOne($clientId);
-        $account = $this->accountRepository->findByClient($client);
+        $account = $this->accountRepository->findByClientId($clientId);
         return $account->calculateBalance($this->clock->now());
     }
 
     public function transferMiles(int $fromClientId, int $toClientId, int $miles): void
     {
-        $fromClient = $this->clientRepository->getOne($fromClientId);
-        $accountFrom = $this->accountRepository->findByClient($fromClient);
-        $accountTo = $this->accountRepository->findByClient($this->clientRepository->getOne($toClientId));
+        $accountFrom = $this->accountRepository->findByClientId($fromClientId);
+        $accountTo = $this->accountRepository->findByClientId($toClientId);
         if($accountFrom === null) {
             throw new \InvalidArgumentException('Account does not exists, id = '.$fromClientId);
         }

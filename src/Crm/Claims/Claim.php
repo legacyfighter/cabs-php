@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\Crm\Claims;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Money\Money;
 
 #[Entity]
@@ -33,8 +33,8 @@ class Claim extends BaseEntity
         self::STATUS_REJECTED
     ];
 
-    #[ManyToOne(inversedBy: 'claims')]
-    private Client $owner;
+    #[Column(type: 'integer')]
+    private int $ownerId;
 
     #[Column(type: 'integer')]
     private int $transitId;
@@ -86,14 +86,14 @@ class Claim extends BaseEntity
         $this->setCompletionMode(self::COMPLETION_MODE_AUTOMATIC);
     }
 
-    public function getOwner(): Client
+    public function getOwnerId(): int
     {
-        return $this->owner;
+        return $this->ownerId;
     }
 
-    public function setOwner(Client $owner): void
+    public function setOwnerId(int $ownerId): void
     {
-        $this->owner = $owner;
+        $this->ownerId = $ownerId;
     }
 
     public function getCreationDate(): \DateTimeImmutable
