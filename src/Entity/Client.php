@@ -40,7 +40,7 @@ class Client extends BaseEntity
     private string $clientType = self::CLIENT_TYPE_INDIVIDUAL;
 
     /**
-     * @var Claim[]
+     * @var Collection<Claim>
      */
     #[OneToMany(mappedBy: 'owner', targetEntity: Claim::class)]
     private Collection $claims;

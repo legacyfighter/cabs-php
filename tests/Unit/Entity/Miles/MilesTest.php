@@ -144,6 +144,7 @@ class MilesTest extends TestCase
 
     private static function assertExceptionIsThrownBy(string $exception, callable $callable): void
     {
+        $throwable = null;
         try {
             $callable();
         } catch (\Throwable $throwable) {

@@ -108,7 +108,7 @@ class DriverService
     }
 
     /**
-     * @return array<string,Money>
+     * @return array<int,Money>
      */
     public function calculateDriverYearlyPayment(int $driverId, int $year): array
     {
@@ -116,7 +116,7 @@ class DriverService
         foreach (range(1, 12) as $month) {
             $payments[$month] = $this->calculateDriverMonthlyPayment($driverId, $year, $month);
         }
-        return  $payments;
+        return $payments;
     }
 
     public function load(int $driverId): DriverDTO

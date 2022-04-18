@@ -13,12 +13,13 @@ use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Service\CarTypeService;
-use LegacyFighter\Cabs\Service\ClaimService;
 use LegacyFighter\Cabs\Service\DriverSessionService;
 use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\GeocodingService;
 use LegacyFighter\Cabs\Service\TransitService;
+use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
+use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
 use LegacyFighter\Cabs\Ui\DriverReportController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,9 +33,8 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
     private Fixtures $fixtures;
     private DriverReportController $driverReportController;
     private AddressRepository $addressRepository;
-    private GeocodingService $geocodingService;
-    private ClaimService $claimService;
-    private Clock $clock;
+    private FakeGeocodingService $geocodingService;
+    private FixedClock $clock;
 
     protected function setUp(): void
     {
@@ -46,7 +46,6 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
         $this->driverReportController = $this->getContainer()->get(DriverReportController::class);
         $this->addressRepository = $this->getContainer()->get(AddressRepository::class);
         $this->geocodingService = $this->getContainer()->get(GeocodingService::class);
-        $this->claimService = $this->getContainer()->get(ClaimService::class);
         $this->clock = $this->getContainer()->get(Clock::class);
 
         $this->anActiveCarCategory(CarType::CAR_CLASS_VAN);

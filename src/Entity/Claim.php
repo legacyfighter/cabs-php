@@ -33,7 +33,7 @@ class Claim extends BaseEntity
         self::STATUS_REJECTED
     ];
 
-    #[ManyToOne]
+    #[ManyToOne(inversedBy: 'claims')]
     private Client $owner;
 
     #[Column(type: 'integer')]

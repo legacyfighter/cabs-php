@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\Contracts\Infra;
 
 use Doctrine\DBAL\LockMode;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Contracts\Model\DocumentHeader;
 use LegacyFighter\Cabs\Contracts\Model\DocumentHeaderRepository;
@@ -25,6 +26,7 @@ class DoctrineDocumentHeaderRepository implements DocumentHeaderRepository
 
     public function getOne(int $id): ?DocumentHeader
     {
+        assert($this->em instanceof EntityManager);
         return $this->em->find(DocumentHeader::class, $id, LockMode::OPTIMISTIC);
     }
 }

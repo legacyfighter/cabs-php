@@ -27,7 +27,7 @@ class AwardedMiles extends BaseEntity
     #[Column(type: 'integer', nullable: true)]
     private ?int $transitId = null;
 
-    #[ManyToOne(targetEntity: AwardsAccount::class)]
+    #[ManyToOne(targetEntity: AwardsAccount::class, inversedBy: 'miles')]
     private AwardsAccount $account;
 
     public function __construct(AwardsAccount $account, ?int $transitId, Client $client, \DateTimeImmutable $when, Miles $constantUntil)

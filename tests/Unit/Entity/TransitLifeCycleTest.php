@@ -448,6 +448,7 @@ class TransitLifeCycleTest extends TestCase
 
     private static function assertThatExceptionOfTypeIsThrownBy(string $exception, callable $callable): void
     {
+        $throwable = null;
         try {
             $callable();
         } catch (\Throwable $throwable) {

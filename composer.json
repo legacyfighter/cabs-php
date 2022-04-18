@@ -36,6 +36,7 @@
     "require-dev": {
         "dama/doctrine-test-bundle": "^6.7",
         "friendsofphp/php-cs-fixer": "^3.4",
+        "phpstan/phpstan": "^1.6",
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {
@@ -83,6 +84,14 @@
         ],
         "test": [
             "@db:test:reset",
+            "phpunit"
+        ],
+        "phpstan": [
+            "phpstan analyze -l 3 src/ tests/"
+        ],
+        "build": [
+            "@phpstan",
+            "symfony console d:s:v",
             "phpunit"
         ]
     }

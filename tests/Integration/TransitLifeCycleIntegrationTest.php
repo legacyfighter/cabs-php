@@ -11,13 +11,14 @@ use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\GeocodingService;
 use LegacyFighter\Cabs\Service\TransitService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
+use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class TransitLifeCycleIntegrationTest extends KernelTestCase
 {
     private Fixtures $fixtures;
     private TransitService $transitService;
-    private GeocodingService $geocodingService;
+    private FakeGeocodingService $geocodingService;
     private DriverSessionService $driverSessionService;
     private DriverTrackingService $driverTrackingService;
 
@@ -553,6 +554,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
 
     private static function assertThatExceptionOfTypeIsThrownBy(string $exception, callable $callable): void
     {
+        $throwable = null;
         try {
             $callable();
         } catch (\Throwable $throwable) {

@@ -55,7 +55,7 @@ class StateBuilder implements StateConfig
     public function beginWith(string $stateName): self
     {
         if($this->initialState !== null) {
-            throw new \RuntimeException(sprintf('Initial state already set to: %S', $this->initialState->getStateDescriptor()));
+            throw new \RuntimeException(sprintf('Initial state already set to: %s', $this->initialState->getStateDescriptor()));
         }
 
         $config = $this->from($stateName);

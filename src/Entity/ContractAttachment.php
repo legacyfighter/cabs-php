@@ -32,13 +32,12 @@ class ContractAttachment extends BaseEntity
     #[Column]
     private string $status = self::STATUS_PROPOSED;
 
-    #[ManyToOne(targetEntity: Contract::class)]
+    #[ManyToOne(targetEntity: Contract::class, inversedBy: 'attachments')]
     private Contract $contract;
 
     public function __construct()
     {
         $this->contractAttachmentNo = Uuid::v4();
-        $this->creationDate = new \DateTimeImmutable();
     }
 
     public function getAcceptedAt(): ?\DateTimeImmutable

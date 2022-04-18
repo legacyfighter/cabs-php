@@ -32,7 +32,7 @@ class DriverAttribute
     #[Column]
     private string $value;
 
-    #[ManyToOne(targetEntity: Driver::class)]
+    #[ManyToOne(targetEntity: Driver::class, inversedBy: 'attributes')]
     #[JoinColumn(name: 'driver_id')]
     private Driver $driver;
 

@@ -10,7 +10,7 @@ class AnalyzedAddressesDTO implements \JsonSerializable
     private array $addresses;
 
     /**
-     * @var AddressDTO[]
+     * @param AddressDTO[] $addresses
      */
     public function __construct(array $addresses)
     {

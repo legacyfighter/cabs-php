@@ -2,7 +2,6 @@
 
 namespace LegacyFighter\Cabs\Ui;
 
-use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\DTO\DriverSessionDTO;
 use LegacyFighter\Cabs\Entity\DriverSession;
 use LegacyFighter\Cabs\Service\DriverSessionService;
@@ -14,7 +13,6 @@ class DriverSessionController
 {
     public function __construct(
         private DriverSessionService $driverSessionService,
-        Clock $clock
     ) {}
 
     #[Route('/drivers/{driverId}/driverSessions/login', methods: ['POST'])]
