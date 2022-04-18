@@ -27,12 +27,12 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $this->fixtures->aTransit($driver, 60, new \DateTimeImmutable('2000-10-01 06:30'));
-        $this->fixtures->aTransit($driver, 70, new \DateTimeImmutable('2000-10-10 02:30'));
-        $this->fixtures->aTransit($driver, 80, new \DateTimeImmutable('2000-10-30 06:30'));
-        $this->fixtures->aTransit($driver, 60, new \DateTimeImmutable('2000-11-10 01:30'));
-        $this->fixtures->aTransit($driver, 30, new \DateTimeImmutable('2000-11-10 01:30'));
-        $this->fixtures->aTransit($driver, 15, new \DateTimeImmutable('2000-12-10 02:30'));
+        $this->fixtures->transitDetails($driver, 60, new \DateTimeImmutable('2000-10-01 06:30'));
+        $this->fixtures->transitDetails($driver, 70, new \DateTimeImmutable('2000-10-10 02:30'));
+        $this->fixtures->transitDetails($driver, 80, new \DateTimeImmutable('2000-10-30 06:30'));
+        $this->fixtures->transitDetails($driver, 60, new \DateTimeImmutable('2000-11-10 01:30'));
+        $this->fixtures->transitDetails($driver, 30, new \DateTimeImmutable('2000-11-10 01:30'));
+        $this->fixtures->transitDetails($driver, 15, new \DateTimeImmutable('2000-12-10 02:30'));
 
         //and
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);
@@ -61,12 +61,12 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $this->fixtures->aTransit($driver, 60, new \DateTimeImmutable('2000-10-01 06:30'));
-        $this->fixtures->aTransit($driver, 70, new \DateTimeImmutable('2000-10-10 02:30'));
-        $this->fixtures->aTransit($driver, 80, new \DateTimeImmutable('2000-10-30 06:30'));
-        $this->fixtures->aTransit($driver, 60, new \DateTimeImmutable('2000-11-10 01:30'));
-        $this->fixtures->aTransit($driver, 30, new \DateTimeImmutable('2000-11-10 01:30'));
-        $this->fixtures->aTransit($driver, 15, new \DateTimeImmutable('2000-12-10 02:30'));
+        $this->fixtures->transitDetails($driver, 60, new \DateTimeImmutable('2000-10-01 06:30'));
+        $this->fixtures->transitDetails($driver, 70, new \DateTimeImmutable('2000-10-10 02:30'));
+        $this->fixtures->transitDetails($driver, 80, new \DateTimeImmutable('2000-10-30 06:30'));
+        $this->fixtures->transitDetails($driver, 60, new \DateTimeImmutable('2000-11-10 01:30'));
+        $this->fixtures->transitDetails($driver, 30, new \DateTimeImmutable('2000-11-10 01:30'));
+        $this->fixtures->transitDetails($driver, 15, new \DateTimeImmutable('2000-12-10 02:30'));
 
         //and
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);

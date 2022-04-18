@@ -9,28 +9,16 @@ use LegacyFighter\Cabs\Repository\TransitRepository;
 
 class DriverFeeService
 {
-    private DriverFeeRepository $driverFeeRepository;
-    private TransitRepository $transitRepository;
+    public function __construct(
+        private DriverFeeRepository $driverFeeRepository
+    )
+    {}
 
-    public function __construct(DriverFeeRepository $driverFeeRepository, TransitRepository $transitRepository)
+    public function calculateDriverFee(Money $transitPrice, int $driverId): Money
     {
-        $this->driverFeeRepository = $driverFeeRepository;
-        $this->transitRepository = $transitRepository;
-    }
-
-    public function calculateDriverFee(int $transitId): Money
-    {
-        $transit = $this->transitRepository->getOne($transitId);
-        if($transit === null) {
-            throw new \InvalidArgumentException('transit does not exist, id = '.$transitId);
-        }
-        if($transit->getDriversFee() !== null) {
-            return $transit->getDriversFee();
-        }
-        $transitPrice = $transit->getPrice();
-        $driverFee = $this->driverFeeRepository->findByDriver($transit->getDriver());
+        $driverFee = $this->driverFeeRepository->findByDriverId($driverId);
         if($driverFee === null) {
-            throw new \InvalidArgumentException('driver Fees not defined for driver, driver id = '.$transit->getDriver()->getId());
+            throw new \InvalidArgumentException('driver Fees not defined for driver, driver id = '.$driverId);
         }
         if($driverFee->getType() === DriverFee::TYPE_FLAT) {
             $finalFee = $transitPrice->subtract(Money::from($driverFee->getAmount()));

@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Money\Money;
 
 #[Entity]
 class Claim extends BaseEntity
@@ -35,8 +36,8 @@ class Claim extends BaseEntity
     #[ManyToOne]
     private Client $owner;
 
-    #[ManyToOne]
-    private Transit $transit;
+    #[Column(type: 'integer')]
+    private int $transitId;
 
     #[Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $creationDate;
@@ -61,6 +62,9 @@ class Claim extends BaseEntity
 
     #[Column(type: 'string')]
     private string $claimNo;
+
+    #[Column(type: 'money', nullable: true)]
+    private ?Money $transitPrice = null;
 
     public function __construct()
     {
@@ -90,16 +94,6 @@ class Claim extends BaseEntity
     public function setOwner(Client $owner): void
     {
         $this->owner = $owner;
-    }
-
-    public function getTransit(): Transit
-    {
-        return $this->transit;
-    }
-
-    public function setTransit(Transit $transit): void
-    {
-        $this->transit = $transit;
     }
 
     public function getCreationDate(): \DateTimeImmutable
@@ -183,5 +177,25 @@ class Claim extends BaseEntity
     public function setClaimNo(string $claimNo): void
     {
         $this->claimNo = $claimNo;
+    }
+
+    public function getTransitId(): int
+    {
+        return $this->transitId;
+    }
+
+    public function getTransitPrice(): Money
+    {
+        return $this->transitPrice ?? Money::zero();
+    }
+
+    public function setTransitId(int $transitId): void
+    {
+        $this->transitId = $transitId;
+    }
+
+    public function setTransitPrice(Money $transitPrice): void
+    {
+        $this->transitPrice = $transitPrice;
     }
 }

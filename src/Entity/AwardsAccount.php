@@ -45,9 +45,9 @@ class AwardsAccount extends BaseEntity
         return new self($client, false, $when);
     }
 
-    public function addExpiringMiles(int $amount, \DateTimeImmutable $expireAt, Transit $transit, \DateTimeImmutable $when): AwardedMiles
+    public function addExpiringMiles(int $amount, \DateTimeImmutable $expireAt, int $transitId, \DateTimeImmutable $when): AwardedMiles
     {
-        $expiringMiles = new AwardedMiles($this, $transit, $this->client, $when, ConstantUntil::until($amount, $expireAt));
+        $expiringMiles = new AwardedMiles($this, $transitId, $this->client, $when, ConstantUntil::until($amount, $expireAt));
         $this->miles->add($expiringMiles);
         $this->transactions++;
         return $expiringMiles;

@@ -12,6 +12,7 @@ use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Service\TransitService;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class RideFixture
 {
@@ -19,7 +20,8 @@ class RideFixture
         private TransitService $transitService,
         private AddressRepository $addressRepository,
         private CarTypeFixture $carTypeFixture,
-        private StubbedTransitPrice $stubbedPrice
+        private StubbedTransitPrice $stubbedPrice,
+        private TransitDetailsFacade $transitDetailsFacade
     )
     {
     }
@@ -35,6 +37,7 @@ class RideFixture
         $this->transitService->acceptTransit($driver->getId(), $transit->getId());
         $this->transitService->startTransit($driver->getId(), $transit->getId());
         $this->transitService->completeTransit($driver->getId(), $transit->getId(), AddressDTO::from($destination));
+        $this->transitDetailsFacade->transitCompleted($transit->getId(), new \DateTimeImmutable(), Money::from($price), Money::from($price));
         return $this->stubbedPrice->stub($transit->getId(), Money::from($price));
     }
 
@@ -51,6 +54,7 @@ class RideFixture
         $this->transitService->startTransit($driver->getId(), $transit->getId());
         $clock->setDateTime($completedAt);
         $this->transitService->completeTransit($driver->getId(), $transit->getId(), AddressDTO::from($destination));
+        $this->transitDetailsFacade->transitCompleted($transit->getId(), new \DateTimeImmutable(), Money::from($price), Money::from($price));
         return $this->stubbedPrice->stub($transit->getId(), Money::from($price));
     }
 }

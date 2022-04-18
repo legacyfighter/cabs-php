@@ -74,17 +74,13 @@ class AwardsServiceImpl implements AwardsService
     public function registerMiles(int $clientId, int $transitId): ?AwardedMiles
     {
         $account = $this->accountRepository->findByClient($this->clientRepository->getOne($clientId));
-        $transit = $this->transitRepository->getOne($transitId);
-        if($transit === null) {
-            throw new \InvalidArgumentException('Transit does not exists, id = '.$transitId);
-        }
 
         $now = $this->clock->now();
         if($account === null || !$account->isActive()) {
             return null;
         } else {
             $expireAt = $now->modify(sprintf('+%s days', $this->appProperties->getMilesExpirationInDays()));
-            $miles = $account->addExpiringMiles($this->appProperties->getDefaultMilesBonus(), $expireAt, $transit, $now);
+            $miles = $account->addExpiringMiles($this->appProperties->getDefaultMilesBonus(), $expireAt, $transitId, $now);
             $this->accountRepository->save($account);
             return $miles;
         }

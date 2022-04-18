@@ -80,16 +80,10 @@ class Fixtures
         return $this->driverFixture->driverHasFee($driver, $feeType, $amount, $min);
     }
 
-    public function aTransit(?Driver $driver, int $price, ?\DateTimeImmutable $when = null, ?Client $client = null): Transit
+    public function transitDetails(Driver $driver, int $price, \DateTimeImmutable $when, ?Client $client = null): Transit
     {
-        return $this->transitFixture->aTransit(
-            $driver ?? $this->driverFixture->aDriver(),
-            $price,
-            $when ?? new \DateTimeImmutable(),
-            $client ?? $this->aClient()
-        );
+        return $this->transitFixture->transitDetails($driver, $price, $when, $client ?? $this->aClient(), $this->anAddress(), $this->anAddress());
     }
-
 
     public function anActiveCarCategory(string $carClass): CarType
     {
@@ -141,7 +135,7 @@ class Fixtures
     public function clientHasDoneClaims(Client $client, int $howMany): void
     {
         foreach (range(1, $howMany) as $_) {
-            $this->createAndResolveClaim($client, $this->aTransit($this->aDriver(), 20, new \DateTimeImmutable(), $client));
+            $this->createAndResolveClaim($client, $this->aJourney(20, $client, $this->aNearbyDriver(), $this->anAddress(), $this->anAddress()));
         }
         $this->em->refresh($client);
     }
@@ -149,6 +143,7 @@ class Fixtures
     public function aClientWithClaims(string $type, int $howManyClaims): Client
     {
         $client = $this->aClient($type);
+        $this->awardsAccount($client);
         $this->clientHasDoneClaims($client, $howManyClaims);
         return $client;
     }

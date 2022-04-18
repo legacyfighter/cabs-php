@@ -20,6 +20,7 @@ class ExpiringMilesIntegrationTest extends KernelTestCase
     private Fixtures $fixtures;
     private FixedClock $clock;
     private FakeAppProperties $appProperties;
+    private const TRANSIT_ID = 1;
 
     protected function setUp(): void
     {
@@ -46,19 +47,17 @@ class ExpiringMilesIntegrationTest extends KernelTestCase
         $this->appProperties->setMilesExpirationInDays(365);
         //and
         $this->fixtures->activeAwardsAccount($client);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
 
         //when
-        $this->registerMilesAt($transit, $client, new \DateTimeImmutable('1989-12-12'));
+        $this->registerMilesAt($client, new \DateTimeImmutable('1989-12-12'));
         //then
         self::assertEquals(10, $this->calculateBalanceAt($client, new \DateTimeImmutable('1989-12-12')));
         //when
-        $this->registerMilesAt($transit, $client, new \DateTimeImmutable('1989-12-13'));
+        $this->registerMilesAt($client, new \DateTimeImmutable('1989-12-13'));
         //then
         self::assertEquals(20, $this->calculateBalanceAt($client, new \DateTimeImmutable('1989-12-12')));
         //when
-        $this->registerMilesAt($transit, $client, new \DateTimeImmutable('1989-12-14'));
+        $this->registerMilesAt($client, new \DateTimeImmutable('1989-12-14'));
         //then
         self::assertEquals(30, $this->calculateBalanceAt($client, new \DateTimeImmutable('1989-12-14')));
         self::assertEquals(30, $this->calculateBalanceAt($client, (new \DateTimeImmutable('1989-12-12'))->modify('+300 days')));
@@ -67,10 +66,10 @@ class ExpiringMilesIntegrationTest extends KernelTestCase
         self::assertEquals(0, $this->calculateBalanceAt($client, (new \DateTimeImmutable('1989-12-14'))->modify('+365 days')));
     }
 
-    private function registerMilesAt(Transit $transit, Client $client, \DateTimeImmutable $when): void
+    private function registerMilesAt(Client $client, \DateTimeImmutable $when): void
     {
         $this->clock->setDateTime($when);
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
     }
 
     private function calculateBalanceAt(Client $client, \DateTimeImmutable $when): int

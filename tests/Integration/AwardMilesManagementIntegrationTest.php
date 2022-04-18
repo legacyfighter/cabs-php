@@ -15,6 +15,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
     private AwardsService $awardsService;
     private AwardsAccountRepository $awardsAccountRepository;
     private Fixtures $fixtures;
+    private const TRANSIT_ID = 1;
 
     protected function setUp(): void
     {
@@ -89,11 +90,9 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $client = $this->fixtures->aClient();
         //and
         $this->fixtures->activeAwardsAccount($client);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
 
         //when
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
 
         //then
         $account = $this->awardsService->findBy($client->getId());
@@ -135,13 +134,11 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $client = $this->fixtures->aClient();
         //and
         $this->fixtures->activeAwardsAccount($client);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
 
         //when
         $this->awardsService->registerNonExpiringMiles($client->getId(), 20);
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
 
         //then
         $account = $this->awardsService->findBy($client->getId());
@@ -226,11 +223,9 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         //and
         $this->fixtures->activeAwardsAccount($client);
         //and
-        $transit = $this->fixtures->aTransit(null, 80);
-        //and
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
 
         //when
         $this->awardsService->removeMiles($client->getId(), 20);
@@ -249,11 +244,9 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         //and
         $this->fixtures->activeAwardsAccount($client);
         //and
-        $transit = $this->fixtures->aTransit(null, 80);
-        //and
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
 
         //then
         $this->expectException(\InvalidArgumentException::class);
@@ -272,12 +265,10 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         //and
         $this->awardsService->registerToProgram($client->getId());
         //and
-        $transit = $this->fixtures->aTransit(null, 80);
-        //and
         $currentBalance = $this->awardsService->calculateBalance($client->getId());
 
         //when
-        $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
 
 
         //when

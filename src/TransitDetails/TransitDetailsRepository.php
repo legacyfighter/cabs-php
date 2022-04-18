@@ -24,4 +24,26 @@ class TransitDetailsRepository
 
         return $transitDetails;
     }
+
+    /**
+     * @return TransitDetails[]
+     */
+    public function findByClientId(int $clientId): array
+    {
+        return $this->em->getRepository(TransitDetails::class)->findBy(['client' => $clientId]);
+    }
+
+    /**
+     * @return TransitDetails[]
+     */
+    public function findAllByDriverAndDateTimeBetween(int $driverId, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        return $this->em->createQuery(sprintf('SELECT td FROM %s td WHERE td.driverId = :driverId AND td.dateTime >= :from AND td.dateTime <= :to' , TransitDetails::class))
+            ->setParameters([
+                'driverId' => $driverId,
+                'from' => $from,
+                'to' => $to
+            ])
+            ->getResult();
+    }
 }

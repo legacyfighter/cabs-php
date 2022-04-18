@@ -27,12 +27,10 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $transit = $this->fixtures->aTransit($driver, 60);
-        //and
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);
 
         //when
-        $fee = $this->driverFeeService->calculateDriverFee($transit->getId());
+        $fee = $this->driverFeeService->calculateDriverFee(Money::from(60), $driver->getId());
 
         //then
         self::assertEquals(Money::from(50), $fee);
@@ -46,12 +44,10 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $transit = $this->fixtures->aTransit($driver, 80);
-        //and
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_PERCENTAGE, 50);
 
         //when
-        $fee = $this->driverFeeService->calculateDriverFee($transit->getId());
+        $fee = $this->driverFeeService->calculateDriverFee(Money::from(80), $driver->getId());
 
         //then
         self::assertEquals(Money::from(40), $fee);
@@ -65,12 +61,10 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         //given
         $driver = $this->fixtures->aDriver();
         //and
-        $transit = $this->fixtures->aTransit($driver, 10);
-        //and
         $this->fixtures->driverHasFee($driver, DriverFee::TYPE_PERCENTAGE, 7, 5);
 
         //when
-        $fee = $this->driverFeeService->calculateDriverFee($transit->getId());
+        $fee = $this->driverFeeService->calculateDriverFee(Money::from(10), $driver->getId());
 
         //then
         self::assertEquals(Money::from(5), $fee);

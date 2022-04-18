@@ -10,9 +10,9 @@ class DriverFeeRepository
 {
     public function __construct(private EntityManagerInterface $em) {}
 
-    public function findByDriver(Driver $driver): ?DriverFee
+    public function findByDriverId(int $driverId): ?DriverFee
     {
-        return $this->em->getRepository(DriverFee::class)->findOneBy(['driver' => $driver]);
+        return $this->em->getRepository(DriverFee::class)->findOneBy(['driver' => $driverId]);
     }
 
     public function save(DriverFee $driverFee): DriverFee

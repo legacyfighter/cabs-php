@@ -5,9 +5,11 @@ namespace LegacyFighter\Cabs\Tests\Common;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
+use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\TransitRepository;
@@ -20,19 +22,19 @@ class TransitFixture
     public function __construct(
         private TransitRepository $transitRepository,
         private TransitDetailsFacade $transitDetailsFacade,
-        private AddressFixture $addressFixture
+        private StubbedTransitPrice $stubbedTransitPrice
     )
     {
     }
 
-    public function aTransit(Driver $driver, int $price, \DateTimeImmutable $when = null, Client $client = null): Transit
+    public function transitDetails(Driver $driver, int $price, \DateTimeImmutable $when, Client $client, Address $from, Address $to): Transit
     {
-        $transit = new Transit($client, $when, Distance::zero());
-        $transit->setPrice(Money::from($price));
-        $transit->proposeTo($driver);
-        $transit->acceptBy($driver, new \DateTimeImmutable());
-        $transit = $this->transitRepository->save($transit);
-        $this->transitDetailsFacade->transitRequested($when, $transit->getId(), $this->addressFixture->anAddress('Polska', 'Warszawa', 'Zytnia', 20), $this->addressFixture->anAddress('Polska', 'Warszawa', 'Młynarska', 20), Distance::zero(), $client, CarType::CAR_CLASS_VAN, $transit->getPrice(), $transit->getTariff());
+        $transit = $this->transitRepository->save(new Transit($client, $when, Distance::zero()));
+        $this->stubbedTransitPrice->stub($transit->getId(), Money::from($price));
+        $this->transitDetailsFacade->transitRequested($when, $transit->getId(), $from, $to, Distance::zero(), $client, CarType::CAR_CLASS_VAN, Money::from($price), Tariff::ofTime($when));
+        $this->transitDetailsFacade->transitAccepted($transit->getId(), $when, $driver->getId());
+        $this->transitDetailsFacade->transitStarted($transit->getId(), $when);
+        $this->transitDetailsFacade->transitCompleted($transit->getId(), $when, Money::from($price), Money::zero());
         return $transit;
     }
 

@@ -20,7 +20,6 @@ use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class TransitService
@@ -409,8 +408,7 @@ class TransitService
         $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
         $now = $this->clock->now();
         $transit->completeAt($now, $destinationAddress, $distance);
-        $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
-        $transit->setDriversFee($driverFee);
+        $driverFee = $this->driverFeeService->calculateDriverFee($transit->getPrice(), $driverId);
         $driver->setOccupied(false);
         $this->driverRepository->save($driver);
         $this->awardsService->registerMiles($transitDetails->client->getId(), $transitId);
