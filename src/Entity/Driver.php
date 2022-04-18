@@ -50,16 +50,9 @@ class Driver extends BaseEntity
     #[OneToMany(mappedBy: 'driver', targetEntity: DriverAttribute::class)]
     private Collection $attributes;
 
-    /**
-     * @var Collection<Transit>
-     */
-    #[OneToMany(mappedBy: 'driver', targetEntity: Transit::class)]
-    private Collection $transits;
-
     public function __construct()
     {
         $this->attributes = new ArrayCollection();
-        $this->transits = new ArrayCollection();
     }
 
     public function calculateEarningsForTransit(Transit $transit): void
@@ -161,15 +154,5 @@ class Driver extends BaseEntity
     public function setAttributes(array $attributes): void
     {
         $this->attributes = new ArrayCollection($attributes);
-    }
-
-    public function getTransits(): array
-    {
-        return $this->transits->toArray();
-    }
-
-    public function setTransits(array $transits): void
-    {
-        $this->transits = new ArrayCollection($transits);
     }
 }

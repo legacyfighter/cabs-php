@@ -200,4 +200,14 @@ class TransitDetails extends BaseEntity
     {
         return $this->tariff;
     }
+
+    public function getPrice(): ?Money
+    {
+        return $this->price;
+    }
+
+    public function getDriversFee(): ?Money
+    {
+        return $this->driversFee;
+    }
 }

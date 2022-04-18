@@ -76,8 +76,8 @@ class TransitDTO implements \JsonSerializable
         $instance->from = $transitDetails->from;
         $instance->carClass = $transitDetails->carType;
         $instance->clientDTO = $transitDetails->client;
-        if($transit->getDriversFee()!==null) {
-            $instance->driverFee = (float) $transit->getDriversFee()->toInt();
+        if($transitDetails->driverFee != null) {
+            $instance->driverFee = (float) $transitDetails->driverFee->toInt();
         }
         if($transit->getEstimatedPrice() !== null) {
             $instance->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();

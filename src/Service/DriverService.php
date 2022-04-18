@@ -6,28 +6,21 @@ use LegacyFighter\Cabs\DTO\DriverDTO;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\DriverLicense;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
-use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\DriverRepository;
-use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class DriverService
 {
-    public const DRIVER_LICENSE_REGEX = '/^[A-Z9]{5}\d{6}[A-Z9]{2}\d[A-Z]{2}$/';
-
-    private DriverRepository $driverRepository;
-    private DriverAttributeRepository $driverAttributeRepository;
-    private TransitRepository $transitRepository;
-    private DriverFeeService $driverFeeService;
-
-    public function __construct(DriverRepository $driverRepository, DriverAttributeRepository $driverAttributeRepository, TransitRepository $transitRepository, DriverFeeService $driverFeeService)
+    public function __construct(
+        private DriverRepository $driverRepository,
+        private DriverAttributeRepository $driverAttributeRepository,
+        private TransitDetailsFacade $transitDetailsFacade,
+        private DriverFeeService $driverFeeService
+    )
     {
-        $this->driverRepository = $driverRepository;
-        $this->driverAttributeRepository = $driverAttributeRepository;
-        $this->transitRepository = $transitRepository;
-        $this->driverFeeService = $driverFeeService;
     }
 
     public function createDriver(string $license, string $lastName, string $firstName, string $type, string $status, ?string $photo): Driver
@@ -104,17 +97,14 @@ class DriverService
         $from = new \DateTimeImmutable(sprintf('first day of %s-%s', $year, $month));
         $to = (new \DateTimeImmutable(sprintf('last day of %s-%s', $year, $month)))->modify('+1 day');
 
-        $transitsList = $this->transitRepository->findAllByDriverAndDateTimeBetween($driver, $from, $to);
-        $sum = array_reduce(
+        return array_reduce(
             array_map(
-                fn(Transit $transit) => $this->driverFeeService->calculateDriverFee($transit->getId()),
-                $transitsList
+                fn(TransitDetailsDTO $td) => $this->driverFeeService->calculateDriverFee($td->price, $driverId),
+                $this->transitDetailsFacade->findByDriver($driver->getId(), $from, $to)
             ),
             fn(Money $sum, Money $fee) => $sum->add($fee),
             Money::zero()
         );
-
-        return $sum;
     }
 
     /**

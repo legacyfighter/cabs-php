@@ -24,16 +24,16 @@ class AwardedMiles extends BaseEntity
     #[Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $date;
 
-    #[ManyToOne(targetEntity: Transit::class)]
-    private ?Transit $transit = null;
+    #[Column(type: 'integer', nullable: true)]
+    private ?int $transitId = null;
 
     #[ManyToOne(targetEntity: AwardsAccount::class)]
     private AwardsAccount $account;
 
-    public function __construct(AwardsAccount $account, ?Transit $transit, Client $client, \DateTimeImmutable $when, Miles $constantUntil)
+    public function __construct(AwardsAccount $account, ?int $transitId, Client $client, \DateTimeImmutable $when, Miles $constantUntil)
     {
         $this->account = $account;
-        $this->transit = $transit;
+        $this->transitId = $transitId;
         $this->client = $client;
         $this->date = $when;
         $this->miles = $constantUntil;
@@ -73,11 +73,6 @@ class AwardedMiles extends BaseEntity
     public function cantExpire(): bool
     {
         return $this->miles->expiresAt() === null;
-    }
-
-    public function getTransit(): ?Transit
-    {
-        return $this->transit;
     }
 
     public function removeAll(\DateTimeImmutable $when): void

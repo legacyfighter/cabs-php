@@ -197,7 +197,8 @@ class ClaimAutomaticResolvingTest extends TestCase
     private function createClaim(Transit $transit, ?Client $client = null): Claim
     {
         $claim = new Claim();
-        $claim->setTransit($transit);
+        $claim->setTransitId($transit->getId());
+        $claim->setTransitPrice($transit->getPrice());
         if($client !== null) {
             $claim->setOwner($client);
         }

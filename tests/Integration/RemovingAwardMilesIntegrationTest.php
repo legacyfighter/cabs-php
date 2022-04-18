@@ -6,7 +6,6 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
@@ -21,6 +20,7 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     private Fixtures $fixtures;
     private FixedClock $clock;
     private FakeAppProperties $appProperties;
+    private const TRANSIT_ID = 1;
 
     protected function setUp(): void
     {
@@ -38,11 +38,9 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     {
         //given
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
         //add
-        $middle = $this->grantedMilesThatWillExpireInDays(10, 365, $this->yesterday(), $client, $transit);
-        $youngest = $this->grantedMilesThatWillExpireInDays(10, 365, $this->today(), $client, $transit);
+        $middle = $this->grantedMilesThatWillExpireInDays(10, 365, $this->yesterday(), $client);
+        $youngest = $this->grantedMilesThatWillExpireInDays(10, 365, $this->today(), $client);
         $oldestNonExpiringMiles = $this->grantedNonExpiringMiles(5, $this->dayBeforeYesterday(), $client);
 
         //when
@@ -64,12 +62,10 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
         //and
         $this->fixtures->clientHasDoneTransits($client, 15);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
         //add
-        $oldest = $this->grantedMilesThatWillExpireInDays(10, 60, $this->dayBeforeYesterday(), $client, $transit);
-        $middle = $this->grantedMilesThatWillExpireInDays(10, 365, $this->yesterday(), $client, $transit);
-        $youngest = $this->grantedMilesThatWillExpireInDays(10, 30, $this->today(), $client, $transit);
+        $oldest = $this->grantedMilesThatWillExpireInDays(10, 60, $this->dayBeforeYesterday(), $client);
+        $middle = $this->grantedMilesThatWillExpireInDays(10, 365, $this->yesterday(), $client);
+        $youngest = $this->grantedMilesThatWillExpireInDays(10, 30, $this->today(), $client);
 
         //when
         $this->awardsService->removeMiles($client->getId(), 15);
@@ -90,10 +86,8 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
         //and
         $this->fixtures->clientHasDoneTransits($client, 15);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
         //add
-        $regularMiles = $this->grantedMilesThatWillExpireInDays(10, 365, $this->today(), $client, $transit);
+        $regularMiles = $this->grantedMilesThatWillExpireInDays(10, 365, $this->today(), $client);
         $oldestNonExpiringMiles = $this->grantedNonExpiringMiles(5, $this->dayBeforeYesterday(), $client);
 
         //when
@@ -112,12 +106,10 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
     {
         //given
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_VIP);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
         //add
-        $secondToExpire = $this->grantedMilesThatWillExpireInDays(10, 60, $this->yesterday(), $client, $transit);
-        $thirdToExpire = $this->grantedMilesThatWillExpireInDays(5, 365, $this->dayBeforeYesterday(), $client, $transit);
-        $firstToExpire = $this->grantedMilesThatWillExpireInDays(15, 30, $this->today(), $client, $transit);
+        $secondToExpire = $this->grantedMilesThatWillExpireInDays(10, 60, $this->yesterday(), $client);
+        $thirdToExpire = $this->grantedMilesThatWillExpireInDays(5, 365, $this->dayBeforeYesterday(), $client);
+        $firstToExpire = $this->grantedMilesThatWillExpireInDays(15, 30, $this->today(), $client);
         $nonExpiring = $this->grantedNonExpiringMiles(1, $this->dayBeforeYesterday(), $client);
 
         //when
@@ -140,12 +132,10 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
         //and
         $this->fixtures->clientHasDoneTransits($client, 15);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
         //add
-        $secondToExpire = $this->grantedMilesThatWillExpireInDays(10, 60, $this->yesterday(), $client, $transit);
-        $thirdToExpire = $this->grantedMilesThatWillExpireInDays(5, 365, $this->dayBeforeYesterday(), $client, $transit);
-        $firstToExpire = $this->grantedMilesThatWillExpireInDays(15, 10, $this->today(), $client, $transit);
+        $secondToExpire = $this->grantedMilesThatWillExpireInDays(10, 60, $this->yesterday(), $client);
+        $thirdToExpire = $this->grantedMilesThatWillExpireInDays(5, 365, $this->dayBeforeYesterday(), $client);
+        $firstToExpire = $this->grantedMilesThatWillExpireInDays(15, 10, $this->today(), $client);
         $nonExpiring = $this->grantedNonExpiringMiles(100, $this->yesterday(), $client);
 
         //when
@@ -169,12 +159,10 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         $client = $this->clientWithAnActiveMilesProgram(Client::TYPE_NORMAL);
         //and
         $this->fixtures->clientHasDoneClaims($client, 3);
-        //and
-        $transit = $this->fixtures->aTransit(null, 80);
         //add
-        $secondToExpire = $this->grantedMilesThatWillExpireInDays(4, 60, $this->yesterday(), $client, $transit);
-        $thirdToExpire = $this->grantedMilesThatWillExpireInDays(10, 365, $this->dayBeforeYesterday(), $client, $transit);
-        $firstToExpire = $this->grantedMilesThatWillExpireInDays(5, 10, $this->yesterday(), $client, $transit);
+        $secondToExpire = $this->grantedMilesThatWillExpireInDays(4, 60, $this->yesterday(), $client);
+        $thirdToExpire = $this->grantedMilesThatWillExpireInDays(10, 365, $this->dayBeforeYesterday(), $client);
+        $firstToExpire = $this->grantedMilesThatWillExpireInDays(5, 10, $this->yesterday(), $client);
         $nonExpiring = $this->grantedNonExpiringMiles(10, $this->yesterday(), $client);
 
         //when
@@ -200,11 +188,11 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         self::assertEquals($milesAfterReduction, $actual[0]);
     }
 
-    private function grantedMilesThatWillExpireInDays(int $miles, int $expirationDays, \DateTimeImmutable $when, Client $client, Transit $transit): AwardedMiles
+    private function grantedMilesThatWillExpireInDays(int $miles, int $expirationDays, \DateTimeImmutable $when, Client $client): AwardedMiles
     {
         $this->milesWillExpireInDays($expirationDays);
         $this->defaultMilesBonusIs($miles);
-        return $this->milesRegisteredAt($when, $client, $transit);
+        return $this->milesRegisteredAt($when, $client);
     }
 
     private function grantedNonExpiringMiles(int $miles, \DateTimeImmutable $when, Client $client): AwardedMiles
@@ -214,10 +202,10 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
         return $this->awardsService->registerNonExpiringMiles($client->getId(), $miles);
     }
 
-    private function milesRegisteredAt(\DateTimeImmutable $when, Client $client, Transit $transit): AwardedMiles
+    private function milesRegisteredAt(\DateTimeImmutable $when, Client $client): AwardedMiles
     {
         $this->clock->setDateTime($when);
-        return $this->awardsService->registerMiles($client->getId(), $transit->getId());
+        return $this->awardsService->registerMiles($client->getId(), self::TRANSIT_ID);
     }
 
     private function clientWithAnActiveMilesProgram(string $type): Client

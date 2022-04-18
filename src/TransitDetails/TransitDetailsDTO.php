@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\TransitDetails;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\ClientDTO;
+use LegacyFighter\Cabs\Money\Money;
 
 class TransitDetailsDTO
 {
@@ -22,7 +23,10 @@ class TransitDetailsDTO
         public Distance $distance,
         public float $kmRate,
         public int $baseFee,
-        public string $tariffName
+        public string $tariffName,
+        public ?Money $price,
+        public ?Money $driverFee,
+        public ?int $driverId
     )
     {
     }
@@ -43,7 +47,10 @@ class TransitDetailsDTO
             $td->getDistance(),
             $td->getTariff()->getKmRate(),
             $td->getTariff()->getBaseFee(),
-            $td->getTariff()->getName()
+            $td->getTariff()->getName(),
+            $td->getPrice(),
+            $td->getDriversFee(),
+            $td->getDriverId()
         );
     }
 }

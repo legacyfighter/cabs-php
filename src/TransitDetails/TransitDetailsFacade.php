@@ -63,6 +63,22 @@ class TransitDetailsFacade
         $this->load($transitId)->completedAt($when, $price, $driverFee);
     }
 
+    /**
+     * @return TransitDetailsDTO[]
+     */
+    public function findByClient(int $clientId): array
+    {
+        return array_map(fn(TransitDetails $td) => TransitDetailsDTO::from($td), $this->transitDetailsRepository->findByClientId($clientId));
+    }
+
+    /**
+     * @return TransitDetailsDTO[]
+     */
+    public function findByDriver(int $driverId, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        return array_map(fn(TransitDetails $td) => TransitDetailsDTO::from($td), $this->transitDetailsRepository->findAllByDriverAndDateTimeBetween($driverId, $from, $to));
+    }
+
     private function load(int $transitId): TransitDetails
     {
         return $this->transitDetailsRepository->findByTransitId($transitId);

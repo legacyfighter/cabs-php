@@ -35,7 +35,7 @@ class ClaimDTO implements \JsonSerializable
         $dto->claimId = $claim->getId();
         $dto->reason = $claim->getReason();
         $dto->incidentDescription = $claim->getIncidentDescription();
-        $dto->transitId = $claim->getTransit()->getId();
+        $dto->transitId = $claim->getTransitId();
         $dto->clientId = $claim->getOwner()->getId();
         $dto->completionDate = $claim->getCompletionDate();
         $dto->changeDate = $claim->getChangeDate();

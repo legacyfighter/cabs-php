@@ -13,12 +13,13 @@ use LegacyFighter\Cabs\Repository\ClaimRepository;
 use LegacyFighter\Cabs\Repository\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class ClaimService
 {
     private Clock $clock;
     private ClientRepository $clientRepository;
-    private TransitRepository $transitRepository;
+    private TransitDetailsFacade $transitDetailsFacade;
     private ClaimRepository $claimRepository;
     private ClaimNumberGenerator $claimNumberGenerator;
     private AppProperties $appProperties;
@@ -30,7 +31,7 @@ class ClaimService
     public function __construct(
         Clock $clock,
         ClientRepository $clientRepository,
-        TransitRepository $transitRepository,
+        TransitDetailsFacade $transitDetailsFacade,
         ClaimRepository $claimRepository,
         ClaimNumberGenerator $claimNumberGenerator,
         AppProperties $appProperties,
@@ -42,7 +43,7 @@ class ClaimService
     {
         $this->clock = $clock;
         $this->clientRepository = $clientRepository;
-        $this->transitRepository = $transitRepository;
+        $this->transitDetailsFacade = $transitDetailsFacade;
         $this->claimRepository = $claimRepository;
         $this->claimNumberGenerator = $claimNumberGenerator;
         $this->appProperties = $appProperties;
@@ -75,12 +76,9 @@ class ClaimService
     public function update(ClaimDTO $claimDTO, Claim $claim): Claim
     {
         $client = $this->clientRepository->getOne($claimDTO->getClientId());
-        $transit = $this->transitRepository->getOne($claimDTO->getTransitId());
+        $transit = $this->transitDetailsFacade->find($claimDTO->getTransitId());
         if($client===null) {
             throw new \InvalidArgumentException('Client does not exists');
-        }
-        if($transit===null) {
-            throw new \InvalidArgumentException('Transit does not exists');
         }
         if($claimDTO->isDraft()) {
             $claim->setStatus(Claim::STATUS_DRAFT);
@@ -88,7 +86,8 @@ class ClaimService
             $claim->setStatus(Claim::STATUS_NEW);
         }
         $claim->setOwner($client);
-        $claim->setTransit($transit);
+        $claim->setTransitId($transit->transitId);
+        $claim->setTransitPrice($transit->price);
         $claim->setCreationDate($this->clock->now());
         $claim->setReason($claimDTO->getReason());
         $claim->setIncidentDescription($claimDTO->getIncidentDescription());
@@ -107,7 +106,7 @@ class ClaimService
         $claim = $this->find($id);
 
         $claimsResolver = $this->findOrCreateResolver($claim->getOwner());
-        $transitsDoneByClient = $this->transitRepository->findByClient($claim->getOwner());
+        $transitsDoneByClient = $this->transitDetailsFacade->findByClient($claim->getOwner()->getId());
         $result = $claimsResolver->resolve(
             $claim,
             $this->appProperties->getAutomaticRefundForVipThreshold(),
@@ -128,7 +127,7 @@ class ClaimService
         }
 
         if($result->getWhoToAsk() === Result::ASK_DRIVER) {
-            $this->driverNotificationService->askDriverForDetailsAboutClaim($claim->getClaimNo(), $claim->getTransit()->getDriver()->getId());
+            $this->driverNotificationService->askDriverForDetailsAboutClaim($claim->getClaimNo(), $this->transitDetailsFacade->find($claim->getTransitId())->driverId);
         }
         if($result->getWhoToAsk() === Result::ASK_CLIENT) {
             $this->clientNotificationService->askForMoreInformation($claim->getClaimNo(), $claim->getOwner()->getId());

@@ -27,25 +27,4 @@ class ClaimRepository
         $this->em->flush();
         return $claim;
     }
-
-    /**
-     * @return Claim[]
-     */
-    public function findByOwnerAndTransit(Client $owner, Transit $transit): array
-    {
-        return $this->em->getRepository(Claim::class)->findBy([
-            'owner' => $owner,
-            'transit' => $transit
-        ]);
-    }
-
-    /**
-     * @return Claim[]
-     */
-    public function findByOwner(Client $owner): array
-    {
-        return $this->em->getRepository(Claim::class)->findBy([
-            'owner' => $owner,
-        ]);
-    }
 }

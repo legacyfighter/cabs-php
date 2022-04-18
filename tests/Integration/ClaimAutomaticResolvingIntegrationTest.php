@@ -19,6 +19,7 @@ use LegacyFighter\Cabs\Service\ClientNotificationService;
 use LegacyFighter\Cabs\Service\DriverNotificationService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeAppProperties;
+use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -37,7 +38,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         $this->claimService = new ClaimService(
             $this->getContainer()->get(Clock::class),
             $this->getContainer()->get(ClientRepository::class),
-            $this->getContainer()->get(TransitRepository::class),
+            $this->getContainer()->get(TransitDetailsFacade::class),
             $this->getContainer()->get(ClaimRepository::class),
             $this->getContainer()->get(ClaimNumberGenerator::class),
             $this->appProperties,
@@ -57,7 +58,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //given
         $this->lowCostThresholdIs(40);
         //and
-        $driver = $this->fixtures->aDriver();
+        $driver = $this->fixtures->aNearbyDriver();
         //and
         $client = $this->fixtures->aClient(Client::TYPE_VIP);
         //and
@@ -87,7 +88,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //given
         $this->lowCostThresholdIs(40);
         //and
-        $driver = $this->fixtures->aDriver();
+        $driver = $this->fixtures->aNearbyDriver();
         //and
         $client = $this->aClientWithClaims(Client::TYPE_VIP, 3);
         //and
@@ -115,7 +116,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //given
         $this->lowCostThresholdIs(40);
         //and
-        $driver = $this->fixtures->aDriver();
+        $driver = $this->fixtures->aNearbyDriver();
         //and
         $client = $this->aClientWithClaims(Client::TYPE_VIP, 3);
         //and
@@ -147,7 +148,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $client = $this->fixtures->aClient(Client::TYPE_NORMAL);
         //and
-        $driver = $this->fixtures->aDriver();
+        $driver = $this->fixtures->aNearbyDriver();
 
         //then
         $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
@@ -184,7 +185,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $this->fixtures->clientHasDoneTransits($client, 12);
         //and
-        $transit = $this->aTransit($client, $this->fixtures->aDriver(), 39);
+        $transit = $this->aTransit($client, $this->fixtures->aNearbyDriver(), 39);
         //and
         $claim = $this->fixtures->createClaim($client, $transit);
 
@@ -214,7 +215,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $this->fixtures->clientHasDoneTransits($client, 12);
         //and
-        $transit = $this->aTransit($client, $this->fixtures->aDriver(), 50);
+        $transit = $this->aTransit($client, $this->fixtures->aNearbyDriver(), 50);
         //and
         $claim = $this->fixtures->createClaim($client, $transit);
 
@@ -244,9 +245,9 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $this->fixtures->clientHasDoneTransits($client, 2);
         //and
-        $driver = $this->fixtures->aDriver();
+        $driver = $this->fixtures->aNearbyDriver();
         //and
-        $claim = $this->fixtures->createClaim($client, $this->fixtures->aTransit($driver, 50, new \DateTimeImmutable(), $client));
+        $claim = $this->fixtures->createClaim($client, $this->fixtures->aJourney(50, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress()));
 
         //then
         $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
@@ -262,12 +263,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
 
     private function aTransit(Client $client, Driver $driver, int $price): Transit
     {
-        return $this->fixtures->aTransit($driver, $price, new \DateTimeImmutable(), $client);
-    }
-
-    private function aClient(string $type): Client
-    {
-        return $this->fixtures->aClient($type);
+        return $this->fixtures->aJourney($price, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress());
     }
 
     private function noOfTransitsForAutomaticRefundIs(int $no): void
@@ -282,12 +278,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
 
     private function aClientWithClaims(string $type, int $howManyClaims): Client
     {
-        $client = $this->fixtures->aClient($type);
-        foreach (range(1, $howManyClaims+1) as $_) {
-            $claim = $this->createClaim($client, $this->fixtures->aTransit($this->fixtures->aDriver(), 20, new \DateTimeImmutable(), $client));
-            $this->claimService->tryToResolveAutomatically($claim->getId());
-        }
-        return $client;
+        return $this->fixtures->aClientWithClaims($type, $howManyClaims);
     }
 
     public function createClaim(Client $client, Transit $transit): Claim

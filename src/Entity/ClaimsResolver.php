@@ -31,7 +31,7 @@ class ClaimsResolver extends BaseEntity
         int $noOfTransitsForClaimAutomaticRefund
     ): Result
     {
-        $transitId = $claim->getTransit()->getId();
+        $transitId = $claim->getTransitId();
         if(in_array($transitId, $this->claimedTransitsIds, true)) {
             return new Result(Result::ASK_NOONE, Claim::STATUS_ESCALATED);
         }
@@ -40,14 +40,14 @@ class ClaimsResolver extends BaseEntity
             return new Result(Result::ASK_NOONE, Claim::STATUS_REFUNDED);
         }
         if($claim->getOwner()->getType() === Client::TYPE_VIP) {
-            if($claim->getTransit()->getPrice()->toInt() < $automaticRefundForVipThreshold) {
+            if($claim->getTransitPrice()->toInt() < $automaticRefundForVipThreshold) {
                 return new Result(Result::ASK_NOONE, Claim::STATUS_REFUNDED);
             } else {
                 return new Result(Result::ASK_DRIVER, Claim::STATUS_ESCALATED);
             }
         } else {
             if($numberOfTransits > $noOfTransitsForClaimAutomaticRefund) {
-                if($claim->getTransit()->getPrice()->toInt() < $automaticRefundForVipThreshold) {
+                if($claim->getTransitPrice()->toInt() < $automaticRefundForVipThreshold) {
                     return new Result(Result::ASK_NOONE, Claim::STATUS_REFUNDED);
                 } else {
                     return new Result(Result::ASK_CLIENT, Claim::STATUS_ESCALATED);
