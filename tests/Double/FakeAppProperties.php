@@ -10,7 +10,7 @@ class FakeAppProperties extends AppProperties
     private int $noOfTransitsForClaimAutomaticRefund = 5;
 
     private int $milesExpirationInDays = 365;
-    private int $defaultMilesBonus = 10;
+    private int $defaultMilesBonus = 0;
 
     public function getAutomaticRefundForVipThreshold(): int
     {

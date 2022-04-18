@@ -3,6 +3,8 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use Doctrine\ORM\EntityManagerInterface;
+use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
@@ -19,6 +21,8 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         $this->awardsService = $this->getContainer()->get(AwardsService::class);
         $this->awardsAccountRepository = $this->getContainer()->get(AwardsAccountRepository::class);
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
+        $this->getContainer()->get(Clock::class)->setDateTime($this->now());
+        $this->getContainer()->get(AppProperties::class)->setDefaultMilesBonus(10);
     }
 
     /**
@@ -96,7 +100,7 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
         self::assertEquals(1, $account->getTransactions());
         $awardedMiles = $this->awardsAccountRepository->findAllMilesBy($client);
         self::assertCount(1, $awardedMiles);
-        self::assertEquals(10, $awardedMiles[0]->getMilesAmount(new \DateTimeImmutable()));
+        self::assertEquals(10, $awardedMiles[0]->getMilesAmount($this->now()));
         self::assertFalse($awardedMiles[0]->cantExpire());
     }
 
@@ -278,5 +282,10 @@ class AwardMilesManagementIntegrationTest extends KernelTestCase
 
         //when
         self::assertEquals($currentBalance, $this->awardsService->calculateBalance($client->getId()));
+    }
+
+    private function now(): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable('1989-12-12 12:12');
     }
 }

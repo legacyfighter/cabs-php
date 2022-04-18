@@ -2,14 +2,13 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
-use LegacyFighter\Cabs\Repository\ClientRepository;
-use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\AwardsService;
-use LegacyFighter\Cabs\Service\AwardsServiceImpl;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeAppProperties;
@@ -25,13 +24,9 @@ class RemovingAwardMilesIntegrationTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $this->awardsService = new AwardsServiceImpl(
-            $this->getContainer()->get(AwardsAccountRepository::class),
-            $this->getContainer()->get(ClientRepository::class),
-            $this->getContainer()->get(TransitRepository::class),
-            $this->clock = new FixedClock(),
-            $this->appProperties = new FakeAppProperties()
-        );
+        $this->awardsService = $this->getContainer()->get(AwardsService::class);
+        $this->appProperties = $this->getContainer()->get(AppProperties::class);
+        $this->clock = $this->getContainer()->get(Clock::class);
         $this->awardsAccountRepository = $this->getContainer()->get(AwardsAccountRepository::class);
         $this->fixtures = $this->getContainer()->get(Fixtures::class);
     }

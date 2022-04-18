@@ -41,7 +41,7 @@ class TransitDTO implements \JsonSerializable
 
     }
 
-    public static function with(int $id, string $status, string $tariff, float $kmRate, AddressDTO $from, AddressDTO $to, ?DriverDTO $driverDTO, ?ClientDTO $clientDTO, ?ClaimDTO $claimDTO): self
+    public static function with(int $id, string $status, string $tariff, float $kmRate, AddressDTO $from, AddressDTO $to, ?DriverDTO $driverDTO, ?ClientDTO $clientDTO, ?ClaimDTO $claimDTO, ?string $carType = null): self
     {
         $instance = new self();
         $instance->id = $id;
@@ -53,6 +53,7 @@ class TransitDTO implements \JsonSerializable
         $instance->driver = $driverDTO;
         $instance->clientDTO = $clientDTO;
         $instance->claimDTO = $claimDTO;
+        $instance->carClass = $carType;
         return $instance;
     }
 

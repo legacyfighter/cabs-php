@@ -6,8 +6,21 @@ services:
   LegacyFighter\Cabs\Tests\Common\Fixtures:
     public: true
 
+  LegacyFighter\Cabs\Tests\Common\AddressFixture: ~
+  LegacyFighter\Cabs\Tests\Common\AwardsAccountFixture: ~
+  LegacyFighter\Cabs\Tests\Common\CarTypeFixture: ~
+  LegacyFighter\Cabs\Tests\Common\ClaimFixture: ~
+  LegacyFighter\Cabs\Tests\Common\ClientFixture: ~
+  LegacyFighter\Cabs\Tests\Common\DriverFixture: ~
+  LegacyFighter\Cabs\Tests\Common\RideFixture: ~
+  LegacyFighter\Cabs\Tests\Common\StubbedTransitPrice: ~
+  LegacyFighter\Cabs\Tests\Common\TransitFixture: ~
+
   LegacyFighter\Cabs\Service\GeocodingService:
     class: LegacyFighter\Cabs\Tests\Double\FakeGeocodingService
+
+  LegacyFighter\Cabs\Config\AppProperties:
+    class: LegacyFighter\Cabs\Tests\Double\FakeAppProperties
 
   LegacyFighter\Cabs\Common\Clock:
     class: LegacyFighter\Cabs\Tests\Common\FixedClock

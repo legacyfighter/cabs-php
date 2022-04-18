@@ -37,32 +37,27 @@ use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 class Fixtures
 {
     public function __construct(
-        private TransitRepository $transitRepository,
-        private DriverFeeRepository $feeRepository,
-        private DriverService $driverService,
-        private AddressRepository $addressRepository,
-        private ClientRepository $clientRepository,
-        private CarTypeService $carTypeService,
-        private ClaimService $claimService,
-        private AwardsService $awardsService,
-        private EntityManagerInterface $em,
-        private DriverAttributeRepository $driverAttributeRepository,
-        private TransitService $transitService,
-        private DriverSessionService $driverSessionService,
-        private DriverTrackingService $driverTrackingService,
-        private TransitDetailsFacade $transitDetailsFacade
+        private AddressFixture $addressFixture,
+        private AwardsAccountFixture $awardsAccountFixture,
+        private CarTypeFixture $carTypeFixture,
+        private ClaimFixture $claimFixture,
+        private ClientFixture $clientFixture,
+        private DriverFixture $driverFixture,
+        private RideFixture $rideFixture,
+        private TransitFixture $transitFixture,
+        private EntityManagerInterface $em
     )
     {
     }
 
+    public function anAddress(string $country = 'Polska', string $city = 'Warszawa', string $street = 'Młynarska', int $buildingNumber = 20): Address
+    {
+        return $this->addressFixture->anAddress($country, $city, $street, $buildingNumber);
+    }
+
     public function aClient(string $type = Client::TYPE_NORMAL): Client
     {
-        $client = new Client();
-        $client->setName('Janusz');
-        $client->setLastName('Kowalski');
-        $client->setType($type);
-        $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
-        return $this->clientRepository->save($client);
+        return $this->clientFixture->aClient($type);
     }
 
     public function aDriver(
@@ -72,114 +67,33 @@ class Fixtures
         string $license = 'FARME100165AB5EW'
     ): Driver
     {
-        return $this->driverService->createDriver($license, $lastName, $name, Driver::TYPE_REGULAR, $status, '');
+        return $this->driverFixture->aDriver($status, $name, $lastName, $license);
     }
 
-    public function aNearbyDriver(string $plateNumber): Driver
+    public function aNearbyDriver(string $plateNumber = 'WU DAMIAN'): Driver
     {
-        $driver = $this->aDriver();
-        $this->driverHasFee($driver, DriverFee::TYPE_FLAT, 10);
-        $this->driverSessionService->logIn($driver->getId(), $plateNumber, CarType::CAR_CLASS_VAN, 'brand');
-        $this->driverTrackingService->registerPosition($driver->getId(), 1, 1, new \DateTimeImmutable());
-        return $driver;
+        return $this->driverFixture->aNearbyDriver($plateNumber);
     }
 
     public function driverHasFee(Driver $driver, string $feeType, int $amount, ?int $min = null): DriverFee
     {
-        $driverFee = new DriverFee($feeType, $driver, $amount, $min === null ? Money::zero() : Money::from($min));
-        return $this->feeRepository->save($driverFee);
+        return $this->driverFixture->driverHasFee($driver, $feeType, $amount, $min);
     }
 
     public function aTransit(?Driver $driver, int $price, ?\DateTimeImmutable $when = null, ?Client $client = null): Transit
     {
-        $when = $when ?? new \DateTimeImmutable();
-        $client = $client ?? $this->aClient();
-        $transit = new Transit($client, $when, Distance::zero());
-        $transit->setPrice(Money::from($price));
-        if($driver!==null) {
-            $transit->proposeTo($driver);
-            $transit->acceptBy($driver, new \DateTimeImmutable());
-        }
-        $transit = $this->transitRepository->save($transit);
-        $this->transitDetailsFacade->transitRequested($when, $transit->getId(), $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20), $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20), Distance::zero(), $client, CarType::CAR_CLASS_VAN, $transit->getPrice(), $transit->getTariff());
-        return $transit;
+        return $this->transitFixture->aTransit(
+            $driver ?? $this->driverFixture->aDriver(),
+            $price,
+            $when ?? new \DateTimeImmutable(),
+            $client ?? $this->aClient()
+        );
     }
 
-    public function aCompletedTransitAt(int $price, \DateTimeImmutable $when, ?Client $client = null): Transit
-    {
-        $transit = $this->aTransit(null, $price, $when, $client);
-        $transit->publishAt($when);
-        $driver = $this->aDriver();
-        $transit->proposeTo($driver);
-        $transit->acceptBy($driver, new \DateTimeImmutable());
-        $transit->start(new \DateTimeImmutable());
-        $transit->completeAt(new \DateTimeImmutable(), $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20), Distance::ofKm(20.0));
-        $transit->setPrice(Money::from($price));
-        return $this->transitRepository->save($transit);
-    }
-
-    public function aRequestedAndCompletedTransit(
-        string $publishedAt,
-        string $completedAt,
-        Client $client,
-        Driver $driver,
-        Address $from,
-        Address $destination,
-        FixedClock $clock
-    ): Transit
-    {
-        $from = $this->addressRepository->save($from);
-        $destination = $this->addressRepository->save($destination);
-        $clock->setDateTime(new \DateTimeImmutable($publishedAt));
-        $transit = $this->transitService->createTransitFrom($client->getId(), $from, $destination, CarType::CAR_CLASS_VAN);
-        $this->transitService->publishTransit($transit->getId());
-        $this->transitService->findDriversForTransit($transit->getId());
-        $this->transitService->acceptTransit($driver->getId(), $transit->getId());
-        $this->transitService->startTransit($driver->getId(), $transit->getId());
-        $clock->setDateTime(new \DateTimeImmutable($completedAt));
-        $this->transitService->completeTransitFrom($driver->getId(), $transit->getId(), $destination);
-
-        return $this->transitRepository->getOne($transit->getId());
-    }
-
-    public function aRequestedAndCompletedTransitByHand(
-        int $price,
-        string $publishedAt,
-        string $completedAt,
-        Client $client,
-        Driver $driver,
-        Address $from,
-        Address $destination,
-    ): Transit
-    {
-        $publishedAt = new \DateTimeImmutable($publishedAt);
-        $completedAt = new \DateTimeImmutable($completedAt);
-        $from = $this->addressRepository->save($from);
-        $destination = $this->addressRepository->save($destination);
-        $transit = new Transit($client, $publishedAt, Distance::zero());
-        $transit->publishAt($publishedAt);
-        $transit->proposeTo($driver);
-        $transit->acceptBy($driver, $publishedAt);
-        $transit->start($publishedAt);
-        $transit->completeAt($completedAt, $destination, Distance::ofKm(1));
-        $transit->setPrice(Money::from($price));
-        $transit = $this->transitRepository->save($transit);
-        $this->transitDetailsFacade->transitRequested($publishedAt, $transit->getId(), $from, $destination, Distance::zero(), $client, CarType::CAR_CLASS_VAN, $transit->getPrice(), $transit->getTariff());
-        $this->transitDetailsFacade->transitAccepted($transit->getId(), $publishedAt, $driver->getId());
-        $this->transitDetailsFacade->transitStarted($transit->getId(), $publishedAt);
-        $this->transitDetailsFacade->transitCompleted($transit->getId(), $publishedAt, $transit->getPrice(), Money::zero());
-        return $transit;
-    }
 
     public function anActiveCarCategory(string $carClass): CarType
     {
-        $carType = new CarType($carClass, 'opis', 1);
-        PrivateProperty::setId(1, $carType);
-        $carTypeDTO = CarTypeDTO::new($carType);
-        $carType = $this->carTypeService->create($carTypeDTO);
-        $this->carTypeService->registerCar($carClass);
-        $this->carTypeService->activate($carType->getId());
-        return $carType;
+        return $this->carTypeFixture->anActiveCarCategory($carClass);
     }
 
     public function aTransitDTOWith(Client $client, AddressDTO $from, AddressDTO $to): TransitDTO
@@ -200,22 +114,28 @@ class Fixtures
     public function clientHasDoneTransits(Client $client, int $noOfTransits): void
     {
         foreach (range(1, $noOfTransits) as $_) {
-            $this->aCompletedTransitAt(10, new \DateTimeImmutable(), $client);
+            $this->aJourney(10, $client, $this->aNearbyDriver(), $this->anAddress(), $this->anAddress());
         }
+    }
+
+    public function aJourney(int $price, Client $client, Driver $driver, Address $from, Address $destination): Transit
+    {
+        return $this->rideFixture->aRide($price, $client, $driver, $from, $destination);
+    }
+
+    public function aJourneyWithFixedClock(int $price, \DateTimeImmutable $publishedAt, \DateTimeImmutable $completedAt, Client $client, Driver $driver, Address $from, Address $destination, FixedClock $clock): Transit
+    {
+        return $this->rideFixture->aRideWithFixedClock($price, $publishedAt, $completedAt, $client, $driver, $from, $destination, $clock);
     }
 
     public function createClaim(Client $client, Transit $transit, string $reason = '$$$'): Claim
     {
-        $claimDto = ClaimDTO::with('Okradli mnie na hajs', $reason, $client->getId(), $transit->getId());
-        $claimDto->setIsDraft(false);
-        return $this->claimService->create($claimDto);
+        return $this->claimFixture->createClaim($client, $transit, $reason);
     }
 
     public function createAndResolveClaim(Client $client, Transit $transit): Claim
     {
-        $claim = $this->createClaim($client, $transit);
-        $this->claimService->tryToResolveAutomatically($claim->getId());
-        return $claim;
+        return $this->claimFixture->createAndResolveClaim($client, $transit);
     }
 
     public function clientHasDoneClaims(Client $client, int $howMany): void
@@ -244,26 +164,16 @@ class Fixtures
 
     public function awardsAccount(Client $client): void
     {
-        $this->awardsService->registerToProgram($client->getId());
+        $this->awardsAccountFixture->awardsAccount($client);
     }
 
     public function activeAwardsAccount(Client $client): void
     {
-        $this->awardsAccount($client);
-        $this->awardsService->activateAccount($client->getId());
+        $this->awardsAccountFixture->activeAwardsAccount($client);
     }
 
     public function driverHasAttribute(Driver $driver, string $name, string $value): void
     {
-        $this->driverAttributeRepository->save(new DriverAttribute($name, $value, $driver));
-    }
-
-    private function anAddress(string $country, string $city, string $street, int $buildingNumber): Address
-    {
-        $address = new Address($country, $city, $street, $buildingNumber);
-        $address->setPostalCode('11-111');
-        $address->setName('Home');
-        $address->setDistrict('district');
-        return $this->addressRepository->save($address);
+        $this->driverFixture->driverHasAttribute($driver, $name, $value);
     }
 }
