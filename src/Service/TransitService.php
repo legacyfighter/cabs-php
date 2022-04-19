@@ -6,11 +6,13 @@ namespace LegacyFighter\Cabs\Service;
 use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Distance\Distance;
+use LegacyFighter\Cabs\DriverFleet\Driver;
+use LegacyFighter\Cabs\DriverFleet\DriverFeeService;
+use LegacyFighter\Cabs\DriverFleet\DriverRepository;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\DriverPositionDTOV2;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverSession;
 use LegacyFighter\Cabs\Entity\Events\TransitCompleted;
 use LegacyFighter\Cabs\Entity\Transit;
@@ -19,7 +21,6 @@ use LegacyFighter\Cabs\Notification\DriverNotificationService;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\DriverPositionRepository;
-use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
@@ -284,11 +285,11 @@ class TransitService
                             $carClasses = $activeCarClasses;
                         }
 
-                        $drivers = array_map(fn(DriverPositionDTOV2 $dp) => $dp->getDriver(), $driversAvgPositions);
+                        $drivers = array_map(fn(DriverPositionDTOV2 $dp) => $dp->getDriver()->getId(), $driversAvgPositions);
 
                         $activeDriverIdsInSpecificCar = array_map(
                             fn(DriverSession $ds)
-                                => $ds->getDriver()->getId(),
+                                => $ds->getDriverId(),
 
                             $this->driverSessionRepository->findAllByLoggedOutAtNullAndDriverInAndCarClassIn($drivers, $carClasses));
 

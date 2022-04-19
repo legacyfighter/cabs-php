@@ -2,9 +2,6 @@
 
 namespace LegacyFighter\Cabs\Agreements;
 
-use LegacyFighter\Cabs\Entity\ContractAttachmentData;
-use LegacyFighter\Cabs\Repository\ContractAttachmentDataRepository;
-
 class ContractService
 {
 

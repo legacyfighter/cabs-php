@@ -1,10 +1,9 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Agreements;
 
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\ContractAttachmentData;
 use Symfony\Component\Uid\Uuid;
 
 class ContractAttachmentDataRepository

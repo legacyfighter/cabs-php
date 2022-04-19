@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity\ClaimResolver;
+namespace LegacyFighter\Cabs\Crm\Claims\ClaimResolver;
 
 use LegacyFighter\Cabs\Crm\Claims\Claim;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\DriverFleet;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Entity\Transit;
 
 #[Entity]
 class Driver extends BaseEntity

@@ -3,13 +3,13 @@
 namespace LegacyFighter\Cabs\Tests\Common;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
-use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Entity\DriverAttribute;
-use LegacyFighter\Cabs\Entity\DriverFee;
+use LegacyFighter\Cabs\DriverFleet\Driver;
+use LegacyFighter\Cabs\DriverFleet\DriverAttribute;
+use LegacyFighter\Cabs\DriverFleet\DriverAttributeRepository;
+use LegacyFighter\Cabs\DriverFleet\DriverFee;
+use LegacyFighter\Cabs\DriverFleet\DriverFeeRepository;
+use LegacyFighter\Cabs\DriverFleet\DriverService;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
-use LegacyFighter\Cabs\Repository\DriverFeeRepository;
-use LegacyFighter\Cabs\Service\DriverService;
 use LegacyFighter\Cabs\Service\DriverSessionService;
 use LegacyFighter\Cabs\Service\DriverTrackingService;
 

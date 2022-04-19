@@ -3,8 +3,8 @@
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
 use LegacyFighter\Cabs\Crm\Claims\Claim;
+use LegacyFighter\Cabs\Crm\Claims\ClaimResolver\Result;
 use LegacyFighter\Cabs\Crm\Claims\ClaimsResolver;
-use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;

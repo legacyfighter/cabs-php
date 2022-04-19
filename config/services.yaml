@@ -32,6 +32,12 @@ services:
     LegacyFighter\Cabs\Crm\TransitAnalyzer\TransitAnalyzerController:
         tags: ['controller.service_arguments']
 
+    LegacyFighter\Cabs\DriverFleet\DriverController:
+        tags: ['controller.service_arguments']
+
+    LegacyFighter\Cabs\DriverFleet\DriverReport\DriverReportController:
+        tags: ['controller.service_arguments']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     Laudis\Neo4j\Contracts\ClientInterface:

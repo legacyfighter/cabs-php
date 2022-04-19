@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
-use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\DriverFleet\Driver;
 
 class DriverPositionDTOV2
 {

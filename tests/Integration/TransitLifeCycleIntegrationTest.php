@@ -3,8 +3,8 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\DriverFleet\DriverFee;
 use LegacyFighter\Cabs\DTO\AddressDTO;
-use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Service\DriverSessionService;
 use LegacyFighter\Cabs\Service\DriverTrackingService;

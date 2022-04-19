@@ -2,11 +2,8 @@
 
 namespace LegacyFighter\Cabs\Repository;
 
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\TransitDetails\TransitDetails;
 

@@ -12,10 +12,9 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
-use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
 use LegacyFighter\Cabs\Distance\Distance;
+use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\Money\Money;
 
 #[Entity]

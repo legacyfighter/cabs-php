@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\Entity\DriverAttribute;
+namespace LegacyFighter\Cabs\DriverFleet;
 
 class DriverAttributeDTO implements \JsonSerializable
 {

@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
-use LegacyFighter\Cabs\Entity\AwardsAccount;
+use LegacyFighter\Cabs\Entity\Miles\AwardsAccount;
 
 class AwardsAccountDTO implements \JsonSerializable
 {

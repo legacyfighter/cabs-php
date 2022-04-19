@@ -3,12 +3,9 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Common\Clock;
-use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Entity\DriverPosition;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
+use LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance\TravelledDistanceService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
-use LegacyFighter\Cabs\TravelledDistance\TravelledDistanceService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class CalculateDriverTravelledDistanceIntegrationTest extends KernelTestCase

@@ -4,29 +4,24 @@ namespace LegacyFighter\Cabs\Service;
 
 use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\DriverFleet\DriverRepository;
 use LegacyFighter\Cabs\Entity\DriverSession;
-use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 
 class DriverSessionService
 {
-    private DriverRepository $driverRepository;
-    private DriverSessionRepository $driverSessionRepository;
-    private CarTypeService $carTypeService;
-    private Clock $clock;
-
-    public function __construct(DriverRepository $driverRepository, DriverSessionRepository $driverSessionRepository, CarTypeService $carTypeService, Clock $clock)
+    public function __construct(
+        private DriverSessionRepository $driverSessionRepository,
+        private CarTypeService $carTypeService,
+        private Clock $clock
+    )
     {
-        $this->driverRepository = $driverRepository;
-        $this->driverSessionRepository = $driverSessionRepository;
-        $this->carTypeService = $carTypeService;
-        $this->clock = $clock;
     }
 
     public function logIn(int $driverId, string $plateNumber, string $carClass, string $carBrand): DriverSession
     {
         $session = new DriverSession();
-        $session->setDriver($this->driverRepository->getOne($driverId));
+        $session->setDriverId($driverId);
         $session->setLoggedAt($this->clock->now());
         $session->setCarClass($carClass);
         $session->setPlatesNumber($plateNumber);
@@ -47,7 +42,7 @@ class DriverSessionService
 
     public function logOutCurrentSession(int $driverId): void
     {
-        $session = $this->driverSessionRepository->findTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc($this->driverRepository->getOne($driverId));
+        $session = $this->driverSessionRepository->findTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc($driverId);
         if($session !== null) {
             $session->setLoggedOutAt($this->clock->now());
             $this->carTypeService->unregisterCar($session->getCarClass());
@@ -59,6 +54,6 @@ class DriverSessionService
      */
     public function findByDriver(int $driverId): array
     {
-        return $this->driverSessionRepository->findByDriver($this->driverRepository->getOne($driverId));
+        return $this->driverSessionRepository->findByDriverId($driverId);
     }
 }

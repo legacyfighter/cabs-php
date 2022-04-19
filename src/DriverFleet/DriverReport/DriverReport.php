@@ -1,6 +1,11 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
+namespace LegacyFighter\Cabs\DriverFleet\DriverReport;
+
+use LegacyFighter\Cabs\DriverFleet\DriverAttributeDTO;
+use LegacyFighter\Cabs\DriverFleet\DriverDTO;
+use LegacyFighter\Cabs\DTO\DriverSessionDTO;
+use LegacyFighter\Cabs\DTO\TransitDTO;
 
 class DriverReport implements \JsonSerializable
 {

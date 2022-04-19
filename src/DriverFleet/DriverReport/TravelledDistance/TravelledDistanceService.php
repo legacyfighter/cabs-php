@@ -1,12 +1,9 @@
 <?php
 
-namespace LegacyFighter\Cabs\TravelledDistance;
+namespace LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance;
 
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Distance\Distance;
-use LegacyFighter\Cabs\Entity\DriverPosition;
-use LegacyFighter\Cabs\Entity\TimeSlot;
-use LegacyFighter\Cabs\Entity\TravelledDistance;
 use LegacyFighter\Cabs\Service\DistanceCalculator;
 
 class TravelledDistanceService

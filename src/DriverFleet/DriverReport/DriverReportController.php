@@ -1,8 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\DriverFleet\DriverReport;
 
-use LegacyFighter\Cabs\DriverReport\SqlBasedDriverReportCreator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

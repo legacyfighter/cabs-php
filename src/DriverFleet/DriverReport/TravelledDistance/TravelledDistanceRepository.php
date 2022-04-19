@@ -1,10 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\TravelledDistance;
+namespace LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\TimeSlot;
-use LegacyFighter\Cabs\Entity\TravelledDistance;
 
 class TravelledDistanceRepository
 {

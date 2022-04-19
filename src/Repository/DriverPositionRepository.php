@@ -4,8 +4,8 @@ namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
+use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DTO\DriverPositionDTOV2;
-use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverPosition;
 
 class DriverPositionRepository

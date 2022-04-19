@@ -1,11 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\DriverFleet;
 
-use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Repository\DriverFeeRepository;
-use LegacyFighter\Cabs\Repository\TransitRepository;
 
 class DriverFeeService
 {

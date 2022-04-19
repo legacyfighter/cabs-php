@@ -4,7 +4,7 @@ namespace LegacyFighter\Cabs\Crm\Claims;
 
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
-use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
+use LegacyFighter\Cabs\Crm\Claims\ClaimResolver\Result;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Notification\ClientNotificationService;
 use LegacyFighter\Cabs\Notification\DriverNotificationService;

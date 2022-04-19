@@ -1,10 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\DriverFleet;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Entity\DriverFee;
 
 class DriverFeeRepository
 {

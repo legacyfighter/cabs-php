@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;

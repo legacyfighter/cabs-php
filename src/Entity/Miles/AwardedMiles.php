@@ -8,9 +8,6 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Entity\AwardsAccount;
-use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Entity\Transit;
 
 #[Entity]
 class AwardedMiles extends BaseEntity

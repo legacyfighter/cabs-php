@@ -2,13 +2,12 @@
 
 namespace LegacyFighter\Cabs\Service;
 
-use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Distance\Distance;
-use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\DriverFleet\Driver;
+use LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance\TravelledDistanceService;
+use LegacyFighter\Cabs\DriverFleet\DriverRepository;
 use LegacyFighter\Cabs\Entity\DriverPosition;
 use LegacyFighter\Cabs\Repository\DriverPositionRepository;
-use LegacyFighter\Cabs\Repository\DriverRepository;
-use LegacyFighter\Cabs\TravelledDistance\TravelledDistanceService;
 
 class DriverTrackingService
 {

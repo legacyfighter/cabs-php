@@ -2,8 +2,6 @@
 
 namespace LegacyFighter\Cabs\Agreements;
 
-use LegacyFighter\Cabs\Entity\ContractAttachmentData;
-
 class ContractAttachmentDTO implements \JsonSerializable
 {
     private int $id;

@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
-use LegacyFighter\Cabs\Entity\DriverFee;
+use LegacyFighter\Cabs\DriverFleet\DriverFee;
+use LegacyFighter\Cabs\DriverFleet\DriverFeeService;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Service\DriverFeeService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

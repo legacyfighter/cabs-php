@@ -1,16 +1,15 @@
 <?php
 
-namespace LegacyFighter\Cabs\DriverReport;
+namespace LegacyFighter\Cabs\DriverFleet\DriverReport;
 
 use Doctrine\DBAL\Connection;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
+use LegacyFighter\Cabs\DriverFleet\DriverAttribute;
+use LegacyFighter\Cabs\DriverFleet\DriverDTO;
 use LegacyFighter\Cabs\DTO\AddressDTO;
-use LegacyFighter\Cabs\DTO\DriverDTO;
-use LegacyFighter\Cabs\DTO\DriverReport;
 use LegacyFighter\Cabs\DTO\DriverSessionDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\Transit;
 
 class SqlBasedDriverReportCreator

@@ -5,7 +5,7 @@ namespace LegacyFighter\Cabs\Crm\Claims;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Entity\ClaimResolver\Result;
+use LegacyFighter\Cabs\Crm\Claims\ClaimResolver\Result;
 use LegacyFighter\Cabs\Entity\Client;
 
 #[Entity]

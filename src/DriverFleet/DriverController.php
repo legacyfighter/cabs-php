@@ -1,10 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\DriverFleet;
 
-use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Repository\DriverRepository;
-use LegacyFighter\Cabs\Service\DriverService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,8 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class DriverController
 {
     public function __construct(
-        private DriverService $driverService,
-        private DriverRepository $driverRepository
+        private DriverService $driverService
     ) {}
 
     #[Route('/drivers', methods: ['POST'], )]

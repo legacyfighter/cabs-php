@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Entity\DriverLicense;
+use LegacyFighter\Cabs\DriverFleet\DriverLicense;
 use PHPUnit\Framework\TestCase;
 
 class DriverLicenseTest extends TestCase

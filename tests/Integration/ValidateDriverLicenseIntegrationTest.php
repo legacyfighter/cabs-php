@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
-use LegacyFighter\Cabs\DTO\DriverDTO;
-use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Service\DriverService;
+use LegacyFighter\Cabs\DriverFleet\Driver;
+use LegacyFighter\Cabs\DriverFleet\DriverDTO;
+use LegacyFighter\Cabs\DriverFleet\DriverService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ValidateDriverLicenseIntegrationTest extends KernelTestCase

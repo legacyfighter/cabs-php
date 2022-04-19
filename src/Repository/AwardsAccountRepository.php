@@ -3,9 +3,9 @@
 namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\AwardsAccount;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
+use LegacyFighter\Cabs\Entity\Miles\AwardsAccount;
 
 class AwardsAccountRepository
 {

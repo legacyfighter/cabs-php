@@ -4,7 +4,7 @@ namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\Entity\DriverSession;
 
 class DriverSessionRepository
@@ -23,13 +23,13 @@ class DriverSessionRepository
         return $this->em->find(DriverSession::class, $sessionId);
     }
 
-    public function findTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc(Driver $driver): ?DriverSession
+    public function findTopByDriverAndLoggedOutAtIsNullOrderByLoggedAtDesc(int $driverId): ?DriverSession
     {
         $expr = Criteria::expr();
 
         return $this->em->getRepository(DriverSession::class)->matching(
             Criteria::create()
-                ->where($expr->eq('driver', $driver))
+                ->where($expr->eq('driverId', $driverId))
                 ->andWhere($expr->isNull('loggedOutAt'))
                 ->orderBy(['loggedAt' => Criteria::DESC])
                 ->setMaxResults(1)
@@ -37,17 +37,17 @@ class DriverSessionRepository
     }
 
     /**
-     * @param Driver[] $drivers
+     * @param int[] $driverIds
      * @param string[] $carClasses
      * @return DriverSession[]
      */
-    public function findAllByLoggedOutAtNullAndDriverInAndCarClassIn(array $drivers, array $carClasses): array
+    public function findAllByLoggedOutAtNullAndDriverInAndCarClassIn(array $driverIds, array $carClasses): array
     {
         $expr = Criteria::expr();
 
         return $this->em->getRepository(DriverSession::class)->matching(
             Criteria::create()
-                ->where($expr->in('driver', $drivers))
+                ->where($expr->in('driverId', $driverIds))
                 ->andWhere($expr->in('carClass', $carClasses))
                 ->andWhere($expr->isNull('loggedOutAt'))
         )->toArray();
@@ -56,22 +56,8 @@ class DriverSessionRepository
     /**
      * @return DriverSession[]
      */
-    public function findAllByDriverAndLoggedAtAfter(Driver $driver, \DateTimeImmutable $since): array
+    public function findByDriverId(int $driverId): array
     {
-        $expr = Criteria::expr();
-
-        return $this->em->getRepository(DriverSession::class)->matching(
-            Criteria::create()
-                ->where($expr->eq('driver', $driver))
-                ->andWhere($expr->gt('loggedAt', $since))
-        )->toArray();
-    }
-
-    /**
-     * @return DriverSession[]
-     */
-    public function findByDriver(Driver $driver): array
-    {
-        return $this->em->getRepository(DriverSession::class)->findBy(['driver' => $driver]);
+        return $this->em->getRepository(DriverSession::class)->findBy(['driverId' => $driverId]);
     }
 }

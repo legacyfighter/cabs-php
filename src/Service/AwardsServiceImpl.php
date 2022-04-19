@@ -6,11 +6,10 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
-use LegacyFighter\Cabs\Entity\AwardsAccount;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
+use LegacyFighter\Cabs\Entity\Miles\AwardsAccount;
 use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
-use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 
 class AwardsServiceImpl implements AwardsService

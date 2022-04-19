@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\DriverFleet\Driver;
 
 #[Entity]
 class DriverSession extends BaseEntity
@@ -16,8 +17,8 @@ class DriverSession extends BaseEntity
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $loggedOutAt = null;
 
-    #[ManyToOne(targetEntity: Driver::class)]
-    private Driver $driver;
+    #[Column(type: 'integer')]
+    private int $driverId;
 
     #[Column]
     private string $platesNumber;
@@ -48,14 +49,14 @@ class DriverSession extends BaseEntity
         $this->loggedOutAt = $loggedOutAt;
     }
 
-    public function getDriver(): Driver
+    public function getDriverId(): int
     {
-        return $this->driver;
+        return $this->driverId;
     }
 
-    public function setDriver(Driver $driver): void
+    public function setDriverId(int $driverId): void
     {
-        $this->driver = $driver;
+        $this->driverId = $driverId;
     }
 
     public function getPlatesNumber(): string

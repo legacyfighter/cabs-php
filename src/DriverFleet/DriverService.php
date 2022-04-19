@@ -1,14 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\DriverFleet;
 
-use LegacyFighter\Cabs\DTO\DriverDTO;
-use LegacyFighter\Cabs\Entity\Driver;
-use LegacyFighter\Cabs\Entity\DriverAttribute;
-use LegacyFighter\Cabs\Entity\DriverLicense;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
-use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 

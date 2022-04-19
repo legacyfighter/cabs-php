@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Entity\TimeSlot;
+use LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance\TimeSlot;
 use PHPUnit\Framework\TestCase;
 
 class TimeSlotTest extends TestCase
