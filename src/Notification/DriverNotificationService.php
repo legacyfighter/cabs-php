@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\Notification;
 
 class DriverNotificationService
 {

@@ -15,6 +15,7 @@ use LegacyFighter\Cabs\Entity\DriverSession;
 use LegacyFighter\Cabs\Entity\Events\TransitCompleted;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Invocing\InvoiceGenerator;
+use LegacyFighter\Cabs\Notification\DriverNotificationService;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\DriverPositionRepository;
