@@ -3,8 +3,8 @@
 namespace LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance;
 
 use LegacyFighter\Cabs\Common\Clock;
-use LegacyFighter\Cabs\Distance\Distance;
-use LegacyFighter\Cabs\Service\DistanceCalculator;
+use LegacyFighter\Cabs\Geolocation\Distance;
+use LegacyFighter\Cabs\Geolocation\DistanceCalculator;
 
 class TravelledDistanceService
 {

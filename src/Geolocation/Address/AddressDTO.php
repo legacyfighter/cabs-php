@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\Entity\Address;
+namespace LegacyFighter\Cabs\Geolocation\Address;
 
 class AddressDTO implements \JsonSerializable
 {

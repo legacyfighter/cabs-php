@@ -16,7 +16,7 @@ services:
   LegacyFighter\Cabs\Tests\Common\StubbedTransitPrice: ~
   LegacyFighter\Cabs\Tests\Common\TransitFixture: ~
 
-  LegacyFighter\Cabs\Service\GeocodingService:
+  LegacyFighter\Cabs\Geolocation\GeocodingService:
     class: LegacyFighter\Cabs\Tests\Double\FakeGeocodingService
 
   LegacyFighter\Cabs\Config\AppProperties:

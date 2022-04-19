@@ -3,9 +3,10 @@
 namespace LegacyFighter\Cabs\DTO;
 
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
-use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DriverFleet\DriverDTO;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
 
 class TransitDTO implements \JsonSerializable

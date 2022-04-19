@@ -1,9 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Geolocation\Address;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Address;
 
 class AddressRepository
 {

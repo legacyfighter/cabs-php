@@ -2,11 +2,11 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DriverFleet\Driver;
-use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
 use PHPUnit\Framework\TestCase;
 

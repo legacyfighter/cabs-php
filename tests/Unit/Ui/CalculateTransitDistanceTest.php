@@ -3,11 +3,11 @@
 namespace LegacyFighter\Cabs\Tests\Unit\Ui;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
-use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
 use LegacyFighter\Cabs\TransitDetails\TransitDetails;

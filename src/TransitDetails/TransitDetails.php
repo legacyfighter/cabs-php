@@ -7,11 +7,11 @@ use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Distance\Distance;
-use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
 
 #[Entity]

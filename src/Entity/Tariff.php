@@ -4,7 +4,7 @@ namespace LegacyFighter\Cabs\Entity;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embeddable;
-use LegacyFighter\Cabs\Distance\Distance;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
 
 #[Embeddable]

@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Distance;
 
-use LegacyFighter\Cabs\Distance\Distance;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use PHPUnit\Framework\TestCase;
 
 class DistanceTest extends TestCase

@@ -2,6 +2,8 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
+use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
+
 class AnalyzedAddressesDTO implements \JsonSerializable
 {
     /**

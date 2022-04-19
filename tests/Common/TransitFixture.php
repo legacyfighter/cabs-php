@@ -3,14 +3,14 @@
 namespace LegacyFighter\Cabs\Tests\Common;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
-use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DriverFleet\Driver;
-use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\TransitDetails\TransitDetails;

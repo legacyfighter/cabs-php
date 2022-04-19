@@ -2,8 +2,8 @@
 
 namespace LegacyFighter\Cabs\Tests\Double;
 
-use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Service\GeocodingService;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\GeocodingService;
 
 class FakeGeocodingService extends GeocodingService
 {

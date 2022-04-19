@@ -2,8 +2,8 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Repository\AddressRepository;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Address\AddressRepository;
 
 class AddressFixture
 {

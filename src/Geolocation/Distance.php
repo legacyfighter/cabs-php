@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Distance;
+namespace LegacyFighter\Cabs\Geolocation;
 
 final class Distance
 {

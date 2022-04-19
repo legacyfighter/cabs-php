@@ -2,11 +2,11 @@
 
 namespace LegacyFighter\Cabs\TransitDetails;
 
-use LegacyFighter\Cabs\Distance\Distance;
-use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
 
 class TransitDetailsFacade

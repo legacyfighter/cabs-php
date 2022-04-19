@@ -1,8 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\Geolocation;
 
-use LegacyFighter\Cabs\Entity\Address;
+use LegacyFighter\Cabs\Geolocation\Address\Address;
 
 class GeocodingService
 {

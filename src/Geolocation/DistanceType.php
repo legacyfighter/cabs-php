@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Distance;
+namespace LegacyFighter\Cabs\Geolocation;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\FloatType;
