@@ -1,9 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\Crm;
 
-use LegacyFighter\Cabs\DTO\ClientDTO;
-use LegacyFighter\Cabs\Service\ClientService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

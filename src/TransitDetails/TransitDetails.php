@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;

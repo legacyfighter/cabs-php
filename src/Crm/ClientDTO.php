@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\Entity\Client;
+namespace LegacyFighter\Cabs\Crm;
 
 class ClientDTO implements \JsonSerializable
 {

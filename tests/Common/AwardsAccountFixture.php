@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
 
 class AwardsAccountFixture

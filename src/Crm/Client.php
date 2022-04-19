@@ -2,15 +2,11 @@
 
 declare(strict_types=1);
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\Crm;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\OneToMany;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Crm\Claims\Claim;
 
 #[Entity]
 class Client extends BaseEntity

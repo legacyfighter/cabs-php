@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Distance;

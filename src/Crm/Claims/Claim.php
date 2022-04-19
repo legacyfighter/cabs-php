@@ -6,9 +6,7 @@ namespace LegacyFighter\Cabs\Crm\Claims;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Money\Money;
 
 #[Entity]

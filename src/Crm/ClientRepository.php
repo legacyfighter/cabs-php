@@ -1,9 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Crm;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Client;
 
 class ClientRepository
 {

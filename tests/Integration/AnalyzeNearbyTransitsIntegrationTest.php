@@ -4,8 +4,8 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Crm\TransitAnalyzer\TransitAnalyzerController;
-use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;

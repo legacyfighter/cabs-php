@@ -4,7 +4,7 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Loyalty\AwardedMiles;
 use LegacyFighter\Cabs\Loyalty\AwardsAccountRepository;
 use LegacyFighter\Cabs\Loyalty\AwardsService;

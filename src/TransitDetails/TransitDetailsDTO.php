@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\TransitDetails;
 
-use LegacyFighter\Cabs\DTO\ClientDTO;
+use LegacyFighter\Cabs\Crm\ClientDTO;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;

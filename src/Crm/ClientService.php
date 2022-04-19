@@ -1,10 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
-
-use LegacyFighter\Cabs\DTO\ClientDTO;
-use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Repository\ClientRepository;
+namespace LegacyFighter\Cabs\Crm;
 
 class ClientService
 {

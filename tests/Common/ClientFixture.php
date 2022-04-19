@@ -2,8 +2,8 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Repository\ClientRepository;
+use LegacyFighter\Cabs\Crm\Client;
+use LegacyFighter\Cabs\Crm\ClientRepository;
 
 class ClientFixture
 {

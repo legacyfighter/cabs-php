@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\TransitDetails;
 
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;

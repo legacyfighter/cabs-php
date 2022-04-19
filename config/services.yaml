@@ -41,6 +41,9 @@ services:
     LegacyFighter\Cabs\Loyalty\AwardsAccountController:
         tags: ['controller.service_arguments']
 
+    LegacyFighter\Cabs\Crm\ClientController:
+        tags: ['controller.service_arguments']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     Laudis\Neo4j\Contracts\ClientInterface:

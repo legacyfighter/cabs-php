@@ -3,9 +3,9 @@
 namespace LegacyFighter\Cabs\Tests\Common;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;

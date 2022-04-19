@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Distance;

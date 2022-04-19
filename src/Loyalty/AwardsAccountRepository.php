@@ -3,7 +3,7 @@
 namespace LegacyFighter\Cabs\Loyalty;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 
 class AwardsAccountRepository
 {

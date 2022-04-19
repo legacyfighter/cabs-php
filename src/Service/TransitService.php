@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Service;
 // If this class will still be here in 2022 I will quit.
 use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
+use LegacyFighter\Cabs\Crm\ClientRepository;
 use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DriverFleet\DriverFeeService;
 use LegacyFighter\Cabs\DriverFleet\DriverRepository;
@@ -22,7 +23,6 @@ use LegacyFighter\Cabs\Geolocation\GeocodingService;
 use LegacyFighter\Cabs\Invocing\InvoiceGenerator;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Notification\DriverNotificationService;
-use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\DriverPositionRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;

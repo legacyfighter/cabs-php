@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use LegacyFighter\Cabs\Common\BaseEntity;
 use LegacyFighter\Cabs\Crm\Claims\ClaimResolver\Result;
-use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Crm\Client;
 
 #[Entity]
 class ClaimsResolver extends BaseEntity

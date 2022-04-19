@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\DTO;
 
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
+use LegacyFighter\Cabs\Crm\ClientDTO;
 use LegacyFighter\Cabs\DriverFleet\DriverDTO;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;

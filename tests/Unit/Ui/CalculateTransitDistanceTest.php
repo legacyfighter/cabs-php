@@ -3,8 +3,8 @@
 namespace LegacyFighter\Cabs\Tests\Unit\Ui;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Distance;

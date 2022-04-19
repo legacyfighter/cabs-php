@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Loyalty;
 
-use LegacyFighter\Cabs\DTO\ClientDTO;
+use LegacyFighter\Cabs\Crm\ClientDTO;
 
 class AwardsAccountDTO implements \JsonSerializable
 {
