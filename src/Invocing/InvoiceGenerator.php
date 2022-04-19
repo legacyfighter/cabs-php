@@ -1,9 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
-
-use LegacyFighter\Cabs\Entity\Invoice;
-use LegacyFighter\Cabs\Repository\InvoiceRepository;
+namespace LegacyFighter\Cabs\Invocing;
 
 class InvoiceGenerator
 {
