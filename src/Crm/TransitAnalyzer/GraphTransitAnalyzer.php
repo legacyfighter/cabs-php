@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\TransitAnalyzer;
+namespace LegacyFighter\Cabs\Crm\TransitAnalyzer;
 
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Contracts\TransactionInterface;

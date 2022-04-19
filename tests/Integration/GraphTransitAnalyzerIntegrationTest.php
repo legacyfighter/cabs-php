@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
-use LegacyFighter\Cabs\TransitAnalyzer\GraphTransitAnalyzer;
+use LegacyFighter\Cabs\Crm\TransitAnalyzer\GraphTransitAnalyzer;
 
 class GraphTransitAnalyzerIntegrationTest extends Neo4jTestCase
 {

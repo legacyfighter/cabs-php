@@ -2,11 +2,11 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use LegacyFighter\Cabs\Crm\TransitAnalyzer\GraphTransitAnalyzer;
+use LegacyFighter\Cabs\Crm\TransitAnalyzer\PopulateGraphService;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
-use LegacyFighter\Cabs\TransitAnalyzer\GraphTransitAnalyzer;
-use LegacyFighter\Cabs\TransitAnalyzer\PopulateGraphService;
 
 class PopulateGraphServiceIntegrationTest extends Neo4jTestCase
 {

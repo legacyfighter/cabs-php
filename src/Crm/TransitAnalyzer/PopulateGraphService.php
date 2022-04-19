@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\TransitAnalyzer;
+namespace LegacyFighter\Cabs\Crm\TransitAnalyzer;
 
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\TransitRepository;
@@ -9,7 +9,6 @@ use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 class PopulateGraphService
 {
     public function __construct(
-        private TransitRepository $transitRepository,
         private GraphTransitAnalyzer $graphTransitAnalyzer,
         private TransitDetailsFacade $transitDetailsFacade
     )
@@ -18,11 +17,11 @@ class PopulateGraphService
 
     public function populate(): void
     {
-        foreach ($this->transitRepository->findAllByStatus(Transit::STATUS_COMPLETED) as $transit) {
-            $transitDetails = $this->transitDetailsFacade->find($transit->getId());
+        foreach ($this->transitDetailsFacade->findCompleted() as $transit) {
+            $transitDetails = $this->transitDetailsFacade->find($transit->transitId);
             $this->graphTransitAnalyzer->addTransitBetweenAddresses(
                 $transitDetails->client->getId(),
-                $transit->getId(),
+                $transit->transitId,
                 $transitDetails->from->getHash(),
                 $transitDetails->to->getHash(),
                 $transitDetails->started,

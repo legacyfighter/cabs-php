@@ -25,7 +25,7 @@ services:
   LegacyFighter\Cabs\Common\Clock:
     class: LegacyFighter\Cabs\Tests\Common\FixedClock
 
-  LegacyFighter\Cabs\TransitAnalyzer\PopulateGraphService:
+  LegacyFighter\Cabs\Crm\TransitAnalyzer\PopulateGraphService:
     public: true
 
   LegacyFighter\Cabs\Repair\Api\RepairProcess:

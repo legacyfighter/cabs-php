@@ -29,13 +29,16 @@ services:
     LegacyFighter\Cabs\CarFleet\CarTypeController:
         tags: ['controller.service_arguments']
 
+    LegacyFighter\Cabs\Crm\TransitAnalyzer\TransitAnalyzerController:
+        tags: ['controller.service_arguments']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     Laudis\Neo4j\Contracts\ClientInterface:
         factory: ['LegacyFighter\Cabs\Config\Neo4jClientFactory', 'create']
         arguments: ['%env(NEO4J_DSN)%']
 
-    LegacyFighter\Cabs\TransitAnalyzer\GraphTransitAnalyzer:
+    LegacyFighter\Cabs\Crm\TransitAnalyzer\GraphTransitAnalyzer:
         tags:
             - { name: kernel.event_listener, event: 'LegacyFighter\Cabs\Entity\Events\TransitCompleted', method: 'handle' }
 

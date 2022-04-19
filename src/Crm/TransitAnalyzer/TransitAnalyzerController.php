@@ -1,13 +1,10 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\Crm\TransitAnalyzer;
 
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\AnalyzedAddressesDTO;
-use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Repository\AddressRepository;
-use LegacyFighter\Cabs\Service\TransitAnalyzer;
-use LegacyFighter\Cabs\TransitAnalyzer\GraphTransitAnalyzer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

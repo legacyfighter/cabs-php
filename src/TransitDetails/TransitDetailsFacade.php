@@ -6,6 +6,7 @@ use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Tariff;
+use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 
 class TransitDetailsFacade
@@ -19,6 +20,14 @@ class TransitDetailsFacade
     public function find(int $transitId): TransitDetailsDTO
     {
         return TransitDetailsDTO::from($this->load($transitId));
+    }
+
+    /**
+     * @return TransitDetailsDTO[]
+     */
+    public function findCompleted(): array
+    {
+        return array_map(fn(TransitDetails $td) => TransitDetailsDTO::from($td), $this->transitDetailsRepository->findByStatus(Transit::STATUS_COMPLETED));
     }
 
     public function transitRequested(\DateTimeImmutable $when, int $transitId, Address $from, Address $to, Distance $distance, Client $client, string $carType, Money $estimatedPrice, Tariff $tariff): void
