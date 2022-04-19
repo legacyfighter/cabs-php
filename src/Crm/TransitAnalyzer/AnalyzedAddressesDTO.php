@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
+namespace LegacyFighter\Cabs\Crm\TransitAnalyzer;
 
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 

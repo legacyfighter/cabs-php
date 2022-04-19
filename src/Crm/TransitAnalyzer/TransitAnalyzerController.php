@@ -2,7 +2,6 @@
 
 namespace LegacyFighter\Cabs\Crm\TransitAnalyzer;
 
-use LegacyFighter\Cabs\DTO\AnalyzedAddressesDTO;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Address\AddressRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
