@@ -1,12 +1,9 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\Tracking;
 
 use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
-use LegacyFighter\Cabs\DriverFleet\DriverRepository;
-use LegacyFighter\Cabs\Entity\DriverSession;
-use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 
 class DriverSessionService
 {
@@ -55,5 +52,18 @@ class DriverSessionService
     public function findByDriver(int $driverId): array
     {
         return $this->driverSessionRepository->findByDriverId($driverId);
+    }
+
+    /**
+     * @param int[] $driversId
+     * @param string[] $carClasses
+     * @return int[]
+     */
+    public function findCurrentlyLoggedDriverIds(array $driversId, array $carClasses): array
+    {
+        return array_map(
+            fn(DriverSession $ds) => $ds->getDriverId(),
+            $this->driverSessionRepository->findAllByLoggedOutAtNullAndDriverInAndCarClassIn($driversId, $carClasses)
+        );
     }
 }

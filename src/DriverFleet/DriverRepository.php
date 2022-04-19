@@ -19,4 +19,13 @@ class DriverRepository
     {
         return $this->em->find(Driver::class, $driverId);
     }
+
+    /**
+     * @param int[] $ids
+     * @return Driver[]
+     */
+    public function findAllByIds(array $ids): array
+    {
+        return $this->em->getRepository(Driver::class)->findBy(['id' => $ids]);
+    }
 }

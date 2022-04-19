@@ -210,4 +210,14 @@ class TransitDetails extends BaseEntity
     {
         return $this->driversFee;
     }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function getEstimatedPrice(): ?Money
+    {
+        return $this->estimatedPrice;
+    }
 }

@@ -1,18 +1,16 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\Tracking;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\DriverFleet\Driver;
 
 #[Entity]
 class DriverPosition extends BaseEntity
 {
-    #[ManyToOne(targetEntity: Driver::class)]
-    private Driver $driver;
+    #[Column(type: 'integer')]
+    private int $driverId;
 
     #[Column(type: 'float')]
     private float $latitude;
@@ -23,17 +21,17 @@ class DriverPosition extends BaseEntity
     #[Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $seenAt;
 
-    public function __construct(Driver $driver, float $latitude, float $longitude, \DateTimeImmutable $seenAt)
+    public function __construct(int $driverId, float $latitude, float $longitude, \DateTimeImmutable $seenAt)
     {
-        $this->driver = $driver;
+        $this->driverId = $driverId;
         $this->latitude = $latitude;
         $this->longitude = $longitude;
         $this->seenAt = $seenAt;
     }
 
-    public function getDriver(): Driver
+    public function getDriverId(): int
     {
-        return $this->driver;
+        return $this->driverId;
     }
 
     public function getLatitude(): float

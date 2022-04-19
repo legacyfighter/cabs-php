@@ -12,6 +12,9 @@ use PHPUnit\Framework\TestCase;
 
 class TransitLifeCycleTest extends TestCase
 {
+    private const DRIVER_ID = 1;
+    private const SECOND_DRIVER_ID = 2;
+
     /**
      * @test
      */
@@ -52,15 +55,13 @@ class TransitLifeCycleTest extends TestCase
         //given
         $destination = new Address('Polska', 'Warszawa', 'Żytnia', 25);
         //and
-        $driver = new Driver();
-        //and
         $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
         //and
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
         //and
         $transit->start(new \DateTimeImmutable());
         //and
@@ -99,15 +100,13 @@ class TransitLifeCycleTest extends TestCase
         //given
         $destination = new Address('Polska', 'Warszawa', 'Żytnia', 25);
         //and
-        $driver = new Driver();
-        //and
         $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
         //and
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
@@ -202,15 +201,13 @@ class TransitLifeCycleTest extends TestCase
         //given
         $destination = new Address('Polska', 'Warszawa', 'Żytnia', 25);
         //and
-        $driver = new Driver();
-        //and
         $transit = $this->requestTransit();
         //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
         //and
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
 
 
         //and
@@ -252,14 +249,12 @@ class TransitLifeCycleTest extends TestCase
         //given
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
 
         //when
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
 
         //then
         self::assertEquals(Transit::STATUS_TRANSIT_TO_PASSENGER, $transit->getStatus());
@@ -273,20 +268,16 @@ class TransitLifeCycleTest extends TestCase
         //given
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
-        $secondDriver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
 
         //when
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $transit->acceptBy($secondDriver, new \DateTimeImmutable())
+            fn() => $transit->acceptBy(self::SECOND_DRIVER_ID, new \DateTimeImmutable())
         );
     }
 
@@ -298,15 +289,13 @@ class TransitLifeCycleTest extends TestCase
         //given
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->rejectBy($driver);
+        $transit->rejectBy(self::DRIVER_ID);
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $transit->acceptBy($driver, new \DateTimeImmutable())
+            fn() => $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable())
         );
     }
 
@@ -318,13 +307,11 @@ class TransitLifeCycleTest extends TestCase
         //given
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $transit->acceptBy($driver, new \DateTimeImmutable())
+            fn() => $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable())
         );
     }
 
@@ -336,13 +323,11 @@ class TransitLifeCycleTest extends TestCase
         //given
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
         //and
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
         //when
         $transit->start(new \DateTimeImmutable());
 
@@ -376,13 +361,11 @@ class TransitLifeCycleTest extends TestCase
         //and
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
         //and
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
         //when
         $transit->start(new \DateTimeImmutable());
 
@@ -405,13 +388,11 @@ class TransitLifeCycleTest extends TestCase
         //and
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
         //and
-        $transit->proposeTo($driver);
+        $transit->proposeTo(self::DRIVER_ID);
         //and
-        $transit->acceptBy($driver, new \DateTimeImmutable());
+        $transit->acceptBy(self::DRIVER_ID, new \DateTimeImmutable());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
@@ -427,12 +408,10 @@ class TransitLifeCycleTest extends TestCase
         //given
         $transit = $this->requestTransit();
         //and
-        $driver = new Driver();
-        //and
         $transit->publishAt(new \DateTimeImmutable());
 
         //when
-        $transit->rejectBy($driver);
+        $transit->rejectBy(self::DRIVER_ID);
 
         //then
         self::assertEquals(Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, $transit->getStatus());

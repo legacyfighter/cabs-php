@@ -4,14 +4,15 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\DriverFleet\DriverFee;
+use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\GeocodingService;
-use LegacyFighter\Cabs\Service\DriverSessionService;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\TransitService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
+use LegacyFighter\Cabs\Tracking\DriverSessionService;
+use LegacyFighter\Cabs\Tracking\DriverTrackingService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class TransitLifeCycleIntegrationTest extends KernelTestCase
@@ -547,7 +548,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         return $driver->getId();
     }
 
-    private function requestTransitFromTo(AddressDTO $pickup, AddressDTO $destination): Transit
+    private function requestTransitFromTo(AddressDTO $pickup, AddressDTO $destination): TransitDTO
     {
         return $this->transitService->createTransit($this->fixtures->aTransitDTO($pickup, $destination));
     }

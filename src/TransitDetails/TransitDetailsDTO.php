@@ -6,6 +6,7 @@ use LegacyFighter\Cabs\Crm\ClientDTO;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
+use phpDocumentor\Reflection\DocBlock\StandardTagFactory;
 
 class TransitDetailsDTO
 {
@@ -25,8 +26,10 @@ class TransitDetailsDTO
         public int $baseFee,
         public string $tariffName,
         public ?Money $price,
+        public ?Money $estimatedPrice,
         public ?Money $driverFee,
-        public ?int $driverId
+        public ?int $driverId,
+        public string $status
     )
     {
     }
@@ -49,8 +52,10 @@ class TransitDetailsDTO
             $td->getTariff()->getBaseFee(),
             $td->getTariff()->getName(),
             $td->getPrice(),
+            $td->getEstimatedPrice(),
             $td->getDriversFee(),
-            $td->getDriverId()
+            $td->getDriverId(),
+            $td->getStatus()
         );
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\Entity\DriverSession;
+namespace LegacyFighter\Cabs\Tracking;
 
 class DriverSessionDTO implements \JsonSerializable
 {

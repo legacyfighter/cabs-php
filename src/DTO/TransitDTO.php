@@ -61,44 +61,36 @@ class TransitDTO implements \JsonSerializable
         return $instance;
     }
 
-    public static function from(Transit $transit, TransitDetailsDTO $transitDetails): self
+    /**
+     * @param DriverDTO[] $proposedDrivers
+     */
+    public static function from(TransitDetailsDTO $transitDetails, array $proposedDrivers, ?int $assignedDriver = null): self
     {
         $instance = new self();
-        $instance->id = $transit->getId();
-        $instance->distance = $transit->getKm();
+        $instance->id = $transitDetails->transitId;
+        $instance->distance = $transitDetails->distance;
         $instance->factor = 1;
-        if($transit->getPrice()!== null) {
-            $instance->price = (float) $transit->getPrice()->toInt();
-        }
+        $instance->price = $transitDetails->price !== null ? (float) $transitDetails->price->toInt() : null;
         $instance->date = $transitDetails->dateTime;
-        $instance->status = $transit->getStatus();
-        $instance->setTariff($transit);
-        foreach ($transit->getProposedDrivers() as $driver) {
-            $instance->proposedDrivers[] = DriverDTO::from($driver);
-        }
+        $instance->status = $transitDetails->status;
+        $instance->tariff = $transitDetails->tariffName;
+        $instance->kmRate = $transitDetails->kmRate;
+        $instance->baseFee = $transitDetails->baseFee;
+        $driver = array_values(array_filter($proposedDrivers, fn(DriverDTO $d) => $d->getId() === $assignedDriver));
+        $instance->driver = $driver !== [] ? $driver[0] : null;
+        $instance->proposedDrivers = $proposedDrivers;
         $instance->to = $transitDetails->to;
         $instance->from = $transitDetails->from;
         $instance->carClass = $transitDetails->carType;
         $instance->clientDTO = $transitDetails->client;
-        if($transitDetails->driverFee != null) {
-            $instance->driverFee = (float) $transitDetails->driverFee->toInt();
-        }
-        if($transit->getEstimatedPrice() !== null) {
-            $instance->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();
-        }
+        $instance->driverFee = $transitDetails->driverFee !== null ? (float) $transitDetails->driverFee->toInt() : null;
+        $instance->estimatedPrice = $transitDetails->estimatedPrice !== null ? (float) $transitDetails->estimatedPrice->toInt() : null;
         $instance->dateTime = $transitDetails->dateTime;
         $instance->published = $transitDetails->publishedAt;
         $instance->acceptedAt = $transitDetails->acceptedAt;
         $instance->started = $transitDetails->started;
         $instance->completedAt = $transitDetails->completedAt;
         return $instance;
-    }
-
-    private function setTariff(Transit $transit): void
-    {
-        $this->tariff = $transit->getTariff()->getName();
-        $this->kmRate = $transit->getTariff()->getKmRate();
-        $this->baseFee = $transit->getTariff()->getBaseFee();
     }
 
     public function getId(): int

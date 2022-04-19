@@ -57,22 +57,20 @@ class Transit extends BaseEntity
     #[Column(type: 'integer')]
     private int $pickupAddressChangeCounter = 0;
 
-    #[ManyToOne(targetEntity: Driver::class)]
-    private ?Driver $driver = null;
+    #[Column(type: 'integer', nullable: true)]
+    private ?int $driverId = null;
 
     /**
-     * @var Collection<Driver>
+     * @var int[]
      */
-    #[ManyToMany(targetEntity: Driver::class)]
-    #[JoinTable(name: 'transit_driver_rejected')]
-    private Collection $driversRejections;
+    #[Column(type: 'json')]
+    private array $driversRejections = [];
 
     /**
-     * @var Collection<Driver>
+     * @var int[]
      */
-    #[ManyToMany(targetEntity: Driver::class)]
-    #[JoinTable(name: 'transit_driver_proposed')]
-    private Collection $proposedDrivers;
+    #[Column(type: 'json')]
+    private array $proposedDrivers = [];
 
     #[Column(type: 'integer')]
     private int $awaitingDriversResponses = 0;
@@ -102,8 +100,6 @@ class Transit extends BaseEntity
         $this->setDateTime($when);
         $this->km = $distance->toKmInFloat();
         $this->setStatus(self::STATUS_DRAFT);
-        $this->proposedDrivers = new ArrayCollection();
-        $this->driversRejections = new ArrayCollection();
     }
 
     public static function withStatus(string $status, Client $client, \DateTimeImmutable $when, Distance $distance): self
@@ -150,20 +146,20 @@ class Transit extends BaseEntity
         }
 
         $this->status = self::STATUS_CANCELLED;
-        $this->driver = null;
+        $this->driverId = null;
         $this->km = Distance::zero()->toKmInFloat();
         $this->awaitingDriversResponses = 0;
     }
 
-    public function canProposeTo(Driver $driver): bool
+    public function canProposeTo(int $driverId): bool
     {
-        return !$this->driversRejections->contains($driver);
+        return !in_array($driverId, $this->proposedDrivers);
     }
 
-    public function proposeTo(Driver $driver): void
+    public function proposeTo(int $driverId): void
     {
-        if($this->canProposeTo($driver)) {
-            $this->proposedDrivers->add($driver);
+        if($this->canProposeTo($driverId)) {
+            $this->proposedDrivers[] = $driverId;
             $this->awaitingDriversResponses++;
         }
     }
@@ -171,7 +167,7 @@ class Transit extends BaseEntity
     public function failDriverAssignment(): void
     {
         $this->status = self::STATUS_DRIVER_ASSIGNMENT_FAILED;
-        $this->driver = null;
+        $this->driverId = null;
         $this->km = Distance::zero()->toKmInFloat();
         $this->awaitingDriversResponses = 0;
     }
@@ -181,20 +177,19 @@ class Transit extends BaseEntity
         return $this->status === self::STATUS_CANCELLED || $this->getPublished()->modify('+300 seconds') < $date;
     }
 
-    public function acceptBy(Driver $driver, \DateTimeImmutable $when): void
+    public function acceptBy(int $driverId, \DateTimeImmutable $when): void
     {
-        if($this->driver !== null) {
+        if($this->driverId !== null) {
             throw new \RuntimeException('Transit already accepted, id = '.$this->getId());
         }
-        if(!$this->proposedDrivers->contains($driver)) {
+        if(!in_array($driverId, $this->proposedDrivers)) {
             throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getId());
         }
-        if($this->driversRejections->contains($driver)) {
+        if(in_array($driverId, $this->driversRejections)) {
             throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getId());
         }
 
-        $this->driver = $driver;
-        $this->driver->setOccupied(true);
+        $this->driverId = $driverId;
         $this->awaitingDriversResponses = 0;
         $this->status = self::STATUS_TRANSIT_TO_PASSENGER;
     }
@@ -207,9 +202,9 @@ class Transit extends BaseEntity
         $this->status = self::STATUS_IN_TRANSIT;
     }
 
-    public function rejectBy(Driver $driver): void
+    public function rejectBy(int $driverId): void
     {
-        $this->driversRejections->add($driver);
+        $this->driversRejections[] = $driverId;
         $this->awaitingDriversResponses--;
     }
 
@@ -292,9 +287,12 @@ class Transit extends BaseEntity
         $this->date = $date;
     }
 
+    /**
+     * @return int[]
+     */
     public function getProposedDrivers(): array
     {
-        return $this->proposedDrivers->toArray();
+        return $this->proposedDrivers;
     }
 
     public function getAwaitingDriversResponses(): int
@@ -362,9 +360,9 @@ class Transit extends BaseEntity
         return $money;
     }
 
-    public function getDriver(): ?Driver
+    public function getDriverId(): ?int
     {
-        return $this->driver;
+        return $this->driverId;
     }
 
     public function getTariff(): Tariff

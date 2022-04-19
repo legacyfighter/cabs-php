@@ -52,6 +52,6 @@ class PopulateGraphServiceIntegrationTest extends Neo4jTestCase
 
     private function aTransitFromTo(Address $pickup, Address $destination, Client $client): void
     {
-        $this->fixtures->aJourney(10, $client, $this->fixtures->aNearbyDriver(), $pickup, $destination);
+        $this->fixtures->aRide(10, $client, $this->fixtures->aNearbyDriver(), $pickup, $destination);
     }
 }

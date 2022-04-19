@@ -11,8 +11,9 @@ class DriverDTO implements \JsonSerializable
     private ?string $photo;
     private string $status;
     private string $type;
+    private bool $isOccupied;
 
-    private function __construct(int $id, string $firstName, string $lastName, string $driverLicense, ?string $photo, string $status, string $type)
+    private function __construct(int $id, string $firstName, string $lastName, string $driverLicense, ?string $photo, string $status, string $type, bool $isOccupied = false)
     {
         $this->id = $id;
         $this->firstName = $firstName;
@@ -21,6 +22,7 @@ class DriverDTO implements \JsonSerializable
         $this->photo = $photo;
         $this->status = $status;
         $this->type = $type;
+        $this->isOccupied = $isOccupied;
     }
 
     public static function from(Driver $driver): self
@@ -32,7 +34,8 @@ class DriverDTO implements \JsonSerializable
             $driver->getDriverLicense()->asString(),
             $driver->getPhoto(),
             $driver->getStatus(),
-            $driver->getType()
+            $driver->getType(),
+            $driver->getOccupied()
         );
     }
 
@@ -74,6 +77,11 @@ class DriverDTO implements \JsonSerializable
     public function getType(): string
     {
         return $this->type;
+    }
+
+    public function isOccupied(): bool
+    {
+        return $this->isOccupied;
     }
 
     public function jsonSerialize(): array

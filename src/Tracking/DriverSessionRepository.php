@@ -1,11 +1,9 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Tracking;
 
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\DriverFleet\Driver;
-use LegacyFighter\Cabs\Entity\DriverSession;
 
 class DriverSessionRepository
 {

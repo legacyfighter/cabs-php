@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
+namespace LegacyFighter\Cabs\Tracking;
 
 class DriverPositionDTO implements \JsonSerializable
 {

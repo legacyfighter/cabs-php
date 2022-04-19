@@ -1,10 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\Tracking;
 
-use LegacyFighter\Cabs\DTO\DriverSessionDTO;
-use LegacyFighter\Cabs\Entity\DriverSession;
-use LegacyFighter\Cabs\Service\DriverSessionService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

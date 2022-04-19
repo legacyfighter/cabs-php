@@ -3,9 +3,9 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Common\Clock;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
+use LegacyFighter\Cabs\Tracking\DriverTrackingService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class DriverTrackingServiceIntegrationTest extends KernelTestCase

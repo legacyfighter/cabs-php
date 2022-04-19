@@ -15,12 +15,12 @@ use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Address\AddressRepository;
 use LegacyFighter\Cabs\Geolocation\GeocodingService;
-use LegacyFighter\Cabs\Service\DriverSessionService;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\TransitService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
+use LegacyFighter\Cabs\Tracking\DriverSessionService;
+use LegacyFighter\Cabs\Tracking\DriverTrackingService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 

@@ -130,4 +130,13 @@ class DriverService
         }
         $this->driverAttributeRepository->save(new DriverAttribute($attributeName, $value, $driver));
     }
+
+    /**
+     * @param int[] $ids
+     * @return DriverDTO[]
+     */
+    public function loadDrivers(array $ids): array
+    {
+        return array_map(fn(Driver $d) => DriverDTO::from($d), $this->driverRepository->findAllByIds($ids));
+    }
 }

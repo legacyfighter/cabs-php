@@ -81,7 +81,7 @@ class Fixtures
         $transitDetails = new TransitDetails(new \DateTimeImmutable(), 1, $from->toAddressEntity(), $to->toAddressEntity(), Distance::zero(), $client, CarType::CAR_CLASS_VAN, Money::zero(), $transit->getTariff());
         PrivateProperty::setId(1, $transitDetails);
 
-        return TransitDTO::from($transit, TransitDetailsDTO::from($transitDetails));
+        return TransitDTO::from(TransitDetailsDTO::from($transitDetails), []);
     }
 
     public function aTransitDTO(AddressDTO $from, AddressDTO $to): TransitDTO
@@ -92,16 +92,16 @@ class Fixtures
     public function clientHasDoneTransits(Client $client, int $noOfTransits): void
     {
         foreach (range(1, $noOfTransits) as $_) {
-            $this->aJourney(10, $client, $this->aNearbyDriver(), $this->anAddress(), $this->anAddress());
+            $this->aRide(10, $client, $this->aNearbyDriver(), $this->anAddress(), $this->anAddress());
         }
     }
 
-    public function aJourney(int $price, Client $client, Driver $driver, Address $from, Address $destination): Transit
+    public function aRide(int $price, Client $client, Driver $driver, Address $from, Address $destination): Transit
     {
         return $this->rideFixture->aRide($price, $client, $driver, $from, $destination);
     }
 
-    public function aJourneyWithFixedClock(int $price, \DateTimeImmutable $publishedAt, \DateTimeImmutable $completedAt, Client $client, Driver $driver, Address $from, Address $destination, FixedClock $clock): Transit
+    public function aRideWithFixedClock(int $price, \DateTimeImmutable $publishedAt, \DateTimeImmutable $completedAt, Client $client, Driver $driver, Address $from, Address $destination, FixedClock $clock): Transit
     {
         return $this->rideFixture->aRideWithFixedClock($price, $publishedAt, $completedAt, $client, $driver, $from, $destination, $clock);
     }
@@ -119,7 +119,7 @@ class Fixtures
     public function clientHasDoneClaims(Client $client, int $howMany): void
     {
         foreach (range(1, $howMany) as $_) {
-            $this->createAndResolveClaim($client, $this->aJourney(20, $client, $this->aNearbyDriver(), $this->anAddress(), $this->anAddress()));
+            $this->createAndResolveClaim($client, $this->aRide(20, $client, $this->aNearbyDriver(), $this->anAddress(), $this->anAddress()));
         }
         $this->em->refresh($client);
     }

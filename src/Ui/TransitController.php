@@ -22,8 +22,7 @@ class TransitController
     #[Route('/transits', methods: ['POST'])]
     public function createTransit(TransitDTO $transitDTO): Response
     {
-        $transit = $this->transitService->createTransit($transitDTO);
-        return new JsonResponse($this->transitService->loadTransit($transit->getId()));
+        return new JsonResponse($this->transitService->createTransit($transitDTO));
     }
 
     #[Route('/transits/{id}/changeAddressTo', methods: ['POST'])]

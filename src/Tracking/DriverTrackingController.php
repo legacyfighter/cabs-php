@@ -1,10 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\Tracking;
 
-use LegacyFighter\Cabs\DTO\DriverPositionDTO;
-use LegacyFighter\Cabs\Entity\DriverPosition;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +27,7 @@ class DriverTrackingController
     private function toDto(DriverPosition $driverPosition): DriverPositionDTO
     {
         return DriverPositionDTO::from(
-            $driverPosition->getDriver()->getId(),
+            $driverPosition->getDriverId(),
             $driverPosition->getLatitude(),
             $driverPosition->getLongitude(),
             $driverPosition->getSeenAt()

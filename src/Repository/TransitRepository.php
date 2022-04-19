@@ -55,9 +55,9 @@ class TransitRepository
      */
     public function findAllByDriverAndDateTimeBetween(Driver $driver, \DateTimeImmutable $from, \DateTimeImmutable $to): array
     {
-        return $this->em->createQuery(sprintf('SELECT t FROM %s t JOIN %s td WITH t.id = td.transitId WHERE t.driver = :driver AND td.dateTime >= :from AND td.dateTime <= :to' , Transit::class, TransitDetails::class))
+        return $this->em->createQuery(sprintf('SELECT t FROM %s t JOIN %s td WITH t.id = td.transitId WHERE t.driverId = :driverId AND td.dateTime >= :from AND td.dateTime <= :to' , Transit::class, TransitDetails::class))
             ->setParameters([
-                'driver' => $driver,
+                'driverId' => $driver->getId(),
                 'from' => $from,
                 'to' => $to
             ])

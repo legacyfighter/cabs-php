@@ -44,6 +44,15 @@ services:
     LegacyFighter\Cabs\Crm\ClientController:
         tags: ['controller.service_arguments']
 
+    LegacyFighter\Cabs\Tracking\DriverSessionController:
+        tags: ['controller.service_arguments']
+
+    LegacyFighter\Cabs\Tracking\DriverTrackingController:
+        tags: ['controller.service_arguments']
+
+    LegacyFighter\Cabs\Agreements\ContractController:
+        tags: ['controller.service_arguments']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     Laudis\Neo4j\Contracts\ClientInterface:

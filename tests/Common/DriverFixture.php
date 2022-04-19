@@ -10,8 +10,8 @@ use LegacyFighter\Cabs\DriverFleet\DriverFee;
 use LegacyFighter\Cabs\DriverFleet\DriverFeeRepository;
 use LegacyFighter\Cabs\DriverFleet\DriverService;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Service\DriverSessionService;
-use LegacyFighter\Cabs\Service\DriverTrackingService;
+use LegacyFighter\Cabs\Tracking\DriverSessionService;
+use LegacyFighter\Cabs\Tracking\DriverTrackingService;
 
 class DriverFixture
 {

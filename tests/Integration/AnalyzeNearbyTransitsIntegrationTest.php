@@ -239,6 +239,6 @@ class AnalyzeNearbyTransitsIntegrationTest extends Neo4jTestCase
 
     private function aTransitFromTo(string $publishedAt, string $completedAt, Client $client, Address $pickup, Address $destination): void
     {
-        $this->fixtures->aJourneyWithFixedClock(40, new \DateTimeImmutable($publishedAt), new \DateTimeImmutable($completedAt), $client, $this->fixtures->aNearbyDriver(), $pickup, $destination, $this->clock);
+        $this->fixtures->aRideWithFixedClock(40, new \DateTimeImmutable($publishedAt), new \DateTimeImmutable($completedAt), $client, $this->fixtures->aNearbyDriver(), $pickup, $destination, $this->clock);
     }
 }

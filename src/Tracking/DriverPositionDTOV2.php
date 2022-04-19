@@ -1,27 +1,25 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\DriverFleet\Driver;
+namespace LegacyFighter\Cabs\Tracking;
 
 class DriverPositionDTOV2
 {
-    private Driver $driver;
+    private int $driverId;
     private float $latitude;
     private float $longitude;
     private \DateTimeImmutable $seenAt;
 
-    public function __construct(Driver $driver, float $latitude, float $longitude, \DateTimeImmutable $seenAt)
+    public function __construct(int $driverId, float $latitude, float $longitude, \DateTimeImmutable $seenAt)
     {
-        $this->driver = $driver;
+        $this->driverId = $driverId;
         $this->latitude = $latitude;
         $this->longitude = $longitude;
         $this->seenAt = $seenAt;
     }
 
-    public function getDriver(): Driver
+    public function getDriverId(): int
     {
-        return $this->driver;
+        return $this->driverId;
     }
 
     public function getLatitude(): float

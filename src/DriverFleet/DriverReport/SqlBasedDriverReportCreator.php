@@ -7,10 +7,10 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
 use LegacyFighter\Cabs\DriverFleet\DriverAttribute;
 use LegacyFighter\Cabs\DriverFleet\DriverDTO;
-use LegacyFighter\Cabs\DTO\DriverSessionDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
+use LegacyFighter\Cabs\Tracking\DriverSessionDTO;
 
 class SqlBasedDriverReportCreator
 {

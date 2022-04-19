@@ -246,7 +246,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         //and
         $driver = $this->fixtures->aNearbyDriver();
         //and
-        $claim = $this->fixtures->createClaim($client, $this->fixtures->aJourney(50, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress()));
+        $claim = $this->fixtures->createClaim($client, $this->fixtures->aRide(50, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress()));
 
         //then
         $this->awardsService->expects($this->never())->method('registerNonExpiringMiles');
@@ -262,7 +262,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
 
     private function aTransit(Client $client, Driver $driver, int $price): Transit
     {
-        return $this->fixtures->aJourney($price, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress());
+        return $this->fixtures->aRide($price, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress());
     }
 
     private function noOfTransitsForAutomaticRefundIs(int $no): void

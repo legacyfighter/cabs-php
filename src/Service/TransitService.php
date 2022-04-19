@@ -6,12 +6,10 @@ namespace LegacyFighter\Cabs\Service;
 use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Crm\ClientRepository;
-use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DriverFleet\DriverFeeService;
 use LegacyFighter\Cabs\DriverFleet\DriverRepository;
-use LegacyFighter\Cabs\DTO\DriverPositionDTOV2;
+use LegacyFighter\Cabs\DriverFleet\DriverService;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\DriverSession;
 use LegacyFighter\Cabs\Entity\Events\TransitCompleted;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
@@ -23,9 +21,8 @@ use LegacyFighter\Cabs\Geolocation\GeocodingService;
 use LegacyFighter\Cabs\Invocing\InvoiceGenerator;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Notification\DriverNotificationService;
-use LegacyFighter\Cabs\Repository\DriverPositionRepository;
-use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Tracking\DriverTrackingService;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -38,8 +35,8 @@ class TransitService
         private InvoiceGenerator $invoiceGenerator,
         private DriverNotificationService $notificationService,
         private DistanceCalculator $distanceCalculator,
-        private DriverPositionRepository $driverPositionRepository,
-        private DriverSessionRepository $driverSessionRepository,
+        private DriverTrackingService $driverTrackingService,
+        private DriverService $driverService,
         private CarTypeService $carTypeService,
         private GeocodingService $geocodingService,
         private AddressRepository $addressRepository,
@@ -51,11 +48,11 @@ class TransitService
     )
     { }
 
-    public function createTransit(TransitDTO $transitDTO): Transit
+    public function createTransit(TransitDTO $transitDTO): TransitDTO
     {
         $from = $this->addressFromDto($transitDTO->getFrom());
         $to = $this->addressFromDto($transitDTO->getTo());
-        return $this->createTransitFrom($transitDTO->getClientDTO()->getId(), $from, $to, $transitDTO->getCarClass());
+        return $this->loadTransit($this->createTransitFrom($transitDTO->getClientDTO()->getId(), $from, $to, $transitDTO->getCarClass())->getId());
     }
 
     public function createTransitFrom(int $clientId, Address $from, Address $to, ?string $carClass): Transit
@@ -128,8 +125,8 @@ class TransitService
         $this->transitRepository->save($transit);
         $this->transitDetailsFacade->pickupChangedTo($transitId, $newAddress, $distance);
 
-        foreach ($transit->getProposedDrivers() as $driver) {
-            $this->notificationService->notifyAboutChangedTransitAddress($driver->getId(), $transit->getId());
+        foreach ($transit->getProposedDrivers() as $driverId) {
+            $this->notificationService->notifyAboutChangedTransitAddress($driverId, $transit->getId());
         }
     }
 
@@ -150,8 +147,8 @@ class TransitService
         $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
         $transit->changeDestinationTo($newAddress, $distance);
         $this->transitDetailsFacade->destinationChanged($transitId, $newAddress, $distance);
-        if($transit->getDriver() !== null) {
-            $this->notificationService->notifyAboutChangedTransitAddress($transit->getDriver()->getId(), $transit->getId());
+        if($transit->getDriverId() !== null) {
+            $this->notificationService->notifyAboutChangedTransitAddress($transit->getDriverId(), $transit->getId());
         }
     }
 
@@ -173,8 +170,8 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getDriver() !== null) {
-            $this->notificationService->notifyAboutCancelledTransit($transit->getDriver()->getId(), $transitId);
+        if($transit->getDriverId() !== null) {
+            $this->notificationService->notifyAboutCancelledTransit($transit->getDriverId(), $transitId);
         }
 
         $transit->cancel();
@@ -259,70 +256,26 @@ class TransitService
                         180 / M_PI;
                     $longitudeMax = $longitude + $dLon * 180 / M_PI;
 
-                    $driversAvgPositions = $this->driverPositionRepository
-                        ->findAverageDriverPositionSince($latitudeMin, $latitudeMax, $longitudeMin, $longitudeMax, $this->clock->now()->modify('-5 minutes'));
+                    $carClasses = $this->choosePossibleCarClasses($transitDetail->carType);
+                    if($carClasses === []) {
+                        return $transit;
+                    }
 
-                    if(count($driversAvgPositions) !== 0) {
-                        usort(
-                            $driversAvgPositions,
-                            fn(DriverPositionDTOV2 $d1, DriverPositionDTOV2 $d2) =>
-                                sqrt(pow($latitude - $d1->getLatitude(), 2) + pow($longitude - $d1->getLongitude(), 2)) <=>
-                                sqrt(pow($latitude - $d2->getLatitude(), 2) + pow($longitude - $d2->getLongitude(), 2))
-                        );
-                        $driversAvgPositions = array_slice($driversAvgPositions, 0, 20);
-
-                        $carClasses = [];
-                        $activeCarClasses = $this->carTypeService->findActiveCarClasses();
-                        if(count($activeCarClasses) === 0) {
-                            return $transit;
-                        }
-                        if($transitDetail->carType
-
-                            !== null) {
-                            if(in_array($transitDetail->carType, $activeCarClasses)) {
-                                $carClasses[] = $transitDetail->carType;
-                            }else {
-                                return $transit;
-                                }
-                        } else {
-                            $carClasses = $activeCarClasses;
-                        }
-
-                        $drivers = array_map(fn(DriverPositionDTOV2 $dp) => $dp->getDriver()->getId(), $driversAvgPositions);
-
-                        $activeDriverIdsInSpecificCar = array_map(
-                            fn(DriverSession $ds)
-                                => $ds->getDriverId(),
-
-                            $this->driverSessionRepository->findAllByLoggedOutAtNullAndDriverInAndCarClassIn($drivers, $carClasses));
-
-                        $driversAvgPositions = array_filter(
-                            $driversAvgPositions,
-                            fn(DriverPositionDTOV2 $dp) => in_array($dp->getDriver()->getId(), $activeDriverIdsInSpecificCar)
-                        );
-
-                        // Iterate across average driver positions
-                        foreach ($driversAvgPositions as $driverAvgPosition) {
-                            /** @var DriverPositionDTOV2 $driverAvgPosition */
-                            $driver = $driverAvgPosition->getDriver();
-                            if($driver->getStatus() === Driver::STATUS_ACTIVE &&
-
-                                    $driver->getOccupied() == false) {
-                                if($transit->canProposeTo($driver)) {
-                                    $transit->proposeTo($driver);
-                                    $this->notificationService->notifyAboutPossibleTransit($driver->getId(), $transitId);
-                                }
-                            } else {
-                                // Not implemented yet!
-                            }
-                        }
-
-                        $this->transitRepository->save($transit);
-
-                    } else {
-                        // Next iteration, no drivers at specified area
+                    $driversAvgPositions = $this->driverTrackingService->findActiveDriversNearby($latitudeMin, $latitudeMax, $longitudeMin, $longitudeMax, $latitude, $longitude, $carClasses);
+                    if($driversAvgPositions === []) {
+                        //next iteration
                         continue;
                     }
+
+                    // Iterate across average driver positions
+                    foreach ($driversAvgPositions as $driverAvgPosition) {
+                        if($transit->canProposeTo($driverAvgPosition->getDriverId())) {
+                            $transit->proposeTo($driverAvgPosition->getDriverId());
+                            $this->notificationService->notifyAboutPossibleTransit($driverAvgPosition->getDriverId(), $transit->getId());
+                        }
+                    }
+
+                    return $transit;
                 }
             } else {
                 throw new \InvalidArgumentException('..., id = '.$transitId);
@@ -344,7 +297,7 @@ class TransitService
         }
 
         $now = $this->clock->now();
-        $transit->acceptBy($driver, $now);
+        $transit->acceptBy($driver->getId(), $now);
         $this->transitRepository->save($transit);
         $this->driverRepository->save($driver);
         $this->transitDetailsFacade->transitAccepted($transitId, $now, $driverId);
@@ -384,7 +337,7 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $transit->rejectBy($driver);
+        $transit->rejectBy($driver->getId());
         $this->transitRepository->save($transit);
     }
 
@@ -435,9 +388,30 @@ class TransitService
 
     public function loadTransit(int $id): TransitDTO
     {
+        $transit = $this->transitRepository->getOne($id);
+
         return TransitDTO::from(
-            $this->transitRepository->getOne($id),
-            $this->transitDetailsFacade->find($id)
+            $this->transitDetailsFacade->find($id),
+            $this->driverService->loadDrivers($transit->getProposedDrivers()),
+            $transit->getDriverId()
         );
+    }
+
+    /**
+     * @return string[]
+     */
+    private function choosePossibleCarClasses(?string $carClass = null): array
+    {
+        $carClasses = [];
+        $activeCarClasses = $this->carTypeService->findActiveCarClasses();
+        if($carClass !== null) {
+            if(in_array($carClass, $activeCarClasses, true)) {
+                $carClasses[] = $carClass;
+            }
+        } else {
+            $carClasses = $activeCarClasses;
+        }
+
+        return $carClasses;
     }
 }
