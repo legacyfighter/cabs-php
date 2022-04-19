@@ -1,9 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\CarFleet;
 
-use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\Service\CarTypeService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,8 +13,7 @@ class CarTypeController
     #[Route('/cartypes', methods: ['POST'])]
     public function create(CarTypeDTO $carTypeDTO): Response
     {
-        $created = $this->carTypeService->create($carTypeDTO);
-        return new JsonResponse($this->carTypeService->loadDto($created->getId()));
+        return new JsonResponse($this->carTypeService->create($carTypeDTO));
     }
 
     #[Route('/cartypes/{carClass}/registerCar', methods: ['POST'])]

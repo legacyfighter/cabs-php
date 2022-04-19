@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\CarFleet;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;

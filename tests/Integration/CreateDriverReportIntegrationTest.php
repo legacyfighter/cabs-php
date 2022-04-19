@@ -3,16 +3,16 @@
 namespace LegacyFighter\Cabs\Tests\Integration;
 
 use Doctrine\ORM\EntityManagerInterface;
+use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AddressRepository;
-use LegacyFighter\Cabs\Service\CarTypeService;
 use LegacyFighter\Cabs\Service\DriverSessionService;
 use LegacyFighter\Cabs\Service\DriverTrackingService;
 use LegacyFighter\Cabs\Service\GeocodingService;

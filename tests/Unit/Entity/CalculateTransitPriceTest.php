@@ -4,7 +4,6 @@ namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;

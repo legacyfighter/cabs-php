@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
-use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Service\CarTypeService;
+use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\CarFleet\CarTypeDTO;
+use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -114,7 +114,7 @@ class CarTypeUpdateIntegrationTest extends KernelTestCase
         $carType = new CarType($carClass, $desc, 1);
         PrivateProperty::setId(1, $carType);
         $carTypDTO = CarTypeDTO::new($carType);
-        return $this->carTypeService->loadDto($this->carTypeService->create($carTypDTO)->getId());
+        return $this->carTypeService->create($carTypDTO);
     }
 
     private function thereIsNoCarClassInTheSystem(string $carClass): void

@@ -3,12 +3,13 @@
 namespace LegacyFighter\Cabs\Tests\Common;
 
 use Doctrine\ORM\EntityManagerInterface;
+use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\CarFleet\CarTypeDTO;
 use LegacyFighter\Cabs\Crm\Claims\Claim;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverFee;
@@ -68,7 +69,7 @@ class Fixtures
         return $this->transitFixture->transitDetails($driver, $price, $when, $client ?? $this->aClient(), $this->anAddress(), $this->anAddress());
     }
 
-    public function anActiveCarCategory(string $carClass): CarType
+    public function anActiveCarCategory(string $carClass): CarTypeDTO
     {
         return $this->carTypeFixture->anActiveCarCategory($carClass);
     }

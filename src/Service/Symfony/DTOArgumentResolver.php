@@ -2,8 +2,6 @@
 
 namespace LegacyFighter\Cabs\Service\Symfony;
 
-use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\DTO\ClientDTO;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;

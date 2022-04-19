@@ -2,11 +2,10 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Ui\TransitAnalyzerController;

@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
-
-use LegacyFighter\Cabs\Entity\CarType;
+namespace LegacyFighter\Cabs\CarFleet;
 
 class CarTypeDTO implements \JsonSerializable
 {

@@ -2,8 +2,6 @@
 
 namespace LegacyFighter\Cabs\Agreements;
 
-use LegacyFighter\Cabs\DTO\ContractAttachmentDTO;
-use LegacyFighter\Cabs\DTO\ContractDTO;
 use LegacyFighter\Cabs\Entity\ContractAttachmentData;
 use LegacyFighter\Cabs\Repository\ContractAttachmentDataRepository;
 

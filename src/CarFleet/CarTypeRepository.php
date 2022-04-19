@@ -1,15 +1,11 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\CarFleet;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Entity\CarTypeActiveCounter;
 
 class CarTypeRepository
 {
-
-
     public function __construct(
         private EntityManagerInterface $em,
         private CarTypeActiveCounterRepository $carTypeActiveCounterRepository

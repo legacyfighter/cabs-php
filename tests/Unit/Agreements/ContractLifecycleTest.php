@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Tests\Unit\Entity;
+namespace LegacyFighter\Cabs\Tests\Unit\Agreements;
 
 use LegacyFighter\Cabs\Agreements\Contract;
 use LegacyFighter\Cabs\Agreements\ContractAttachment;

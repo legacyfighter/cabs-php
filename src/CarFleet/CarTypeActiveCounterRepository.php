@@ -1,9 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\CarFleet;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\CarTypeActiveCounter;
 
 class CarTypeActiveCounterRepository
 {

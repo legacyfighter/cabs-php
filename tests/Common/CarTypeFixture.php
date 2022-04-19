@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Service\CarTypeService;
+use LegacyFighter\Cabs\CarFleet\CarType;
+use LegacyFighter\Cabs\CarFleet\CarTypeDTO;
+use LegacyFighter\Cabs\CarFleet\CarTypeService;
 
 class CarTypeFixture
 {
@@ -14,7 +14,7 @@ class CarTypeFixture
     {
     }
 
-    public function anActiveCarCategory(string $carClass): CarType
+    public function anActiveCarCategory(string $carClass): CarTypeDTO
     {
         $carType = new CarType($carClass, 'opis', 1);
         PrivateProperty::setId(1, $carType);

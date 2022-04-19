@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Ui;
 
+use LegacyFighter\Cabs\Agreements\ContractAttachmentDTO;
+use LegacyFighter\Cabs\Agreements\ContractDTO;
 use LegacyFighter\Cabs\Agreements\ContractService;
-use LegacyFighter\Cabs\DTO\ContractAttachmentDTO;
-use LegacyFighter\Cabs\DTO\ContractDTO;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

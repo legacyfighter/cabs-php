@@ -2,6 +2,7 @@
 
 namespace LegacyFighter\Cabs\Service;
 
+use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Entity\DriverSession;
 use LegacyFighter\Cabs\Repository\DriverRepository;

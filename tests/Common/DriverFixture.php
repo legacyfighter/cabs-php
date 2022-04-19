@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\Entity\CarType;
+use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
 use LegacyFighter\Cabs\Entity\DriverFee;

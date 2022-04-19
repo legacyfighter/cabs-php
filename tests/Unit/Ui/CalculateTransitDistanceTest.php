@@ -2,10 +2,10 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Ui;
 
+use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
-use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;

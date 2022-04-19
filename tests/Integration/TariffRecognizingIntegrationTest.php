@@ -2,10 +2,10 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\DTO\ClientDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Ui\TransitController;

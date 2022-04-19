@@ -1,8 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
+namespace LegacyFighter\Cabs\Agreements;
 
-use LegacyFighter\Cabs\Agreements\Contract;
 use LegacyFighter\Cabs\Entity\ContractAttachmentData;
 
 class ContractDTO implements \JsonSerializable

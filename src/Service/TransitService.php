@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\Service;
 
 // If this class will still be here in 2022 I will quit.
+use LegacyFighter\Cabs\CarFleet\CarTypeService;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;

@@ -1,11 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\CarFleet;
 
 use LegacyFighter\Cabs\Config\AppProperties;
-use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Repository\CarTypeRepository;
 
 class CarTypeService
 {
@@ -34,16 +31,16 @@ class CarTypeService
         return CarTypeDTO::new($loaded, $this->carTypeRepository->findActiveCounter($loaded->getCarClass())->getActiveCarsCounter());
     }
 
-    public function create(CarTypeDTO $carTypeDTO): CarType
+    public function create(CarTypeDTO $carTypeDTO): CarTypeDTO
     {
         $byCarClass = $this->carTypeRepository->findByCarClass($carTypeDTO->getCarClass());
         if($byCarClass === null) {
             $type = new CarType($carTypeDTO->getCarClass(), $carTypeDTO->getDescription(), $carTypeDTO->getMinNoOfCarsToActivateClass());
             $this->carTypeRepository->save($type);
-            return $type;
+            return $this->loadDto($type->getId());
         } else {
             $byCarClass->setDescription($carTypeDTO->getDescription());
-            return $this->carTypeRepository->findByCarClass($carTypeDTO->getCarClass());
+            return $this->loadDto($this->carTypeRepository->findByCarClass($carTypeDTO->getCarClass())->getId());
         }
     }
 
