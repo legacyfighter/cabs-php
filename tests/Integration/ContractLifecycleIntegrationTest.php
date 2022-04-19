@@ -2,11 +2,11 @@
 
 namespace LegacyFighter\Cabs\Tests\Integration;
 
+use LegacyFighter\Cabs\Agreements\Contract;
+use LegacyFighter\Cabs\Agreements\ContractAttachment;
+use LegacyFighter\Cabs\Agreements\ContractService;
 use LegacyFighter\Cabs\DTO\ContractAttachmentDTO;
 use LegacyFighter\Cabs\DTO\ContractDTO;
-use LegacyFighter\Cabs\Entity\Contract;
-use LegacyFighter\Cabs\Entity\ContractAttachment;
-use LegacyFighter\Cabs\Service\ContractService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ContractLifecycleIntegrationTest extends KernelTestCase

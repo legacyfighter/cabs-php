@@ -2,7 +2,7 @@
 
 namespace LegacyFighter\Cabs\DTO;
 
-use LegacyFighter\Cabs\Entity\ContractAttachment;
+use LegacyFighter\Cabs\Agreements\ContractAttachment;
 use LegacyFighter\Cabs\Entity\ContractAttachmentData;
 
 class ContractAttachmentDTO implements \JsonSerializable

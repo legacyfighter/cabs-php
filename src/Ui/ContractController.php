@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Ui;
 
+use LegacyFighter\Cabs\Agreements\ContractService;
 use LegacyFighter\Cabs\DTO\ContractAttachmentDTO;
 use LegacyFighter\Cabs\DTO\ContractDTO;
-use LegacyFighter\Cabs\Service\ContractService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,8 +16,7 @@ class ContractController
     #[Route('/contracts', methods: ['POST'])]
     public function create(ContractDTO $contractDTO): Response
     {
-        $created = $this->contractService->createContract($contractDTO);
-        return new JsonResponse(ContractDTO::from($created, []));
+        return new JsonResponse($this->contractService->createContract($contractDTO));
     }
 
     #[Route('/contracts/{id}', methods: ['GET'])]

@@ -1,19 +1,14 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
+namespace LegacyFighter\Cabs\Agreements;
 
 use LegacyFighter\Cabs\DTO\ContractAttachmentDTO;
 use LegacyFighter\Cabs\DTO\ContractDTO;
-use LegacyFighter\Cabs\Entity\Contract;
-use LegacyFighter\Cabs\Entity\ContractAttachment;
 use LegacyFighter\Cabs\Entity\ContractAttachmentData;
 use LegacyFighter\Cabs\Repository\ContractAttachmentDataRepository;
-use LegacyFighter\Cabs\Repository\ContractAttachmentRepository;
-use LegacyFighter\Cabs\Repository\ContractRepository;
 
 class ContractService
 {
-
 
     public function __construct(
         private ContractRepository $contractRepository,
@@ -22,14 +17,14 @@ class ContractService
     {
     }
 
-    public function createContract(ContractDTO $contractDTO): Contract
+    public function createContract(ContractDTO $contractDTO): ContractDTO
     {
         $partnerContractsCount = count($this->contractRepository->findByPartnerName($contractDTO->getPartnerName())) + 1;
-        return $this->contractRepository->save(new Contract(
+        return $this->findDto($this->contractRepository->save(new Contract(
             $contractDTO->getPartnerName(),
             $contractDTO->getSubject(),
             sprintf('C/%s/%s', $partnerContractsCount, $contractDTO->getPartnerName())
-        ));
+        ))->getId());
     }
 
     public function acceptContract(int $id): void

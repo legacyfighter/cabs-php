@@ -2,8 +2,8 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Entity\Contract;
-use LegacyFighter\Cabs\Entity\ContractAttachment;
+use LegacyFighter\Cabs\Agreements\Contract;
+use LegacyFighter\Cabs\Agreements\ContractAttachment;
 use PHPUnit\Framework\TestCase;
 
 class ContractLifecycleTest extends TestCase
