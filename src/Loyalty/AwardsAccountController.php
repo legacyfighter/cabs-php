@@ -1,8 +1,7 @@
 <?php
 
-namespace LegacyFighter\Cabs\Ui;
+namespace LegacyFighter\Cabs\Loyalty;
 
-use LegacyFighter\Cabs\Service\AwardsService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

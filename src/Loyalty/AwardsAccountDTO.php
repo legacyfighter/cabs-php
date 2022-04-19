@@ -1,8 +1,8 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
+namespace LegacyFighter\Cabs\Loyalty;
 
-use LegacyFighter\Cabs\Entity\Miles\AwardsAccount;
+use LegacyFighter\Cabs\DTO\ClientDTO;
 
 class AwardsAccountDTO implements \JsonSerializable
 {

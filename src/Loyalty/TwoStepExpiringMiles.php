@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity\Miles;
+namespace LegacyFighter\Cabs\Loyalty;
 
 class TwoStepExpiringMiles implements Miles
 {

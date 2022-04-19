@@ -1,8 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity\Miles;
-
-use Doctrine\ORM\Mapping\Entity;
+namespace LegacyFighter\Cabs\Loyalty;
 
 class ConstantUntil implements Miles
 {

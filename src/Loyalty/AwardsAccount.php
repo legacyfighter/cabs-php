@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LegacyFighter\Cabs\Entity\Miles;
+namespace LegacyFighter\Cabs\Loyalty;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

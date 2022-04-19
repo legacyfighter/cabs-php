@@ -6,10 +6,10 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\Crm\Claims\ClaimResolver\Result;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Notification\ClientNotificationService;
 use LegacyFighter\Cabs\Notification\DriverNotificationService;
 use LegacyFighter\Cabs\Repository\ClientRepository;
-use LegacyFighter\Cabs\Service\AwardsService;
 use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 
 class ClaimService

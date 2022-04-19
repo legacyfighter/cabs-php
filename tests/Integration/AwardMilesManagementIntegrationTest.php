@@ -5,8 +5,8 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Config\AppProperties;
-use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
-use LegacyFighter\Cabs\Service\AwardsService;
+use LegacyFighter\Cabs\Loyalty\AwardsAccountRepository;
+use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

@@ -2,8 +2,8 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity\Miles;
 
-use LegacyFighter\Cabs\Entity\Miles\ConstantUntil;
-use LegacyFighter\Cabs\Entity\Miles\TwoStepExpiringMiles;
+use LegacyFighter\Cabs\Loyalty\ConstantUntil;
+use LegacyFighter\Cabs\Loyalty\TwoStepExpiringMiles;
 use PHPUnit\Framework\TestCase;
 
 class MilesTest extends TestCase

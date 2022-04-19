@@ -4,12 +4,10 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\Entity\Client;
-use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Repository\AwardsAccountRepository;
-use LegacyFighter\Cabs\Repository\ClientRepository;
+use LegacyFighter\Cabs\Loyalty\AwardsAccountRepository;
+use LegacyFighter\Cabs\Loyalty\AwardsService;
+use LegacyFighter\Cabs\Loyalty\AwardsServiceImpl;
 use LegacyFighter\Cabs\Repository\TransitRepository;
-use LegacyFighter\Cabs\Service\AwardsService;
-use LegacyFighter\Cabs\Service\AwardsServiceImpl;
 use LegacyFighter\Cabs\Service\ClientService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LegacyFighter\Cabs\Entity\Miles;
+namespace LegacyFighter\Cabs\Loyalty;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;

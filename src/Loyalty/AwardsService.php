@@ -1,9 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service;
-
-use LegacyFighter\Cabs\DTO\AwardsAccountDTO;
-use LegacyFighter\Cabs\Entity\Miles\AwardedMiles;
+namespace LegacyFighter\Cabs\Loyalty;
 
 interface AwardsService
 {

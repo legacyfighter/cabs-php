@@ -38,6 +38,9 @@ services:
     LegacyFighter\Cabs\DriverFleet\DriverReport\DriverReportController:
         tags: ['controller.service_arguments']
 
+    LegacyFighter\Cabs\Loyalty\AwardsAccountController:
+        tags: ['controller.service_arguments']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     Laudis\Neo4j\Contracts\ClientInterface:
@@ -48,6 +51,6 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'LegacyFighter\Cabs\Entity\Events\TransitCompleted', method: 'handle' }
 
-    LegacyFighter\Cabs\Service\AwardsServiceImpl:
+    LegacyFighter\Cabs\Loyalty\AwardsServiceImpl:
         calls:
             - setClaimService: ['@LegacyFighter\Cabs\Crm\Claims\ClaimService']

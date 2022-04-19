@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity\Miles;
+namespace LegacyFighter\Cabs\Loyalty;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
