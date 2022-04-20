@@ -1,18 +1,19 @@
 <?php
 
-namespace LegacyFighter\Cabs\DTO;
+namespace LegacyFighter\Cabs\Ride;
 
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
 use LegacyFighter\Cabs\Crm\ClientDTO;
 use LegacyFighter\Cabs\DriverFleet\DriverDTO;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Distance;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsDTO;
+use Symfony\Component\Uid\Uuid;
 
 class TransitDTO implements \JsonSerializable
 {
-    private int $id;
+    private ?int $id;
+    private Uuid $requestUuid;
     private string $tariff;
     private string $status;
     public ?DriverDTO $driver = null;
@@ -45,10 +46,11 @@ class TransitDTO implements \JsonSerializable
 
     }
 
-    public static function with(int $id, string $status, string $tariff, float $kmRate, AddressDTO $from, AddressDTO $to, ?DriverDTO $driverDTO, ?ClientDTO $clientDTO, ?ClaimDTO $claimDTO, ?string $carType = null): self
+    public static function with(int $id, Uuid $requestUuid, string $status, string $tariff, float $kmRate, AddressDTO $from, AddressDTO $to, ?DriverDTO $driverDTO, ?ClientDTO $clientDTO, ?ClaimDTO $claimDTO, ?string $carType = null): self
     {
         $instance = new self();
         $instance->id = $id;
+        $instance->requestUuid = $requestUuid;
         $instance->status = $status;
         $instance->tariff = $tariff;
         $instance->kmRate = $kmRate;
@@ -68,6 +70,7 @@ class TransitDTO implements \JsonSerializable
     {
         $instance = new self();
         $instance->id = $transitDetails->transitId;
+        $instance->requestUuid = $transitDetails->requestUuid;
         $instance->distance = $transitDetails->distance;
         $instance->factor = 1;
         $instance->price = $transitDetails->price !== null ? (float) $transitDetails->price->toInt() : null;
@@ -93,7 +96,7 @@ class TransitDTO implements \JsonSerializable
         return $instance;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -209,10 +212,16 @@ class TransitDTO implements \JsonSerializable
         $this->claimDTO = $claimDTO;
     }
 
+    public function getRequestUuid(): Uuid
+    {
+        return $this->requestUuid;
+    }
+
     public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,
+            'requestUuid' => (string) $this->requestUuid,
             'status' => $this->status,
             'tariff' => $this->getTariff(),
             'kmRate' => $this->kmRate,

@@ -11,11 +11,12 @@ use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DriverFleet\DriverAttribute;
 use LegacyFighter\Cabs\DriverFleet\DriverFee;
 use LegacyFighter\Cabs\DriverFleet\DriverReport\DriverReportController;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Address\AddressRepository;
 use LegacyFighter\Cabs\Geolocation\GeocodingService;
-use LegacyFighter\Cabs\Service\TransitService;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitDTO;
+use LegacyFighter\Cabs\Ride\TransitService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
@@ -113,7 +114,7 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
         string $plateNumber,
         string $carBrand,
         \DateTimeImmutable $when
-    ): Transit
+    ): TransitDTO
     {
         $this->clock->setDateTime($when);
         $this->driverSessionService->logIn($driver->getId(), $plateNumber, $carClass, $carBrand);
@@ -124,12 +125,12 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
             $this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01),
             $carClass
         );
-        $this->transitService->publishTransit($transit->getId());
-        $this->transitService->acceptTransit($driver->getId(), $transit->getId());
-        $this->transitService->startTransit($driver->getId(), $transit->getId());
-        $this->transitService->completeTransitFrom($driver->getId(), $transit->getId(), $this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01));
+        $this->transitService->publishTransit($transit->getRequestUuid());
+        $this->transitService->acceptTransit($driver->getId(), $transit->getRequestUuid());
+        $this->transitService->startTransit($driver->getId(), $transit->getRequestUuid());
+        $this->transitService->completeTransitFrom($driver->getId(), $transit->getRequestUuid(), $this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01));
         $this->driverSessionService->logOutCurrentSession($driver->getId());
-        return $transit;
+        return $this->transitService->loadTransit($transit->getRequestUuid());
     }
 
     private function loadReportIncludingPastDays(Driver $driver, int $days): array

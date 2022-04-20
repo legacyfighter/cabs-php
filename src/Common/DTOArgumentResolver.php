@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service\Symfony;
+namespace LegacyFighter\Cabs\Common;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;

@@ -2,22 +2,22 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Pricing\Tariff;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitRepository;
+use LegacyFighter\Cabs\Tests\Double\FakeTariffs;
 
 class StubbedTransitPrice
 {
     public function __construct(
-        private TransitRepository $transitRepository
+        private FakeTariffs $fakeTariffs
     )
     {
     }
 
-    public function stub(int $transitId, Money $faked): Transit
+    public function stub(Money $faked): void
     {
-        $transit = $this->transitRepository->getOne($transitId);
-        $transit->setPrice($faked);
-        return $this->transitRepository->save($transit);
+        $this->fakeTariffs->setFakeTariff(Tariff::of(0, 'faked', $faked));
     }
 }

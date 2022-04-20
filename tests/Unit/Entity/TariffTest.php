@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Tests\Unit\Entity;
 
-use LegacyFighter\Cabs\Entity\Tariff;
 use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
+use LegacyFighter\Cabs\Pricing\Tariff;
 use PHPUnit\Framework\TestCase;
 
 class TariffTest extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Service\Symfony;
+namespace LegacyFighter\Cabs\Common;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

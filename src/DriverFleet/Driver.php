@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
-use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Ride\Transit;
 
 #[Entity]
 class Driver extends BaseEntity

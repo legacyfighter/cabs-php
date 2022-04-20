@@ -2,9 +2,7 @@
 
 namespace LegacyFighter\Cabs\Crm\TransitAnalyzer;
 
-use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Repository\TransitRepository;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsFacade;
 
 class PopulateGraphService
 {

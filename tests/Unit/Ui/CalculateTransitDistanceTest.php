@@ -4,16 +4,16 @@ namespace LegacyFighter\Cabs\Tests\Unit\Ui;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Crm\Client;
-use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Tariff;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
+use LegacyFighter\Cabs\Pricing\Tariff;
+use LegacyFighter\Cabs\Ride\Details\TransitDetails;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsDTO;
+use LegacyFighter\Cabs\Ride\TransitDTO;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
-use LegacyFighter\Cabs\TransitDetails\TransitDetails;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Uid\Uuid;
 
 class CalculateTransitDistanceTest extends TestCase
 {
@@ -74,7 +74,7 @@ class CalculateTransitDistanceTest extends TestCase
         $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
         PrivateProperty::setId(1, $client);
 
-        $td = new TransitDetails(new \DateTimeImmutable(), 1, $address, $address, Distance::ofKm($km), $client, CarType::CAR_CLASS_VAN, Money::from(10), Tariff::ofTime(new \DateTimeImmutable()));
+        $td = new TransitDetails(new \DateTimeImmutable(), Uuid::v4(), $address, $address, Distance::ofKm($km), $client, CarType::CAR_CLASS_VAN, Money::from(10), Tariff::ofTime(new \DateTimeImmutable()));
         PrivateProperty::setId(1, $td);
         return TransitDTO::from(TransitDetailsDTO::from($td), []);
     }

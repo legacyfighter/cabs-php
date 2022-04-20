@@ -6,7 +6,8 @@ use LegacyFighter\Cabs\Crm\Claims\Claim;
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
 use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\Crm\Client;
-use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitDTO;
 
 class ClaimFixture
 {
@@ -16,14 +17,14 @@ class ClaimFixture
     {
     }
 
-    public function createClaim(Client $client, Transit $transit, string $reason = '$$$'): Claim
+    public function createClaim(Client $client, TransitDTO $transit, string $reason = '$$$'): Claim
     {
         $claimDto = ClaimDTO::with('Okradli mnie na hajs', $reason, $client->getId(), $transit->getId());
         $claimDto->setIsDraft(false);
         return $this->claimService->create($claimDto);
     }
 
-    public function createAndResolveClaim(Client $client, Transit $transit): Claim
+    public function createAndResolveClaim(Client $client, TransitDTO $transit): Claim
     {
         $claim = $this->createClaim($client, $transit);
         $this->claimService->tryToResolveAutomatically($claim->getId());

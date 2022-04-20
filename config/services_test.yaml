@@ -15,6 +15,7 @@ services:
   LegacyFighter\Cabs\Tests\Common\RideFixture: ~
   LegacyFighter\Cabs\Tests\Common\StubbedTransitPrice: ~
   LegacyFighter\Cabs\Tests\Common\TransitFixture: ~
+  LegacyFighter\Cabs\Tests\Double\FakeTariffs: ~
 
   LegacyFighter\Cabs\Geolocation\GeocodingService:
     class: LegacyFighter\Cabs\Tests\Double\FakeGeocodingService
@@ -24,6 +25,9 @@ services:
 
   LegacyFighter\Cabs\Common\Clock:
     class: LegacyFighter\Cabs\Tests\Common\FixedClock
+
+  LegacyFighter\Cabs\Pricing\Tariffs:
+    class: LegacyFighter\Cabs\Tests\Double\FakeTariffs
 
   LegacyFighter\Cabs\Crm\TransitAnalyzer\PopulateGraphService:
     public: true

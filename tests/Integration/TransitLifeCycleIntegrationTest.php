@@ -4,11 +4,12 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\DriverFleet\DriverFee;
-use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\GeocodingService;
-use LegacyFighter\Cabs\Service\TransitService;
+use LegacyFighter\Cabs\Ride\Details\Status;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitDTO;
+use LegacyFighter\Cabs\Ride\TransitService;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
 use LegacyFighter\Cabs\Tracking\DriverSessionService;
@@ -45,7 +46,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         );
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
         self::assertNotNull($loaded->getCarClass());
         self::assertNull($loaded->getClaimDTO());
         self::assertNotNull($loaded->getEstimatedPrice());
@@ -58,7 +59,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         self::assertEquals('Warszawa', $loaded->getTo()->getCity());
         self::assertEquals('Żytnia', $loaded->getTo()->getStreet());
         self::assertEquals(20, $loaded->getTo()->getBuildingNumber());
-        self::assertEquals(Transit::STATUS_DRAFT, $transit->getStatus());
+        self::assertEquals(Status::DRAFT, $transit->getStatus());
         self::assertNotNull($loaded->getTariff());
         self::assertNotEquals(0, $loaded->getKmRate());
         self::assertNotNull($loaded->getDateTime());
@@ -76,12 +77,12 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         );
 
         //when
-        $this->transitService->changeTransitAddressTo($transit->getId(), $this->fixtures->anAddressDTO(
+        $this->transitService->changeTransitAddressTo($transit->getRequestUuid(), $this->fixtures->anAddressDTO(
             'Polska', 'Warszawa', 'Mazowiecka', 30
         ));
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
         self::assertEquals(30, $loaded->getTo()->getBuildingNumber());
         self::assertEquals('Mazowiecka', $loaded->getTo()->getStreet());
         self::assertNotNull($loaded->getEstimatedPrice());
@@ -103,18 +104,18 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
         //and
-        $this->transitService->startTransit($driver, $transit->getId());
+        $this->transitService->startTransit($driver, $transit->getRequestUuid());
         //and
-        $this->transitService->completeTransit($driver, $transit->getId(), $destination);
+        $this->transitService->completeTransit($driver, $transit->getRequestUuid(), $destination);
 
         //expect
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\RuntimeException::class);
         $this->transitService->changeTransitAddressTo(
-            $transit->getId(),
+            $transit->getRequestUuid(),
             $this->fixtures->anAddressDTO('Polska', 'Warszawa', 'Żytnia', 23)
         );
     }
@@ -129,14 +130,16 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
             $this->fixtures->anAddressDTO('Polska', 'Warszawa', 'Młynarska', 20),
             $this->fixtures->anAddressDTO('Polska', 'Warszawa', 'Żytnia', 25)
         );
+        //and
+        $this->transitService->publishTransit($transit->getRequestUuid());
 
         //when
-        $this->transitService->changeTransitAddressFrom($transit->getId(), $this->fixtures->anAddressDTO(
+        $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $this->fixtures->anAddressDTO(
             'Polska', 'Warszawa', 'Puławska', 28
         ));
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
         self::assertEquals(28, $loaded->getFrom()->getBuildingNumber());
         self::assertEquals('Puławska', $loaded->getFrom()->getStreet());
     }
@@ -156,27 +159,27 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
-            $this->transitService->changeTransitAddressFrom($transit->getId(), $destination)
+            $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $destination)
         );
 
         //and
-        $this->transitService->startTransit($driver, $transit->getId());
+        $this->transitService->startTransit($driver, $transit->getRequestUuid());
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
-            $this->transitService->changeTransitAddressFrom($transit->getId(), $destination)
+            $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $destination)
         );
 
         //and
-        $this->transitService->completeTransit($driver, $transit->getId(), $destination);
+        $this->transitService->completeTransit($driver, $transit->getRequestUuid(), $destination);
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
-            $this->transitService->changeTransitAddressFrom($transit->getId(), $destination)
+            $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $destination)
         );
     }
 
@@ -191,21 +194,23 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
             $this->fixtures->anAddressDTO('Polska', 'Warszawa', 'Żytnia', 25)
         );
         //and
-        $this->transitService->changeTransitAddressFrom($transit->getId(), $this->fixtures->anAddressDTO(
+        $this->transitService->publishTransit($transit->getRequestUuid());
+        //and
+        $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $this->fixtures->anAddressDTO(
             'Polska', 'Warszawa', 'Żytnia', 26
         ));
         //and
-        $this->transitService->changeTransitAddressFrom($transit->getId(), $this->fixtures->anAddressDTO(
+        $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $this->fixtures->anAddressDTO(
             'Polska', 'Warszawa', 'Żytnia', 27
         ));
         //and
-        $this->transitService->changeTransitAddressFrom($transit->getId(), $this->fixtures->anAddressDTO(
+        $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $this->fixtures->anAddressDTO(
             'Polska', 'Warszawa', 'Żytnia', 28
         ));
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
-            $this->transitService->changeTransitAddressFrom($transit->getId(), $this->fixtures->anAddressDTO(
+            $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $this->fixtures->anAddressDTO(
                 'Polska', 'Warszawa', 'Żytnia', 29
             ))
         );
@@ -224,7 +229,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class, fn() =>
-            $this->transitService->changeTransitAddressFrom($transit->getId(), $this->farAwayAddress())
+            $this->transitService->changeTransitAddressFrom($transit->getRequestUuid(), $this->farAwayAddress())
         );
     }
 
@@ -240,11 +245,11 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         );
 
         //when
-        $this->transitService->cancelTransit($transit->getId());
+        $this->transitService->cancelTransit($transit->getRequestUuid());
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
-        self::assertEquals(Transit::STATUS_CANCELLED, $loaded->getStatus());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
+        self::assertEquals(Status::CANCELLED, $loaded->getStatus());
     }
 
     /**
@@ -262,22 +267,22 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
 
         //and
-        $this->transitService->startTransit($driver, $transit->getId());
+        $this->transitService->startTransit($driver, $transit->getRequestUuid());
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class,
-            fn() => $this->transitService->cancelTransit($transit->getId())
+            fn() => $this->transitService->cancelTransit($transit->getRequestUuid())
         );
 
         //and
-        $this->transitService->completeTransit($driver, $transit->getId(), $destination);
+        $this->transitService->completeTransit($driver, $transit->getRequestUuid(), $destination);
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class,
-            fn() => $this->transitService->cancelTransit($transit->getId())
+            fn() => $this->transitService->cancelTransit($transit->getRequestUuid())
         );
     }
 
@@ -295,11 +300,11 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         $this->aNearbyDriver('WU1212');
 
         //when
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
-        self::assertEquals(Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, $loaded->getStatus());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
+        self::assertEquals(Status::WAITING_FOR_DRIVER_ASSIGNMENT, $loaded->getStatus());
         self::assertNotNull($loaded->getPublished());
     }
 
@@ -316,14 +321,14 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
 
         //when
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
-        self::assertEquals(Transit::STATUS_TRANSIT_TO_PASSENGER, $loaded->getStatus());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
+        self::assertEquals(Status::TRANSIT_TO_PASSENGER, $loaded->getStatus());
         self::assertNotNull($loaded->getAcceptedAt());
     }
 
@@ -342,13 +347,13 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $secondDriver = $this->aNearbyDriver('DW MARIO');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
 
         //expect
-        self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $this->transitService->acceptTransit($secondDriver, $transit->getId())
+        self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class,
+            fn() => $this->transitService->acceptTransit($secondDriver, $transit->getRequestUuid())
         );
     }
 
@@ -365,13 +370,13 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->rejectTransit($driver, $transit->getId());
+        $this->transitService->rejectTransit($driver, $transit->getRequestUuid());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $this->transitService->acceptTransit($driver, $transit->getId())
+            fn() => $this->transitService->acceptTransit($driver, $transit->getRequestUuid())
         );
     }
 
@@ -388,11 +393,11 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $farAwayDriver = $this->aFarAwayDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $this->transitService->acceptTransit($farAwayDriver, $transit->getId())
+            fn() => $this->transitService->acceptTransit($farAwayDriver, $transit->getRequestUuid())
         );
     }
 
@@ -409,14 +414,14 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
         //when
-        $this->transitService->startTransit($driver, $transit->getId());
+        $this->transitService->startTransit($driver, $transit->getRequestUuid());
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
         self::assertEquals(Transit::STATUS_IN_TRANSIT, $loaded->getStatus());
         self::assertNotNull($loaded->getStarted());
     }
@@ -434,11 +439,11 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $farAwayDriver = $this->aFarAwayDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
 
         //expect
         self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class,
-            fn() => $this->transitService->startTransit($farAwayDriver, $transit->getId())
+            fn() => $this->transitService->startTransit($farAwayDriver, $transit->getRequestUuid())
         );
     }
 
@@ -457,17 +462,17 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
         //and
-        $this->transitService->startTransit($driver, $transit->getId());
+        $this->transitService->startTransit($driver, $transit->getRequestUuid());
 
         //when
-        $this->transitService->completeTransit($driver, $transit->getId(), $destination);
+        $this->transitService->completeTransit($driver, $transit->getRequestUuid(), $destination);
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
         self::assertEquals(Transit::STATUS_COMPLETED, $loaded->getStatus());
         self::assertNotNull($loaded->getPrice());
         self::assertNotNull($loaded->getDriverFee());
@@ -489,13 +494,13 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
         //and
-        $this->transitService->acceptTransit($driver, $transit->getId());
+        $this->transitService->acceptTransit($driver, $transit->getRequestUuid());
 
         //expect
-        self::assertThatExceptionOfTypeIsThrownBy(\RuntimeException::class,
-            fn() => $this->transitService->completeTransit($driver, $transit->getId(), $destination)
+        self::assertThatExceptionOfTypeIsThrownBy(\InvalidArgumentException::class,
+            fn() => $this->transitService->completeTransit($driver, $transit->getRequestUuid(), $destination)
         );
     }
 
@@ -512,14 +517,14 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         //and
         $driver = $this->aNearbyDriver('WU1212');
         //and
-        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->publishTransit($transit->getRequestUuid());
 
         //when
-        $this->transitService->rejectTransit($driver, $transit->getId());
+        $this->transitService->rejectTransit($driver, $transit->getRequestUuid());
 
         //then
-        $loaded = $this->transitService->loadTransit($transit->getId());
-        self::assertEquals(Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, $loaded->getStatus());
+        $loaded = $this->transitService->loadTransit($transit->getRequestUuid());
+        self::assertEquals(Status::WAITING_FOR_DRIVER_ASSIGNMENT, $loaded->getStatus());
         self::assertNull($loaded->getAcceptedAt());
     }
 

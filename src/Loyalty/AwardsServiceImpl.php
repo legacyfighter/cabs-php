@@ -7,7 +7,7 @@ use LegacyFighter\Cabs\Config\AppProperties;
 use LegacyFighter\Cabs\Crm\Claims\ClaimService;
 use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Crm\ClientService;
-use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Ride\TransitRepository;
 
 class AwardsServiceImpl implements AwardsService
 {

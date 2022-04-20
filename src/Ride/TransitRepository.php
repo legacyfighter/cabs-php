@@ -1,11 +1,11 @@
 <?php
 
-namespace LegacyFighter\Cabs\Repository;
+namespace LegacyFighter\Cabs\Ride;
 
 use Doctrine\ORM\EntityManagerInterface;
 use LegacyFighter\Cabs\DriverFleet\Driver;
-use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\TransitDetails\TransitDetails;
+use LegacyFighter\Cabs\Ride\Details\TransitDetails;
+use Symfony\Component\Uid\Uuid;
 
 class TransitRepository
 {
@@ -28,7 +28,11 @@ class TransitRepository
      */
     public function findByClientId(int $clientId): array
     {
-        return $this->em->getRepository(Transit::class)->findBy(['client' => $clientId]);
+        return $this->em->createQuery(sprintf('SELECT t FROM %s t JOIN %s td WITH t.id = td.transitId WHERE td.client = :client' , Transit::class, TransitDetails::class))
+            ->setParameters([
+                'client' => $clientId,
+            ])
+            ->getResult();
     }
 
     /**
@@ -62,5 +66,10 @@ class TransitRepository
                 'to' => $to
             ])
             ->getResult();
+    }
+
+    public function findByTransitRequestUuid(Uuid $requestUuid): ?Transit
+    {
+        return $this->em->getRepository(Transit::class)->findOneBy(['requestUuid' => $requestUuid]);
     }
 }

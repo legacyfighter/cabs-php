@@ -19,10 +19,6 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    LegacyFighter\Cabs\Ui\:
-        resource: '../src/Ui/'
-        tags: ['controller.service_arguments']
-
     LegacyFighter\Cabs\Crm\Claims\ClaimController:
         tags: ['controller.service_arguments']
 
@@ -53,6 +49,9 @@ services:
     LegacyFighter\Cabs\Agreements\ContractController:
         tags: ['controller.service_arguments']
 
+    LegacyFighter\Cabs\Ride\TransitController:
+        tags: ['controller.service_arguments']
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     Laudis\Neo4j\Contracts\ClientInterface:
@@ -61,7 +60,7 @@ services:
 
     LegacyFighter\Cabs\Crm\TransitAnalyzer\GraphTransitAnalyzer:
         tags:
-            - { name: kernel.event_listener, event: 'LegacyFighter\Cabs\Entity\Events\TransitCompleted', method: 'handle' }
+            - { name: kernel.event_listener, event: 'LegacyFighter\Cabs\Ride\Events\TransitCompleted', method: 'handle' }
 
     LegacyFighter\Cabs\Loyalty\AwardsServiceImpl:
         calls:

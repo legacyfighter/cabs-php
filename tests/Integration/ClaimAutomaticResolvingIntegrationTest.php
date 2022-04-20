@@ -12,13 +12,14 @@ use LegacyFighter\Cabs\Crm\Claims\ClaimsResolverRepository;
 use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\Crm\ClientRepository;
 use LegacyFighter\Cabs\DriverFleet\Driver;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Notification\ClientNotificationService;
 use LegacyFighter\Cabs\Notification\DriverNotificationService;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsFacade;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitDTO;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeAppProperties;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -260,7 +261,7 @@ class ClaimAutomaticResolvingIntegrationTest extends KernelTestCase
         self::assertEquals(Claim::COMPLETION_MODE_MANUAL, $claim->getCompletionMode());
     }
 
-    private function aTransit(Client $client, Driver $driver, int $price): Transit
+    private function aTransit(Client $client, Driver $driver, int $price): TransitDTO
     {
         return $this->fixtures->aRide($price, $client, $driver, $this->fixtures->anAddress(), $this->fixtures->anAddress());
     }

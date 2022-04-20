@@ -7,7 +7,9 @@ use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DriverFleet\DriverDTO;
 use LegacyFighter\Cabs\DriverFleet\DriverReport\TravelledDistance\TravelledDistanceService;
 use LegacyFighter\Cabs\DriverFleet\DriverService;
+use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Distance;
+use LegacyFighter\Cabs\Geolocation\GeocodingService;
 
 class DriverTrackingService
 {
@@ -17,6 +19,7 @@ class DriverTrackingService
         private TravelledDistanceService $travelledDistanceService,
         private DriverSessionService $driverSessionService,
         private Clock $clock,
+        private GeocodingService $geocodingService
     )
     {
     }
@@ -68,5 +71,45 @@ class DriverTrackingService
             $driversAvgPositions,
             fn(DriverPositionDTOV2 $dp) => $drivers[$dp->getDriverId()]->getStatus() === Driver::STATUS_ACTIVE && !$drivers[$dp->getDriverId()]->isOccupied()
         );
+    }
+
+    /**
+     * @param string[] $carClasses
+     * @return DriverPositionDTOV2[]
+     */
+    public function findActiveDriversNearbyAddress(AddressDTO $address, Distance $distance, array $carClasses): array
+    {
+        $geocoded = [];
+        try {
+            $geocoded = $this->geocodingService->geocodeAddress($address->toAddressEntity());
+        } catch (\Throwable $exception) {
+            // Geocoding failed! Ask Jessica or Bryan for some help if needed.
+        }
+
+        $longitude = $geocoded[1];
+        $latitude = $geocoded[0];
+
+        //https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
+        //Earth’s radius, sphere
+        //double R = 6378;
+        $R = 6371; // Changed to 6371 due to Copy&Paste pattern from different source
+
+        //offsets in meters
+        $dn = $distance->toKmInFloat();
+        $de = $distance->toKmInFloat();
+
+        //Coordinate offsets in radians
+        $dLat = $dn / $R;
+        $dLon = $de / ($R * cos(M_PI * $latitude / 180));
+
+        //Offset positions, decimal degrees
+        $latitudeMin = $latitude - $dLat * 180 / M_PI;
+        $latitudeMax = $latitude + $dLat *
+            180 / M_PI;
+        $longitudeMin = $longitude - $dLon *
+            180 / M_PI;
+        $longitudeMax = $longitude + $dLon * 180 / M_PI;
+
+        return $this->findActiveDriversNearby($latitudeMin, $latitudeMax, $longitudeMin, $longitudeMax, $latitude, $longitude, $carClasses);
     }
 }

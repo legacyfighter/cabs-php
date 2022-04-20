@@ -8,7 +8,7 @@ use LegacyFighter\Cabs\Crm\ClientService;
 use LegacyFighter\Cabs\Loyalty\AwardsAccountRepository;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Loyalty\AwardsServiceImpl;
-use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\Ride\TransitRepository;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeAppProperties;

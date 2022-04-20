@@ -3,8 +3,8 @@
 namespace LegacyFighter\Cabs\DriverFleet;
 
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsDTO;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsFacade;
 
 class DriverService
 {

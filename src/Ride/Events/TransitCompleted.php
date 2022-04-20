@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity\Events;
+namespace LegacyFighter\Cabs\Ride\Events;
 
 class TransitCompleted
 {

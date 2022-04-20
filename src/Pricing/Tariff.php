@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\Pricing;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embeddable;
@@ -18,14 +18,19 @@ class Tariff
     #[Column]
     private string $name;
 
-    #[Column(type: 'integer')]
-    private int $baseFee;
+    #[Column(type: 'money')]
+    private Money $baseFee;
 
-    private function __construct(float $kmRate, string $name, int $baseFee)
+    private function __construct(float $kmRate, string $name, Money $baseFee)
     {
         $this->kmRate = $kmRate;
         $this->name = $name;
         $this->baseFee = $baseFee;
+    }
+
+    public static function of(float $kmRate, string $name, Money $baseFee): self
+    {
+        return new self($kmRate, $name, $baseFee);
     }
 
     public static function ofTime(\DateTimeImmutable $time): self
@@ -33,7 +38,7 @@ class Tariff
         if(($time->format('n') === '12' && $time->format('j') === '31') ||
             ($time->format('n') === '1' && $time->format('j') === '1' && (int) $time->format('G') <= 6)
         ) {
-            return new self(3.5, 'Sylwester', self::BASE_FEE + 3);
+            return new self(3.5, 'Sylwester', Money::from((self::BASE_FEE + 3) * 100));
         } else {
             // piątek i sobota po 17 do 6 następnego dnia
             if(($time->format('l') === 'Friday' && (int) $time->format('G') >= 17) ||
@@ -41,16 +46,16 @@ class Tariff
                 ($time->format('l') === 'Saturday' && (int) $time->format('G') >= 17) ||
                 ($time->format('l') === 'Sunday' && (int) $time->format('G') <= 6)
             ) {
-                return new self(2.5, 'Weekend+', self::BASE_FEE + 2);
+                return new self(2.5, 'Weekend+', Money::from((self::BASE_FEE + 2) * 100));
             } else {
                 // pozostałe godziny weekendu
                 if(($time->format('l') === 'Saturday' && (int) $time->format('G') > 6 && (int) $time->format('G') < 17) ||
                     ($time->format('l') === 'Sunday' && (int) $time->format('G') > 6)
                 ) {
-                    return new self(1.5, 'Weekend', self::BASE_FEE);
+                    return new self(1.5, 'Weekend', Money::from(self::BASE_FEE * 100));
                 } else {
                     // tydzień roboczy
-                    return new self(1.0, 'Standard', self::BASE_FEE + 1);
+                    return new self(1.0, 'Standard', Money::from((self::BASE_FEE + 1) * 100));
                 }
             }
         }
@@ -58,7 +63,7 @@ class Tariff
 
     public function calculateCost(Distance $distance): Money
     {
-        return Money::from((int) (round($distance->toKmInFloat() * $this->kmRate + $this->baseFee, 2) * 100));
+        return Money::from((int) (round($distance->toKmInFloat() * $this->kmRate, 2) * 100))->add($this->baseFee);
     }
 
     public function getKmRate(): float
@@ -73,6 +78,6 @@ class Tariff
 
     public function getBaseFee(): int
     {
-        return $this->baseFee;
+        return $this->baseFee->toInt();
     }
 }

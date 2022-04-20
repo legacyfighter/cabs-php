@@ -1,24 +1,30 @@
 <?php
 
-namespace LegacyFighter\Cabs\TransitDetails;
+namespace LegacyFighter\Cabs\Ride\Details;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\ManyToOne;
+use LegacyFighter\Cabs\Assignment\AssignmentStatus;
+use LegacyFighter\Cabs\Assignment\InvolvedDriversSummary;
 use LegacyFighter\Cabs\Common\BaseEntity;
 use LegacyFighter\Cabs\Crm\Client;
-use LegacyFighter\Cabs\Entity\Tariff;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
+use LegacyFighter\Cabs\Pricing\Tariff;
+use LegacyFighter\Cabs\Ride\Transit;
+use Symfony\Component\Uid\Uuid;
 
 #[Entity]
 class TransitDetails extends BaseEntity
 {
-    #[Column(type: 'integer')]
-    private int $transitId;
+    #[Column(type: 'integer', nullable: true)]
+    private ?int $transitId = null;
+
+    #[Column(type: 'uuid')]
+    private Uuid $requestUuid;
 
     #[Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $dateTime;
@@ -70,7 +76,7 @@ class TransitDetails extends BaseEntity
 
     public function __construct(
         \DateTimeImmutable $dateTime,
-        int $transitId,
+        Uuid $requestUuid,
         Address $from,
         Address $to,
         Distance $distance,
@@ -81,7 +87,7 @@ class TransitDetails extends BaseEntity
     )
     {
         $this->dateTime = $dateTime;
-        $this->transitId = $transitId;
+        $this->requestUuid = $requestUuid;
         $this->from = $from;
         $this->to = $to;
         $this->distance = $distance;
@@ -89,26 +95,27 @@ class TransitDetails extends BaseEntity
         $this->carType = $carClass;
         $this->estimatedPrice = $estimatedPrice;
         $this->tariff = $tariff;
-        $this->status = Transit::STATUS_DRAFT;
+        $this->status = Status::DRAFT;
     }
 
-    public function startedAt(\DateTimeImmutable $when): void
+    public function startedAt(\DateTimeImmutable $when, int $transitId): void
     {
         $this->started = $when;
-        $this->status = Transit::STATUS_IN_TRANSIT;
+        $this->status = Status::IN_TRANSIT;
+        $this->transitId = $transitId;
     }
 
     public function acceptedAt(\DateTimeImmutable $when, int $driverId): void
     {
         $this->acceptedAt = $when;
         $this->driverId = $driverId;
-        $this->status = Transit::STATUS_TRANSIT_TO_PASSENGER;
+        $this->status = Status::TRANSIT_TO_PASSENGER;
     }
 
     public function publishedAt(\DateTimeImmutable $when): void
     {
         $this->publishedAt = $when;
-        $this->status = Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT;
+        $this->status = Status::WAITING_FOR_DRIVER_ASSIGNMENT;
     }
 
     public function completedAt(\DateTimeImmutable $when, Money $price, Money $driverFee): void
@@ -116,12 +123,12 @@ class TransitDetails extends BaseEntity
         $this->completedAt = $when;
         $this->price = $price;
         $this->driversFee = $driverFee;
-        $this->status = Transit::STATUS_COMPLETED;
+        $this->status = Status::COMPLETED;
     }
 
     public function cancelled(): void
     {
-        $this->status = Transit::STATUS_CANCELLED;
+        $this->status = Status::CANCELLED;
     }
 
     public function pickupChangedTo(Address $newAddress, Distance $newDistance): void
@@ -134,6 +141,15 @@ class TransitDetails extends BaseEntity
     {
         $this->to = $newAddress;
         $this->distance = $distance;
+    }
+
+    public function involvedDriversAre(InvolvedDriversSummary $involvedDriversSummary): void
+    {
+        if($involvedDriversSummary->status === AssignmentStatus::DRIVER_ASSIGNMENT_FAILED) {
+            $this->status = Status::DRIVER_ASSIGNMENT_FAILED;
+        } else {
+            $this->status = Status::TRANSIT_TO_PASSENGER;
+        }
     }
 
     public function getKmRate(): float
@@ -219,5 +235,15 @@ class TransitDetails extends BaseEntity
     public function getEstimatedPrice(): ?Money
     {
         return $this->estimatedPrice;
+    }
+
+    public function getRequestUuid(): Uuid
+    {
+        return $this->requestUuid;
+    }
+
+    public function getTransitId(): ?int
+    {
+        return $this->transitId;
     }
 }

@@ -9,14 +9,16 @@ use LegacyFighter\Cabs\Crm\Claims\Claim;
 use LegacyFighter\Cabs\Crm\Client;
 use LegacyFighter\Cabs\DriverFleet\Driver;
 use LegacyFighter\Cabs\DriverFleet\DriverFee;
-use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Distance;
 use LegacyFighter\Cabs\Money\Money;
-use LegacyFighter\Cabs\TransitDetails\TransitDetails;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsDTO;
+use LegacyFighter\Cabs\Pricing\Tariff;
+use LegacyFighter\Cabs\Ride\Details\TransitDetails;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsDTO;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitDTO;
+use Symfony\Component\Uid\Uuid;
 
 class Fixtures
 {
@@ -76,9 +78,7 @@ class Fixtures
 
     public function aTransitDTOWith(Client $client, AddressDTO $from, AddressDTO $to): TransitDTO
     {
-        $transit = new Transit($client, new \DateTimeImmutable(), Distance::zero());
-        PrivateProperty::setId(1, $transit);
-        $transitDetails = new TransitDetails(new \DateTimeImmutable(), 1, $from->toAddressEntity(), $to->toAddressEntity(), Distance::zero(), $client, CarType::CAR_CLASS_VAN, Money::zero(), $transit->getTariff());
+        $transitDetails = new TransitDetails(new \DateTimeImmutable(), Uuid::v4(), $from->toAddressEntity(), $to->toAddressEntity(), Distance::zero(), $client, CarType::CAR_CLASS_VAN, Money::zero(), Tariff::of(0, 'fake', Money::from(20)));
         PrivateProperty::setId(1, $transitDetails);
 
         return TransitDTO::from(TransitDetailsDTO::from($transitDetails), []);
@@ -96,22 +96,22 @@ class Fixtures
         }
     }
 
-    public function aRide(int $price, Client $client, Driver $driver, Address $from, Address $destination): Transit
+    public function aRide(int $price, Client $client, Driver $driver, Address $from, Address $destination): TransitDTO
     {
         return $this->rideFixture->aRide($price, $client, $driver, $from, $destination);
     }
 
-    public function aRideWithFixedClock(int $price, \DateTimeImmutable $publishedAt, \DateTimeImmutable $completedAt, Client $client, Driver $driver, Address $from, Address $destination, FixedClock $clock): Transit
+    public function aRideWithFixedClock(int $price, \DateTimeImmutable $publishedAt, \DateTimeImmutable $completedAt, Client $client, Driver $driver, Address $from, Address $destination, FixedClock $clock): void
     {
-        return $this->rideFixture->aRideWithFixedClock($price, $publishedAt, $completedAt, $client, $driver, $from, $destination, $clock);
+        $this->rideFixture->aRideWithFixedClock($price, $publishedAt, $completedAt, $client, $driver, $from, $destination, $clock);
     }
 
-    public function createClaim(Client $client, Transit $transit, string $reason = '$$$'): Claim
+    public function createClaim(Client $client, TransitDTO $transit, string $reason = '$$$'): Claim
     {
         return $this->claimFixture->createClaim($client, $transit, $reason);
     }
 
-    public function createAndResolveClaim(Client $client, Transit $transit): Claim
+    public function createAndResolveClaim(Client $client, TransitDTO $transit): Claim
     {
         return $this->claimFixture->createAndResolveClaim($client, $transit);
     }

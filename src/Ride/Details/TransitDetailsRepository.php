@@ -1,8 +1,9 @@
 <?php
 
-namespace LegacyFighter\Cabs\TransitDetails;
+namespace LegacyFighter\Cabs\Ride\Details;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Uid\Uuid;
 
 class TransitDetailsRepository
 {
@@ -18,6 +19,16 @@ class TransitDetailsRepository
     public function findByTransitId(int $transitId): TransitDetails
     {
         $transitDetails = $this->em->getRepository(TransitDetails::class)->findOneBy(['transitId' => $transitId]);
+        if(!$transitDetails instanceof TransitDetails) {
+            throw new \RuntimeException('Transit details not found');
+        }
+
+        return $transitDetails;
+    }
+
+    public function findByRequestUuid(Uuid $requestUuid): TransitDetails
+    {
+        $transitDetails = $this->em->getRepository(TransitDetails::class)->findOneBy(['requestUuid' => $requestUuid]);
         if(!$transitDetails instanceof TransitDetails) {
             throw new \RuntimeException('Transit details not found');
         }

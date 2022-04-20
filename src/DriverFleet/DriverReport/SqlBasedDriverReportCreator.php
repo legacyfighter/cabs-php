@@ -7,10 +7,11 @@ use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Crm\Claims\ClaimDTO;
 use LegacyFighter\Cabs\DriverFleet\DriverAttribute;
 use LegacyFighter\Cabs\DriverFleet\DriverDTO;
-use LegacyFighter\Cabs\DTO\TransitDTO;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
+use LegacyFighter\Cabs\Ride\Transit;
+use LegacyFighter\Cabs\Ride\TransitDTO;
 use LegacyFighter\Cabs\Tracking\DriverSessionDTO;
+use Symfony\Component\Uid\Uuid;
 
 class SqlBasedDriverReportCreator
 {
@@ -22,7 +23,7 @@ class SqlBasedDriverReportCreator
             'WHERE d.id = :driverId AND attr.name <> :filteredAttr';
 
     private const QUERY_FOR_SESSIONS = 'SELECT ds.id AS SESSION_ID, ds.logged_at, ds.logged_out_at, ds.plates_number, ds.car_class, ds.car_brand, ' .
-            'td.transit_id as TRANSIT_ID, td.tariff_name as TARIFF_NAME, td.status as TRANSIT_STATUS, td.distance, td.tariff_km_rate, ' .
+            'td.transit_id as TRANSIT_ID, td.request_uuid, td.tariff_name as TARIFF_NAME, td.status as TRANSIT_STATUS, td.distance, td.tariff_km_rate, ' .
             'td.price, td.drivers_fee, td.estimated_price, td.tariff_base_fee, ' .
             'td.date_time, td.published_at, td.accepted_at, td.started, td.completed_at, td.car_type, ' .
             'cl.id as CLAIM_ID, cl.owner_id, cl.reason, cl.incident_description, cl.status as CLAIM_STATUS, cl.creation_date, ' .
@@ -110,6 +111,7 @@ class SqlBasedDriverReportCreator
 
             $data[$session['session_id']]['transits'][] = TransitDTO::with(
                 $session['transit_id'],
+                Uuid::fromString($session['request_uuid']),
                 $session['transit_status'],
                 $session['tariff_name'],
                 $session['tariff_km_rate'],

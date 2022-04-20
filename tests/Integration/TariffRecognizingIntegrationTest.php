@@ -5,11 +5,12 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 use LegacyFighter\Cabs\CarFleet\CarType;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Crm\ClientDTO;
-use LegacyFighter\Cabs\DTO\TransitDTO;
+use LegacyFighter\Cabs\Ride\TransitController;
+use LegacyFighter\Cabs\Ride\TransitDTO;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
-use LegacyFighter\Cabs\Ui\TransitController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Uid\Uuid;
 
 class TariffRecognizingIntegrationTest extends KernelTestCase
 {
@@ -88,16 +89,17 @@ class TariffRecognizingIntegrationTest extends KernelTestCase
         self::assertEquals(1.0, $response['kmRate']);
     }
 
-    private function createTransit(\DateTimeImmutable $when): int
+    private function createTransit(\DateTimeImmutable $when): Uuid
     {
         $client = $this->fixtures->aClient();
         $this->clock->setDateTime($when);
         $response = $this->transitController->createTransit(TransitDTO::with(
-            1, '', '', 2.5,
+            1, Uuid::v4(), '', '', 2.5,
             $this->fixtures->anAddressDTO('Polska', 'Warszawa', 'Żytnia', 20),
             $this->fixtures->anAddressDTO('Polska', 'Warszawa', 'Młynarska', 20),
             null, ClientDTO::from($client), null, CarType::CAR_CLASS_VAN
         ));
-        return (int) json_decode($response->getContent(), true)['id'];
+
+        return Uuid::fromString(json_decode($response->getContent(), true)['requestUuid']);
     }
 }

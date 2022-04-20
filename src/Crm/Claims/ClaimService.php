@@ -10,7 +10,7 @@ use LegacyFighter\Cabs\Crm\ClientRepository;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
 use LegacyFighter\Cabs\Notification\ClientNotificationService;
 use LegacyFighter\Cabs\Notification\DriverNotificationService;
-use LegacyFighter\Cabs\TransitDetails\TransitDetailsFacade;
+use LegacyFighter\Cabs\Ride\Details\TransitDetailsFacade;
 
 class ClaimService
 {
