@@ -12,11 +12,12 @@ use LegacyFighter\Cabs\DriverFleet\DriverAttribute;
 use LegacyFighter\Cabs\DriverFleet\DriverFee;
 use LegacyFighter\Cabs\DriverFleet\DriverReport\DriverReportController;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
+use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Address\AddressRepository;
 use LegacyFighter\Cabs\Geolocation\GeocodingService;
 use LegacyFighter\Cabs\Ride\Transit;
 use LegacyFighter\Cabs\Ride\TransitDTO;
-use LegacyFighter\Cabs\Ride\TransitService;
+use LegacyFighter\Cabs\Ride\RideService;
 use LegacyFighter\Cabs\Tests\Common\FixedClock;
 use LegacyFighter\Cabs\Tests\Common\Fixtures;
 use LegacyFighter\Cabs\Tests\Double\FakeGeocodingService;
@@ -27,7 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class CreateDriverReportIntegrationTest extends KernelTestCase
 {
-    private TransitService $transitService;
+    private RideService $rideService;
     private DriverTrackingService $driverTrackingService;
     private DriverSessionService $driverSessionService;
     private CarTypeService $carTypeService;
@@ -39,7 +40,7 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $this->transitService = $this->getContainer()->get(TransitService::class);
+        $this->rideService = $this->getContainer()->get(RideService::class);
         $this->driverTrackingService = $this->getContainer()->get(DriverTrackingService::class);
         $this->driverSessionService = $this->getContainer()->get(DriverSessionService::class);
         $this->carTypeService = $this->getContainer()->get(CarTypeService::class);
@@ -119,18 +120,18 @@ class CreateDriverReportIntegrationTest extends KernelTestCase
         $this->clock->setDateTime($when);
         $this->driverSessionService->logIn($driver->getId(), $plateNumber, $carClass, $carBrand);
         $this->driverTrackingService->registerPosition($driver->getId(), 10, 20, new \DateTimeImmutable());
-        $transit = $this->transitService->createTransitFrom(
+        $transit = $this->rideService->createTransitFrom(
             $client->getId(),
-            $this->address('PL', 'MAZ', 'WAW', 'STREET', 1, 10, 20),
-            $this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01),
+            AddressDTO::from($this->address('PL', 'MAZ', 'WAW', 'STREET', 1, 10, 20)),
+            AddressDTO::from($this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01)),
             $carClass
         );
-        $this->transitService->publishTransit($transit->getRequestUuid());
-        $this->transitService->acceptTransit($driver->getId(), $transit->getRequestUuid());
-        $this->transitService->startTransit($driver->getId(), $transit->getRequestUuid());
-        $this->transitService->completeTransitFrom($driver->getId(), $transit->getRequestUuid(), $this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01));
+        $this->rideService->publishTransit($transit->getRequestUuid());
+        $this->rideService->acceptTransit($driver->getId(), $transit->getRequestUuid());
+        $this->rideService->startTransit($driver->getId(), $transit->getRequestUuid());
+        $this->rideService->completeTransitFrom($driver->getId(), $transit->getRequestUuid(), $this->address('PL', 'MAZ', 'WAW', 'STREET', 100, 10.01, 20.01));
         $this->driverSessionService->logOutCurrentSession($driver->getId());
-        return $this->transitService->loadTransit($transit->getRequestUuid());
+        return $this->rideService->loadTransit($transit->getRequestUuid());
     }
 
     private function loadReportIncludingPastDays(Driver $driver, int $days): array

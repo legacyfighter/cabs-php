@@ -13,15 +13,15 @@ use LegacyFighter\Cabs\Ride\Details\TransitDetailsFacade;
 use LegacyFighter\Cabs\Ride\Transit;
 use LegacyFighter\Cabs\Ride\TransitDTO;
 use LegacyFighter\Cabs\Ride\TransitRepository;
-use LegacyFighter\Cabs\Ride\TransitService;
+use LegacyFighter\Cabs\Ride\RideService;
 
 class RideFixture
 {
     public function __construct(
-        private TransitService $transitService,
-        private AddressRepository $addressRepository,
-        private CarTypeFixture $carTypeFixture,
-        private StubbedTransitPrice $stubbedPrice,
+        private RideService          $rideService,
+        private AddressRepository    $addressRepository,
+        private CarTypeFixture       $carTypeFixture,
+        private StubbedTransitPrice  $stubbedPrice,
         private TransitDetailsFacade $transitDetailsFacade
     )
     {
@@ -32,15 +32,15 @@ class RideFixture
         $from = $this->addressRepository->save($from);
         $destination = $this->addressRepository->save($destination);
         $this->carTypeFixture->anActiveCarCategory(CarType::CAR_CLASS_VAN);
-        $transit = $this->transitService->createTransitFrom($client->getId(), $from, $destination, CarType::CAR_CLASS_VAN);
-        $this->transitService->publishTransit($transit->getRequestUuid());
-        $this->transitService->findDriversForTransit($transit->getRequestUuid());
-        $this->transitService->acceptTransit($driver->getId(), $transit->getRequestUuid());
-        $this->transitService->startTransit($driver->getId(), $transit->getRequestUuid());
-        $this->transitService->completeTransit($driver->getId(), $transit->getRequestUuid(), AddressDTO::from($destination));
+        $transit = $this->rideService->createTransitFrom($client->getId(), AddressDTO::from($from), AddressDTO::from($destination), CarType::CAR_CLASS_VAN);
+        $this->rideService->publishTransit($transit->getRequestUuid());
+        $this->rideService->findDriversForTransit($transit->getRequestUuid());
+        $this->rideService->acceptTransit($driver->getId(), $transit->getRequestUuid());
+        $this->rideService->startTransit($driver->getId(), $transit->getRequestUuid());
+        $this->rideService->completeTransit($driver->getId(), $transit->getRequestUuid(), AddressDTO::from($destination));
         $this->transitDetailsFacade->transitCompleted($transit->getRequestUuid(), new \DateTimeImmutable(), Money::from($price), Money::from($price));
         $this->stubbedPrice->stub(Money::from($price));
-        return $this->transitService->loadTransit($transit->getRequestUuid());
+        return $this->rideService->loadTransit($transit->getRequestUuid());
     }
 
     public function aRideWithFixedClock(int $price, \DateTimeImmutable $publishedAt, \DateTimeImmutable $completedAt, Client $client, Driver $driver, Address $from, Address $destination, FixedClock $clock): void
@@ -49,13 +49,13 @@ class RideFixture
         $destination = $this->addressRepository->save($destination);
         $clock->setDateTime($publishedAt);
         $this->carTypeFixture->anActiveCarCategory(CarType::CAR_CLASS_VAN);
-        $transit = $this->transitService->createTransitFrom($client->getId(), $from, $destination, CarType::CAR_CLASS_VAN);
-        $this->transitService->publishTransit($transit->getRequestUuid());
-        $this->transitService->findDriversForTransit($transit->getRequestUuid());
-        $this->transitService->acceptTransit($driver->getId(), $transit->getRequestUuid());
-        $this->transitService->startTransit($driver->getId(), $transit->getRequestUuid());
+        $transit = $this->rideService->createTransitFrom($client->getId(), AddressDTO::from($from), AddressDTO::from($destination), CarType::CAR_CLASS_VAN);
+        $this->rideService->publishTransit($transit->getRequestUuid());
+        $this->rideService->findDriversForTransit($transit->getRequestUuid());
+        $this->rideService->acceptTransit($driver->getId(), $transit->getRequestUuid());
+        $this->rideService->startTransit($driver->getId(), $transit->getRequestUuid());
         $clock->setDateTime($completedAt);
-        $this->transitService->completeTransit($driver->getId(), $transit->getRequestUuid(), AddressDTO::from($destination));
+        $this->rideService->completeTransit($driver->getId(), $transit->getRequestUuid(), AddressDTO::from($destination));
         $this->transitDetailsFacade->transitCompleted($transit->getRequestUuid(), new \DateTimeImmutable(), Money::from($price), Money::from($price));
         $this->stubbedPrice->stub(Money::from($price));
     }

@@ -10,80 +10,80 @@ use Symfony\Component\Uid\Uuid;
 
 class TransitController
 {
-    public function __construct(private TransitService $transitService) {}
+    public function __construct(private RideService $rideService) {}
 
     #[Route('/transits/{requestUuid}', methods: ['GET'])]
     public function getTransit(Uuid $requestUuid): Response
     {
-        return new JsonResponse($this->transitService->loadTransit($requestUuid));
+        return new JsonResponse($this->rideService->loadTransit($requestUuid));
     }
 
     #[Route('/transits', methods: ['POST'])]
     public function createTransit(TransitDTO $transitDTO): Response
     {
-        return new JsonResponse($this->transitService->createTransit($transitDTO));
+        return new JsonResponse($this->rideService->createTransit($transitDTO));
     }
 
     #[Route('/transits/{id}/changeAddressTo', methods: ['POST'])]
     public function changeAddressTo(int $id, AddressDTO $addressDTO): Response
     {
-        $this->transitService->changeTransitAddressTo($this->transitService->getRequestUuid($id), $addressDTO);
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->changeTransitAddressTo($this->rideService->getRequestUuid($id), $addressDTO);
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/changeAddressFrom', methods: ['POST'])]
     public function changeAddressFrom(int $id, AddressDTO $addressDTO): Response
     {
-        $this->transitService->changeTransitAddressFrom($this->transitService->getRequestUuid($id), $addressDTO);
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->changeTransitAddressFrom($this->rideService->getRequestUuid($id), $addressDTO);
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/cancel', methods: ['POST'])]
     public function cancel(int $id): Response
     {
-        $this->transitService->cancelTransit($this->transitService->getRequestUuid($id));
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->cancelTransit($this->rideService->getRequestUuid($id));
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/publish', methods: ['POST'])]
     public function publishTransit(int $id): Response
     {
-        $this->transitService->publishTransit($this->transitService->getRequestUuid($id));
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->publishTransit($this->rideService->getRequestUuid($id));
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/findDrivers', methods: ['POST'])]
     public function findDriversForTransit(int $id): Response
     {
-        $this->transitService->findDriversForTransit($this->transitService->getRequestUuid($id));
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->findDriversForTransit($this->rideService->getRequestUuid($id));
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/accept/{driverId}', methods: ['POST'])]
     public function acceptTransit(int $id, int $driverId): Response
     {
-        $this->transitService->acceptTransit($driverId, $this->transitService->getRequestUuid($id));
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->acceptTransit($driverId, $this->rideService->getRequestUuid($id));
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/start/{driverId}', methods: ['POST'])]
     public function start(int $id, int $driverId): Response
     {
-        $this->transitService->startTransit($driverId, $this->transitService->getRequestUuid($id));
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->startTransit($driverId, $this->rideService->getRequestUuid($id));
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/reject/{driverId}', methods: ['POST'])]
     public function reject(int $id, int $driverId): Response
     {
-        $this->transitService->rejectTransit($driverId, $this->transitService->getRequestUuid($id));
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->rejectTransit($driverId, $this->rideService->getRequestUuid($id));
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 
     #[Route('/transits/{id}/complete/{driverId}', methods: ['POST'])]
     public function complete(int $id, int $driverId, AddressDTO $destination): Response
     {
-        $this->transitService->completeTransit($driverId, $this->transitService->getRequestUuid($id), $destination);
-        return new JsonResponse($this->transitService->loadTransitBy($id));
+        $this->rideService->completeTransit($driverId, $this->rideService->getRequestUuid($id), $destination);
+        return new JsonResponse($this->rideService->loadTransitBy($id));
     }
 }

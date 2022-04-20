@@ -23,9 +23,10 @@ use LegacyFighter\Cabs\Ride\Events\TransitCompleted;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class TransitService
+class RideService
 {
     public function __construct(
+        private RequestTransitService $requestTransitService,
         private DriverRepository $driverRepository,
         private TransitRepository $transitRepository,
         private ClientRepository $clientRepository,
@@ -48,29 +49,17 @@ class TransitService
 
     public function createTransit(TransitDTO $transitDTO): TransitDTO
     {
-        $from = $this->addressFromDto($transitDTO->getFrom());
-        $to = $this->addressFromDto($transitDTO->getTo());
-
-        return $this->createTransitFrom($transitDTO->getClientDTO()->getId(), $from, $to, $transitDTO->getCarClass());
+        return $this->createTransitFrom($transitDTO->getClientDTO()->getId(), $transitDTO->getFrom(), $transitDTO->getTo(), $transitDTO->getCarClass());
     }
 
-    public function createTransitFrom(int $clientId, Address $from, Address $to, ?string $carClass): TransitDTO
+    public function createTransitFrom(int $clientId, AddressDTO $from, AddressDTO $to, ?string $carClass): TransitDTO
     {
         $client = $this->clientRepository->getOne($clientId);
-
-        if($client === null) {
-            throw new \InvalidArgumentException('Client does not exist, id = '.$clientId);
-        }
-
-        // FIXME later: add some exceptions handling
-        $geoFrom = $this->geocodingService->geocodeAddress($from);
-        $geoTo = $this->geocodingService->geocodeAddress($to);
-
+        $from = $this->addressFromDto($from);
+        $to = $this->addressFromDto($to);
         $now = $this->clock->now();
-        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
-        $tariff = $this->tariffs->choose($now);
-        $requestForTransit = $this->requestForTransitRepository->save(new RequestForTransit($tariff, $distance));
-        $this->transitDetailsFacade->transitRequested($now, $requestForTransit->getRequestUuid(), $from, $to, $distance, $client, $carClass, $requestForTransit->getEstimatedPrice(), $requestForTransit->getTariff());
+        $requestForTransit = $this->requestTransitService->createRequestForTransit($from, $to);
+        $this->transitDetailsFacade->transitRequested($now, $requestForTransit->getRequestUuid(), $from, $to, $requestForTransit->getDistance(), $client, $carClass, $requestForTransit->getEstimatedPrice(), $requestForTransit->getTariff());
         return $this->loadTransit($requestForTransit->getRequestUuid());
     }
 
