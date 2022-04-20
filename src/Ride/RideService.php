@@ -27,6 +27,8 @@ class RideService
 {
     public function __construct(
         private RequestTransitService $requestTransitService,
+        private ChangePickupService $changePickupService,
+        private ChangeDestinationService $changeDestinationService,
         private DriverRepository $driverRepository,
         private TransitRepository $transitRepository,
         private ClientRepository $clientRepository,
@@ -71,65 +73,19 @@ class RideService
 
     public function changeTransitAddressFromNew(Uuid $requestUuid, Address $newAddress): void
     {
-        $newAddress = $this->addressRepository->save($newAddress);
-        $transitDemand = $this->transitDemandRepository->findByRequestUuid($requestUuid);
-        $transitDetails = $this->transitDetailsFacade->findByUuid($requestUuid);
-
-        if($transitDemand === null) {
-            throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
+        if($this->driverAssignmentFacade->isDriverAssigned($requestUuid)) {
+            throw new \InvalidArgumentException('Driver already assigned, requestUUID = '.$requestUuid);
         }
-
-        // FIXME later: add some exceptions handling
-        $geoFromNew = $this->geocodingService->geocodeAddress($newAddress);
-        $geoFromOld = $this->geocodingService->geocodeAddress($transitDetails->from->toAddressEntity());
-
-        // https://www.geeksforgeeks.org/program-distance-two-points-earth/
-        // The math module contains a function
-        // named toRadians which converts from
-        // degrees to radians.
-        $lon1 = deg2rad($geoFromNew[1]);
-        $lon2 = deg2rad($geoFromOld[1]);
-        $lat1 = deg2rad($geoFromNew[0]);
-        $lat2 = deg2rad($geoFromOld[0]);
-
-        // Haversine formula
-        $dlon = $lon2 - $lon1;
-        $dlat = $lat2 - $lat1;
-        $a = pow(sin($dlat / 2), 2)
-            + cos($lat1) * cos($lat2)
-            *pow(sin($dlon/2),2);
-
-        $c = 2 * asin(sqrt($a));
-
-        // Radius of earth in kilometers. Use 3956 for miles
-        $r = 6371;
-
-        // calculate the result
-        $distanceInKMeters = $c * $r;
-
-        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1]));
-        $transitDemand->changePickupTo($distanceInKMeters);
-        $this->transitDetailsFacade->pickupChangedTo($requestUuid, $newAddress, $distance);
+        $transitDetails = $this->transitDetailsFacade->findByUuid($requestUuid);
+        $newDistance = $this->changePickupService->changeTransitAddressFrom($requestUuid, $newAddress, $transitDetails->from->toAddressEntity());
+        $this->transitDetailsFacade->pickupChangedTo($requestUuid, $newAddress, $newDistance);
         $this->driverAssignmentFacade->notifyProposedDriversAboutChangedDestination($requestUuid);
     }
 
     public function changeTransitAddressToNew(Uuid $requestUuid, Address $newAddress): void
     {
-        $newAddress = $this->addressRepository->save($newAddress);
-        $requestForTransit = $this->requestForTransitRepository->findByRequestUuid($requestUuid);
         $transitDetails = $this->transitDetailsFacade->findByUuid($requestUuid);
-
-        if($requestForTransit === null) {
-            throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
-        }
-
-        // FIXME later: add some exceptions handling
-        $geoFrom = $this->geocodingService->geocodeAddress($transitDetails->from->toAddressEntity());
-        $geoTo = $this->geocodingService->geocodeAddress($newAddress);
-
-        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
-        $transit = $this->transitRepository->findByTransitRequestUuid($requestUuid);
-        $transit?->changeDestination($distance);
+        $distance = $this->changeDestinationService->changeTransitAddressTo($requestUuid, $newAddress, $transitDetails->from->toAddressEntity());
         $this->driverAssignmentFacade->notifyAssignedDriverAboutChangedDestination($requestUuid);
         $this->transitDetailsFacade->destinationChanged($requestUuid, $newAddress, $distance);
     }
