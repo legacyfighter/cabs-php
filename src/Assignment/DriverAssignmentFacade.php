@@ -23,7 +23,7 @@ class DriverAssignmentFacade
     {
     }
 
-    public function createAssignment(Uuid $transitRequestUUID, AddressDTO $from, string $carClass, \DateTimeImmutable $when): InvolvedDriversSummary
+    public function startAssigningDrivers(Uuid $transitRequestUUID, AddressDTO $from, string $carClass, \DateTimeImmutable $when): InvolvedDriversSummary
     {
         $this->driverAssignmentRepository->save(new DriverAssignment($transitRequestUUID, $when));
         return $this->searchForPossibleDrivers($transitRequestUUID, $from, $carClass);
@@ -76,11 +76,11 @@ class DriverAssignmentFacade
         }
     }
 
-    public function acceptTransit(Uuid $transitRequestUUID, Driver $driver): InvolvedDriversSummary
+    public function acceptTransit(Uuid $transitRequestUUID, int $driverId): InvolvedDriversSummary
     {
         $driverAssigment = $this->find($transitRequestUUID);
-        $driverAssigment->acceptBy($driver->getId());
-        $driver->setOccupied(true);
+        $driverAssigment->acceptBy($driverId);
+        $this->driverAssignmentRepository->save($driverAssigment);
         return $this->loadInvolvedDriversFrom($driverAssigment);
     }
 
@@ -95,7 +95,7 @@ class DriverAssignmentFacade
     }
 
     public function isDriverAssigned(Uuid $transitRequestUUID): bool {
-        return $this->driverAssignmentRepository->findByRequestIdAndStatus($transitRequestUUID, AssignmentStatus::ON_THE_WAY) !== null;
+        return $this->driverAssignmentRepository->findByRequestUuidAndStatus($transitRequestUUID, AssignmentStatus::ON_THE_WAY) !== null;
     }
 
     public function cancel(Uuid $transitRequestUUID): void
@@ -156,7 +156,7 @@ class DriverAssignmentFacade
 
     private function find(Uuid $transitRequestUUID): ?DriverAssignment
     {
-        return $this->driverAssignmentRepository->findByRequestId($transitRequestUUID);
+        return $this->driverAssignmentRepository->findByRequestUuid($transitRequestUUID);
     }
 
     private function loadInvolvedDriversFrom(DriverAssignment $driverAssignment): InvolvedDriversSummary

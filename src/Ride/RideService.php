@@ -2,50 +2,41 @@
 
 namespace LegacyFighter\Cabs\Ride;
 
-// If this class will still be here in 2022 I will quit.
 use LegacyFighter\Cabs\Assignment\DriverAssignmentFacade;
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Crm\ClientRepository;
 use LegacyFighter\Cabs\DriverFleet\DriverFeeService;
-use LegacyFighter\Cabs\DriverFleet\DriverRepository;
 use LegacyFighter\Cabs\DriverFleet\DriverService;
 use LegacyFighter\Cabs\Geolocation\Address\Address;
 use LegacyFighter\Cabs\Geolocation\Address\AddressDTO;
 use LegacyFighter\Cabs\Geolocation\Address\AddressRepository;
-use LegacyFighter\Cabs\Geolocation\Distance;
-use LegacyFighter\Cabs\Geolocation\DistanceCalculator;
-use LegacyFighter\Cabs\Geolocation\GeocodingService;
 use LegacyFighter\Cabs\Invocing\InvoiceGenerator;
 use LegacyFighter\Cabs\Loyalty\AwardsService;
-use LegacyFighter\Cabs\Pricing\Tariffs;
 use LegacyFighter\Cabs\Ride\Details\TransitDetailsFacade;
 use LegacyFighter\Cabs\Ride\Events\TransitCompleted;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
+// If this class will still be here in 2022 I will quit.
 class RideService
 {
     public function __construct(
         private RequestTransitService $requestTransitService,
         private ChangePickupService $changePickupService,
         private ChangeDestinationService $changeDestinationService,
-        private DriverRepository $driverRepository,
-        private TransitRepository $transitRepository,
+        private DemandService $demandService,
+        private CompleteTransitService $completeTransitService,
+        private StartTransitService $startTransitService,
         private ClientRepository $clientRepository,
         private InvoiceGenerator $invoiceGenerator,
-        private DistanceCalculator $distanceCalculator,
         private DriverService $driverService,
-        private GeocodingService $geocodingService,
         private AddressRepository $addressRepository,
         private DriverFeeService $driverFeeService,
         private TransitDetailsFacade $transitDetailsFacade,
         private Clock $clock,
         private AwardsService $awardsService,
         private EventDispatcherInterface $dispatcher,
-        private Tariffs $tariffs,
-        private RequestForTransitRepository $requestForTransitRepository,
         private DriverAssignmentFacade $driverAssignmentFacade,
-        private TransitDemandRepository $transitDemandRepository
     )
     { }
 
@@ -102,33 +93,24 @@ class RideService
 
     public function cancelTransit(Uuid $requestUuid): void
     {
-        $transit = $this->requestForTransitRepository->findByRequestUuid($requestUuid);
-
-        if($transit === null) {
+        $transitDetailsDTO = $this->transitDetailsFacade->findByUuid($requestUuid);
+        if($transitDetailsDTO === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
         }
-
-        $transitDemand = $this->transitDemandRepository->findByRequestUuid($requestUuid);
-        if($transitDemand !== null) {
-            $transitDemand->cancel();
-            $this->driverAssignmentFacade->cancel($requestUuid);
-        }
+        $this->demandService->cancelDemand($requestUuid);
+        $this->driverAssignmentFacade->cancel($requestUuid);
         $this->transitDetailsFacade->transitCancelled($requestUuid);
     }
 
     public function publishTransit(Uuid $requestUuid): void
     {
-        $requestFor = $this->requestForTransitRepository->findByRequestUuid($requestUuid);
-        $transitDetailsDto = $this->transitDetailsFacade->findByUuid($requestUuid);
-
-        if($requestFor === null) {
+        $transitDetailsDTO = $this->transitDetailsFacade->findByUuid($requestUuid);
+        if($transitDetailsDTO === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
         }
-
-        $now = $this->clock->now();
-        $this->transitDemandRepository->save(new TransitDemand($requestUuid));
-        $this->driverAssignmentFacade->createAssignment($requestUuid, $transitDetailsDto->from, $transitDetailsDto->carType, $now);
-        $this->transitDetailsFacade->transitPublished($requestUuid, $now);
+        $this->demandService->publishDemand($requestUuid);
+        $this->driverAssignmentFacade->startAssigningDrivers($requestUuid, $transitDetailsDTO->from, $transitDetailsDTO->carType, $this->clock->now());
+        $this->transitDetailsFacade->transitPublished($requestUuid, $this->clock->now());
     }
 
     // Abandon hope all ye who enter here...
@@ -141,37 +123,26 @@ class RideService
 
     public function acceptTransit(int $driverId, Uuid $requestUuid): void
     {
-        $driver = $this->driverRepository->getOne($driverId);
-        if($driver === null) {
+        if(!$this->driverService->exists($driverId)) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
+        } else {
+            if($this->driverAssignmentFacade->isDriverAssigned($requestUuid)) {
+                throw new \InvalidArgumentException('Driver already assigned, requestUUID = '.$requestUuid);
+            }
+            $this->demandService->acceptDemand($requestUuid);
+            $this->driverAssignmentFacade->acceptTransit($requestUuid, $driverId);
+            $this->driverService->markNotOccupied($driverId);
+            $this->transitDetailsFacade->transitAccepted($requestUuid, $this->clock->now(), $driverId);
         }
-        $transitDemand = $this->transitDemandRepository->findByRequestUuid($requestUuid);
-        if($transitDemand === null) {
-            throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
-        }
-
-        if($this->driverAssignmentFacade->isDriverAssigned($requestUuid)) {
-            throw new \InvalidArgumentException('Driver already assigned, requestUUID = '.$requestUuid);
-        }
-
-        $now = $this->clock->now();
-        $transitDemand->accept();
-        $this->driverAssignmentFacade->acceptTransit($requestUuid, $driver);
-        $this->transitDetailsFacade->transitAccepted($requestUuid, $now, $driverId);
-        $this->driverRepository->save($driver);
     }
 
     public function startTransit(int $driverId, Uuid $requestUuid): void
     {
-        $driver = $this->driverRepository->getOne($driverId);
-
-        if($driver === null) {
+        if(!$this->driverService->exists($driverId)) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
         }
 
-        $transitDemand = $this->transitDemandRepository->findByRequestUuid($requestUuid);
-
-        if($transitDemand === null) {
+        if(!$this->demandService->existsFor($requestUuid)) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
         }
 
@@ -180,15 +151,13 @@ class RideService
         }
 
         $now = $this->clock->now();
-        $transit = $this->transitRepository->save(new Transit($this->tariffs->choose($now), $requestUuid));
+        $transit = $this->startTransitService->start($requestUuid);
         $this->transitDetailsFacade->transitStarted($requestUuid, $transit->getId(), $now);
     }
 
     public function rejectTransit(int $driverId, Uuid $requestUuid): void
     {
-        $driver = $this->driverRepository->getOne($driverId);
-
-        if($driver === null) {
+        if(!$this->driverService->exists($driverId)) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
         }
 
@@ -203,42 +172,26 @@ class RideService
     public function completeTransitFrom(int $driverId, Uuid $requestUuid, Address $destinationAddress): void
     {
         $destinationAddress = $this->addressRepository->save($destinationAddress);
-        $driver = $this->driverRepository->getOne($driverId);
-
-        if($driver === null) {
+        $transitDetails = $this->transitDetailsFacade->findByUuid($requestUuid);
+        if(!$this->driverService->exists($driverId)) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
         }
-
-        $transit = $this->transitRepository->findByTransitRequestUuid($requestUuid);
-        $transitDetails = $this->transitDetailsFacade->findByUuid($requestUuid);
-
-        if($transit === null) {
-            throw new \InvalidArgumentException('Transit does not exist, id = '.$requestUuid);
-        }
-
-        // FIXME later: add some exceptions handling
-        $geoFrom = $this->geocodingService->geocodeAddress($transitDetails->from->toAddressEntity());
-        $geoTo = $this->geocodingService->geocodeAddress($destinationAddress);
-        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
-        $now = $this->clock->now();
-        $finalPrice = $transit->completeAt($distance);
-
+        $from = $this->addressRepository->getByHash($transitDetails->from->getHash());
+        $to = $this->addressRepository->getByHash($destinationAddress->getHash());
+        $finalPrice = $this->completeTransitService->completeTransit($driverId, $requestUuid, $from, $to);
         $driverFee = $this->driverFeeService->calculateDriverFee($finalPrice, $driverId);
-        $driver->setOccupied(false);
-        $this->driverRepository->save($driver);
-        $this->awardsService->registerMiles($transitDetails->client->getId(), $transit->getId());
-        $this->transitRepository->save($transit);
-        $this->transitDetailsFacade->transitCompleted($requestUuid, $now, $finalPrice, $driverFee);
+        $this->driverService->markNotOccupied($driverId);
+        $this->transitDetailsFacade->transitCompleted($requestUuid, $this->clock->now(), $finalPrice, $driverFee);
+        $this->awardsService->registerMiles($transitDetails->client->getId(), $transitDetails->transitId);
         $this->invoiceGenerator->generate($finalPrice->toInt(), $transitDetails->client->getName() . ' ' . $transitDetails->client->getLastName());
         $this->dispatcher->dispatch(new TransitCompleted(
             $transitDetails->client->getId(),
-            $transit->getId(),
+            $transitDetails->transitId,
             $transitDetails->from->getHash(),
             $transitDetails->to->getHash(),
             $transitDetails->started,
-            $now
+            $this->clock->now()
         ));
-
     }
 
     public function loadTransit(Uuid $requestUuid): TransitDTO
@@ -259,6 +212,6 @@ class RideService
 
     public function getRequestUuid(int $requestId): Uuid
     {
-        return $this->requestForTransitRepository->getOne($requestId)->getRequestUuid();
+        return $this->requestTransitService->findCalculationUUID($requestId);
     }
 }

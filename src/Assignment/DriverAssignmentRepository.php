@@ -16,14 +16,14 @@ class DriverAssignmentRepository
         return $driverAssignment;
     }
 
-    public function findByRequestId(Uuid $requestId): ?DriverAssignment
+    public function findByRequestUuid(Uuid $requestUuid): ?DriverAssignment
     {
         return $this->em->getRepository(DriverAssignment::class)->findOneBy([
-            'requestId' => $requestId
+            'requestId' => $requestUuid
         ]);
     }
 
-    public function findByRequestIdAndStatus(Uuid $requestId, string $status): ?DriverAssignment
+    public function findByRequestUuidAndStatus(Uuid $requestId, string $status): ?DriverAssignment
     {
         return $this->em->getRepository(DriverAssignment::class)->findOneBy([
             'requestId' => $requestId,

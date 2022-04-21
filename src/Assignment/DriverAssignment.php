@@ -40,7 +40,7 @@ class DriverAssignment extends BaseEntity
     public function cancel(): void
     {
         if(!in_array($this->status, [AssignmentStatus::WAITING_FOR_DRIVER_ASSIGNMENT, AssignmentStatus::ON_THE_WAY], true)) {
-            throw new \RuntimeException('Transit cannot be cancelled, id = '.$this->getRequestId());
+            throw new \RuntimeException('Transit cannot be cancelled, id = '.$this->getRequestUuid());
         }
         $this->status = AssignmentStatus::CANCELLED;
         $this->assignedDriver = null;
@@ -75,13 +75,13 @@ class DriverAssignment extends BaseEntity
     public function acceptBy(int $driverId): void
     {
         if($this->assignedDriver !== null) {
-            throw new \RuntimeException('Transit already accepted, id = '.$this->getRequestId());
+            throw new \RuntimeException('Transit already accepted, id = '.$this->getRequestUuid());
         }
         if(!in_array($driverId, $this->proposedDrivers)) {
-            throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getRequestId());
+            throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getRequestUuid());
         }
         if(in_array($driverId, $this->driversRejections)) {
-            throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getRequestId());
+            throw new \RuntimeException('Driver out of possible drivers, id = '.$this->getRequestUuid());
         }
 
         $this->assignedDriver = $driverId;
@@ -95,7 +95,7 @@ class DriverAssignment extends BaseEntity
         $this->awaitingDriversResponses--;
     }
 
-    public function getRequestId(): Uuid
+    public function getRequestUuid(): Uuid
     {
         return $this->requestId;
     }

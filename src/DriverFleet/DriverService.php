@@ -139,4 +139,19 @@ class DriverService
     {
         return array_map(fn(Driver $d) => DriverDTO::from($d), $this->driverRepository->findAllByIds($ids));
     }
+
+    public function exists(int $driverId): bool
+    {
+        return $this->driverRepository->getOne($driverId) !== null;
+    }
+
+    public function markOccupied(int $driverId): void
+    {
+        $this->driverRepository->getOne($driverId)->setOccupied(true);
+    }
+
+    public function markNotOccupied(int $driverId): void
+    {
+        $this->driverRepository->getOne($driverId)->setOccupied(false);
+    }
 }
